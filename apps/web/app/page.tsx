@@ -1,22 +1,36 @@
-import { getCities } from "@/lib/content/getCities";
+import { getAllCities, getHomepageDiscovery } from "@/content";
+import { CityBrowser } from "@/components/city/CityBrowser";
+import { DiscoverySection } from "@/components/home/DiscoverySection";
+import { HeroSection } from "@/components/home/HeroSection";
+import { SearchSection } from "@/components/home/SearchSection";
+import { Header } from "@/components/layout/Header";
 
-export default function HomePage() {
-  const cities = getCities();
+interface HomePageProps {
+searchParams?: {
+q?: string;
+};
+}
 
-  return (
-    <main>
-      <h1>Wanderlust</h1>
+export default function HomePage({ searchParams }: HomePageProps) {
+const query = searchParams?.q?.trim() ?? "";
+const cities = getAllCities();
+const discoveryCollections = getHomepageDiscovery();
+const filteredCities = query
+? cities.filter((city) => city.searchText.includes(query.toLowerCase()))
+: cities;
 
-      <section>
-        <h2>Cities</h2>
-        <ul>
-          {cities.map((city) => (
-            <li key={city.slug}>
-              <strong>{city.name}</strong> — {city.cardSentence}
-            </li>
-          ))}
-        </ul>
-      </section>
-    </main>
-  );
+return (
+<> <Header />
+
+```
+  <main className="page-main">
+    <HeroSection />
+    <SearchSection query={query} resultCount={filteredCities.length} />
+    <DiscoverySection collections={discoveryCollections} />
+    <CityBrowser cities={filteredCities} />
+  </main>
+</>
+```
+
+);
 }
