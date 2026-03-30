@@ -20,9 +20,10 @@ const filteredCities = query
 : cities;
 
 return (
-<> <Header />
+<>
 
-```
+
+
   <main className="page-main">
     <HeroSection />
     <SearchSection query={query} resultCount={filteredCities.length} />
@@ -30,7 +31,6 @@ return (
     <CityBrowser cities={filteredCities} />
   </main>
 </>
-```
 
 );
 }
