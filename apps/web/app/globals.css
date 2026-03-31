@@ -774,30 +774,55 @@ input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.35rem;
-  height: 1.35rem;
-  color: #8f694d;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(47, 38, 30, 0.08);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  font-size: 1rem;
+  line-height: 1;
 }
 
-.onboarding-chip__icon svg {
-  width: 100%;
-  height: 100%;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.onboarding-chip__icon--food {
+  background: linear-gradient(180deg, rgba(253, 234, 213, 0.95) 0%, rgba(251, 240, 225, 0.92) 100%);
+  color: #b77449;
+}
+
+.onboarding-chip__icon--romantic {
+  background: linear-gradient(180deg, rgba(248, 226, 227, 0.94) 0%, rgba(245, 235, 237, 0.92) 100%);
+  color: #bb7d8d;
+}
+
+.onboarding-chip__icon--culture {
+  background: linear-gradient(180deg, rgba(243, 226, 213, 0.94) 0%, rgba(245, 236, 228, 0.92) 100%);
+  color: #a66f4e;
+}
+
+.onboarding-chip__icon--nature {
+  background: linear-gradient(180deg, rgba(226, 241, 226, 0.95) 0%, rgba(235, 245, 233, 0.92) 100%);
+  color: #668d5d;
+}
+
+.onboarding-chip__icon--adventure {
+  background: linear-gradient(180deg, rgba(251, 238, 198, 0.95) 0%, rgba(248, 244, 223, 0.92) 100%);
+  color: #bf923b;
+}
+
+.onboarding-chip__icon--slow {
+  background: linear-gradient(180deg, rgba(233, 228, 243, 0.95) 0%, rgba(239, 235, 245, 0.92) 100%);
+  color: #8d7daa;
 }
 
 .onboarding-chip--selected .onboarding-chip__icon {
-  color: #6f4d35;
+  transform: translateY(-0.5px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 8px 18px rgba(28, 22, 18, 0.06);
 }
 
 .onboarding-footer {
   display: flex;
   align-items: center;
   gap: 1.1rem;
-  margin-top: 4rem;
+  margin-top: 3rem;
 }
 
 .onboarding-submit {
