@@ -126,9 +126,7 @@ export function DiscoveryExperience({ onComplete, onSkip }: DiscoveryExperienceP
                 >
                   <span className="onboarding-chip__content">
                     <span className="onboarding-chip__icon-slot">
-                      <span className="onboarding-chip__icon">
-                        <span className={`onboarding-chip__icon-glyph ${iconClassName}`}>{option.icon}</span>
-                      </span>
+                      <span className={`onboarding-chip__icon ${iconClassName}`}>{option.icon}</span>
                     </span>
                     <span className="onboarding-chip__label">{option.label}</span>
                   </span>
