@@ -1,9 +1,10 @@
 import { getAllCities, getHomepageDiscovery } from "../content";
 import { CityBrowser } from "../components/city/CityBrowser";
-import { DiscoveryExperience } from "../components/onboarding/DiscoveryExperience";
+import { DiscoverySection } from "../components/home/DiscoverySection";
 import { HeroSection } from "../components/home/HeroSection";
 import { SearchSection } from "../components/home/SearchSection";
 import { Header } from "../components/layout/Header";
+import { OnboardingGate } from "../components/onboarding/OnboardingGate";
 
 interface HomePageProps {
   searchParams?: Promise<{
@@ -24,15 +25,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     : cities;
 
   return (
-    <>
-      <Header />
+    <OnboardingGate>
+      <>
+        <Header />
 
-      <main className="page-main">
-        <HeroSection />
-        <SearchSection query={query} resultCount={filteredCities.length} />
-        <DiscoveryExperience cities={cities} collections={discoveryCollections} />
-        <CityBrowser cities={filteredCities} />
-      </main>
-    </>
+        <main className="page-main">
+          <HeroSection />
+          <SearchSection query={query} resultCount={filteredCities.length} />
+          <DiscoverySection collections={discoveryCollections} />
+          <CityBrowser cities={filteredCities} />
+        </main>
+      </>
+    </OnboardingGate>
   );
 }
