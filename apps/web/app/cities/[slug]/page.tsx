@@ -24,8 +24,8 @@ value: string;
 };
 
 function getMapsUrl(cityName: string, placeName: string) {
-const query = encodeURIComponent(${placeName} ${cityName});
-return https://www.google.com/maps/search/?api=1&query=${query};
+const query = encodeURIComponent(`${placeName} ${cityName}`);
+return `https://www.google.com/maps/search/?api=1&query=${query}`;
 }
 
 function getRequiredCity(slug: string): CityViewModel {
