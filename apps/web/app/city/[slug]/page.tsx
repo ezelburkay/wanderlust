@@ -1,9 +1,11 @@
 import { permanentRedirect } from "next/navigation";
 
 interface LegacyCityPageProps {
-params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export default function LegacyCityPage({ params }: LegacyCityPageProps) {
-permanentRedirect(`/cities/${params.slug}`);
+export default async function LegacyCityPage({ params }: LegacyCityPageProps) {
+  const { slug } = await params;
+
+  permanentRedirect(`/cities/${slug}`);
 }
