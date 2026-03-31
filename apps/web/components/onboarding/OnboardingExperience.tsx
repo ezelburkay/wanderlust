@@ -124,8 +124,12 @@ export function DiscoveryExperience({ onComplete, onSkip }: DiscoveryExperienceP
                   onClick={() => toggleVibe(option.id)}
                   type="button"
                 >
-                  <span className={`onboarding-chip__icon ${iconClassName}`}>{option.icon}</span>
-                  <span>{option.label}</span>
+                  <span className="onboarding-chip__content">
+                    <span className="onboarding-chip__icon-slot">
+                      <span className={`onboarding-chip__icon ${iconClassName}`}>{option.icon}</span>
+                    </span>
+                    <span className="onboarding-chip__label">{option.label}</span>
+                  </span>
                 </button>
               );
             })}
