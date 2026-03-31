@@ -242,7 +242,7 @@ input {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: 1.45rem;
+  gap: 1rem;
 }
 
 .hero-section__eyebrow,
@@ -274,8 +274,16 @@ input {
 
 .hero-section__title {
   max-width: 11ch;
-  font-size: clamp(3.5rem, 7vw, 6.2rem);
+  font-size: clamp(3rem, 6.2vw, 5.35rem);
   line-height: 0.9;
+}
+
+.hero-section__title-line {
+  display: block;
+}
+
+.hero-section__title-line--accent {
+  color: var(--accent-sage);
 }
 
 .hero-section__subtitle,
@@ -284,8 +292,8 @@ input {
 .where-to-eat-list__item {
   margin: 0;
   max-width: 38rem;
-  font-size: 1.04rem;
-  line-height: 1.82;
+  font-size: 1.18rem;
+  line-height: 1.68;
   font-weight: 500;
   color: var(--muted);
 }
