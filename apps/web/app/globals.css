@@ -592,16 +592,32 @@ input {
 }
 
 .loading-screen__brand {
+  position: relative;
   display: inline-flex;
   align-items: baseline;
   gap: 0.04em;
   margin: 0.02rem 0 0;
+  padding-top: 0.82rem;
   font-family: var(--font-code);
   font-size: clamp(1.1rem, 2.2vw, 1.35rem);
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(47, 38, 30, 0.82);
+}
+
+.loading-screen__brand::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(47, 38, 30, 0.3);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: loading-brand-line 1.05s cubic-bezier(0.38, 0.04, 0.18, 1) forwards;
+  animation-delay: 2.25s;
 }
 
 .loading-screen__brand-part {
@@ -636,6 +652,18 @@ input {
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes loading-brand-line {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
   }
 }
 
@@ -774,48 +802,46 @@ input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid rgba(47, 38, 30, 0.08);
-  border-radius: 999px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  font-size: 1rem;
+  flex: 0 0 1.4rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 1.05rem;
   line-height: 1;
+  transform: translateY(-0.02em);
 }
 
 .onboarding-chip__icon--food {
-  background: linear-gradient(180deg, rgba(253, 234, 213, 0.95) 0%, rgba(251, 240, 225, 0.92) 100%);
   color: #b77449;
 }
 
 .onboarding-chip__icon--romantic {
-  background: linear-gradient(180deg, rgba(248, 226, 227, 0.94) 0%, rgba(245, 235, 237, 0.92) 100%);
   color: #bb7d8d;
 }
 
 .onboarding-chip__icon--culture {
-  background: linear-gradient(180deg, rgba(243, 226, 213, 0.94) 0%, rgba(245, 236, 228, 0.92) 100%);
   color: #a66f4e;
+  transform: translateY(0.05em);
 }
 
 .onboarding-chip__icon--nature {
-  background: linear-gradient(180deg, rgba(226, 241, 226, 0.95) 0%, rgba(235, 245, 233, 0.92) 100%);
   color: #668d5d;
 }
 
 .onboarding-chip__icon--adventure {
-  background: linear-gradient(180deg, rgba(251, 238, 198, 0.95) 0%, rgba(248, 244, 223, 0.92) 100%);
   color: #bf923b;
 }
 
 .onboarding-chip__icon--slow {
-  background: linear-gradient(180deg, rgba(233, 228, 243, 0.95) 0%, rgba(239, 235, 245, 0.92) 100%);
   color: #8d7daa;
+  transform: translateY(-0.08em);
 }
 
 .onboarding-chip--selected .onboarding-chip__icon {
-  transform: translateY(-0.5px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 8px 18px rgba(28, 22, 18, 0.06);
+  filter: saturate(1.05);
 }
 
 .onboarding-footer {
