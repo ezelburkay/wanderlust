@@ -524,7 +524,7 @@ input {
 .loading-screen__inner {
   display: grid;
   justify-items: center;
-  gap: 1rem;
+  gap: 0.72rem;
 }
 
 .loading-screen__compass-wrap {
@@ -540,8 +540,8 @@ input {
   position: absolute;
   inset: 9%;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.46) 0%, rgba(255, 255, 255, 0) 72%);
-  filter: blur(12px);
+  background: radial-gradient(circle, rgba(245, 239, 231, 0.34) 0%, rgba(245, 239, 231, 0.08) 54%, rgba(245, 239, 231, 0) 76%);
+  filter: blur(10px);
 }
 
 .loading-compass {
@@ -554,8 +554,8 @@ input {
 }
 
 .loading-compass__halo {
-  fill: rgba(255, 255, 255, 0.18);
-  stroke: rgba(255, 255, 255, 0.28);
+  fill: rgba(248, 242, 235, 0.18);
+  stroke: rgba(242, 234, 225, 0.26);
   stroke-width: 1;
 }
 
@@ -566,7 +566,7 @@ input {
 }
 
 .loading-compass__base {
-  fill: rgba(255, 252, 247, 0.48);
+  fill: rgba(247, 240, 232, 0.28);
   stroke: rgba(47, 38, 30, 0.09);
   stroke-width: 1.1;
 }
@@ -595,7 +595,7 @@ input {
   display: inline-flex;
   align-items: baseline;
   gap: 0.04em;
-  margin: 0;
+  margin: 0.02rem 0 0;
   font-family: var(--font-code);
   font-size: clamp(1.1rem, 2.2vw, 1.35rem);
   font-weight: 500;
@@ -620,7 +620,7 @@ input {
 }
 
 .loading-screen__copy {
-  margin: 0;
+  margin: 0.02rem 0 0;
   font-size: 0.98rem;
   line-height: 1.75;
   letter-spacing: 0.02em;
