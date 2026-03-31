@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { LoadingScreen } from "./LoadingScreen";
 import { DiscoveryExperience, type OnboardingPreferences } from "./OnboardingExperience";
 
 interface OnboardingGateProps {
@@ -15,6 +16,8 @@ interface StoredOnboardingState {
 }
 
 const storageKey = "wanderlust_onboarding";
+const loadingDurationMs = 3600;
+const loadingFadeDurationMs = 850;
 const emptyOnboardingPreferences: OnboardingPreferences = {
   mood: [],
   pace: "",
@@ -74,21 +77,24 @@ function saveStoredOnboarding(state: StoredOnboardingState) {
 
 export function OnboardingGate({ children }: OnboardingGateProps) {
   const [status, setStatus] = useState<"loading" | "onboarding" | "ready">("loading");
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
+  const [loadingScreenExiting, setLoadingScreenExiting] = useState(false);
 
   useEffect(() => {
     const storedState = readStoredOnboarding();
+    const nextStatus = storedState?.completed || storedState?.skipped ? "ready" : "onboarding";
+    const revealTimer = window.setTimeout(() => {
+      setStatus(nextStatus);
+      setLoadingScreenExiting(true);
+    }, loadingDurationMs);
+    const hideLoaderTimer = window.setTimeout(() => {
+      setShowLoadingScreen(false);
+    }, loadingDurationMs + loadingFadeDurationMs);
 
-    if (!storedState) {
-      setStatus("onboarding");
-      return;
-    }
-
-    if (storedState.completed || storedState.skipped) {
-      setStatus("ready");
-      return;
-    }
-
-    setStatus("onboarding");
+    return () => {
+      window.clearTimeout(revealTimer);
+      window.clearTimeout(hideLoaderTimer);
+    };
   }, []);
 
   function handleComplete(preferences: OnboardingPreferences) {
@@ -109,13 +115,11 @@ export function OnboardingGate({ children }: OnboardingGateProps) {
     setStatus("ready");
   }
 
-  if (status === "loading") {
-    return null;
-  }
-
-  if (status === "onboarding") {
-    return <DiscoveryExperience onComplete={handleComplete} onSkip={handleSkip} />;
-  }
-
-  return <>{children}</>;
+  return (
+    <>
+      {status === "onboarding" ? <DiscoveryExperience onComplete={handleComplete} onSkip={handleSkip} /> : null}
+      {status === "ready" ? <>{children}</> : null}
+      {showLoadingScreen ? <LoadingScreen isExiting={loadingScreenExiting} /> : null}
+    </>
+  );
 }
