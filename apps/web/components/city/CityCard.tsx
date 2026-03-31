@@ -7,7 +7,7 @@ interface CityCardProps {
 
 export function CityCard({ city }: CityCardProps) {
   const imageStyle = {
-    backgroundImage: `linear-gradient(180deg, rgba(17, 16, 14, 0.08) 0%, rgba(17, 16, 14, 0.18) 100%), url(${city.imageUrl})`,
+    backgroundImage: `url(${city.imageUrl})`,
     backgroundPosition: city.imagePosition,
     backgroundSize: "cover"
   };
