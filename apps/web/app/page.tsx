@@ -1,6 +1,6 @@
 import { getAllCities, getHomepageDiscovery } from "../content";
 import { CityBrowser } from "../components/city/CityBrowser";
-import { DiscoverySection } from "../components/home/DiscoverySection";
+import { DiscoveryExperience } from "../components/home/DiscoveryExperience";
 import { HeroSection } from "../components/home/HeroSection";
 import { SearchSection } from "../components/home/SearchSection";
 import { Header } from "../components/layout/Header";
@@ -30,7 +30,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <main className="page-main">
         <HeroSection />
         <SearchSection query={query} resultCount={filteredCities.length} />
-        <DiscoverySection collections={discoveryCollections} />
+        <DiscoveryExperience cities={cities} collections={discoveryCollections} />
         <CityBrowser cities={filteredCities} />
       </main>
     </>
