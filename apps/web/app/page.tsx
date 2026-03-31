@@ -1,6 +1,6 @@
 import { getAllCities, getHomepageDiscovery } from "../content";
 import { CityBrowser } from "../components/city/CityBrowser";
-import { DiscoveryExperience } from "../components/home/DiscoveryExperience";
+import { DiscoveryExperience } from "../components/onboarding/DiscoveryExperience";
 import { HeroSection } from "../components/home/HeroSection";
 import { SearchSection } from "../components/home/SearchSection";
 import { Header } from "../components/layout/Header";
