@@ -310,10 +310,7 @@ input {
 }
 
 .search-section__panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.95fr);
-  align-items: end;
-  gap: 1.75rem;
+  display: block;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -326,7 +323,7 @@ input {
 .section-heading,
 .content-panel__heading {
   display: grid;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
 .section-title {
@@ -343,12 +340,11 @@ input {
 }
 
 .search-form {
-  display: grid;
-  gap: 0.85rem;
-  padding: 1.15rem;
-  border: 1px solid rgba(47, 38, 30, 0.08);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.5);
+  width: min(100%, 34rem);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .search-form__label {
