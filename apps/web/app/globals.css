@@ -677,8 +677,8 @@ input {
   content: "";
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: 0.02em;
+  right: 0.18em;
   height: 1px;
   background: rgba(47, 38, 30, 0.3);
   transform: scaleX(0);
