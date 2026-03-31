@@ -1,4 +1,4 @@
-import type { CityViewModel } from "@/content";
+import type { CityViewModel } from "../../content";
 import { CityCard } from "./CityCard";
 
 interface CityBrowserProps {
@@ -10,8 +10,8 @@ export function CityBrowser({ cities }: CityBrowserProps) {
     <section className="city-browser" id="cities">
       <div className="site-shell">
         <div className="section-heading section-heading--compact">
-          <span className="section-label">Cities</span>
-          <h2 className="section-title">Cities to open next.</h2>
+          <span className="section-label">All cities</span>
+          <h2 className="section-title">Explore</h2>
           <p className="section-copy">
             A small collection of city briefings, each shaped around what to see and what to eat.
           </p>
