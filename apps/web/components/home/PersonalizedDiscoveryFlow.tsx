@@ -216,36 +216,47 @@ function buildSections(
   const timingBase = baseCollections[1] ?? baseCollections[0];
   const interestBase = baseCollections[2] ?? baseCollections[0];
   const primaryVibe = vibes[0];
-  const hasPreferences = vibes.length > 0 || timeframe !== null;
-  const effectiveTiming = timeframe === "next-3-months" ? "next-3-months" : "this-month";
+  const hasSelections = vibes.length > 0 || timeframe !== null;
 
-  const pickedCities = hasPreferences ? takeCities(rankCities(cities, vibes, timeframe), 3) : takeCities(pickedBase.cities, 3);
-  const timingCities = takeCities(prioritizeCollectionCities(timingBase, rankCities(cities, [], effectiveTiming)), 2);
+  const pickedCities = takeCities(pickedBase.cities, 3);
+  const timingCities = takeCities(prioritizeCollectionCities(timingBase, rankCities(cities, [], "this-month")), 2);
   const interestCities = primaryVibe
-    ? takeCities(rankCities(cities, [primaryVibe], null), 3)
-    : takeCities(interestBase.cities, 3);
+    ? takeCities(rankCities(cities, [primaryVibe], timeframe), 3)
+    : takeCities(rankCities(cities, vibes, timeframe), 3);
+
+  if (!hasSelections) {
+    return [
+      {
+        cities: pickedCities,
+        label: "Personalised",
+        layout: "three",
+        slug: "picked-for-you",
+        title: "Picked for you"
+      },
+      {
+        cities: timingCities,
+        label: "Timing",
+        layout: "two",
+        slug: "timing-this-month",
+        title: "Best this month"
+      }
+    ];
+  }
 
   return [
     {
-      cities: pickedCities,
-      label: "Personalised",
+      cities: interestCities,
+      label: primaryVibe ? `Your interest — ${vibeCopy[primaryVibe].interestLabel}` : "Your interest",
       layout: "three",
-      slug: "picked-for-you",
-      title: "Picked for you"
+      slug: `interest-${primaryVibe ?? "custom"}`,
+      title: primaryVibe ? vibeCopy[primaryVibe].title : interestBase.title
     },
     {
       cities: timingCities,
       label: "Timing",
       layout: "two",
-      slug: `timing-${effectiveTiming}`,
-      title: effectiveTiming === "next-3-months" ? "Good in the next few months" : "Best this month"
-    },
-    {
-      cities: interestCities,
-      label: primaryVibe ? `Your interest — ${vibeCopy[primaryVibe].interestLabel}` : "Your interest — Food lovers",
-      layout: "three",
-      slug: `interest-${primaryVibe ?? "food"}`,
-      title: primaryVibe ? vibeCopy[primaryVibe].title : interestBase.title
+      slug: "timing-this-month",
+      title: "Best this month"
     }
   ];
 }
@@ -290,4 +301,3 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
     </section>
   );
 }
-
