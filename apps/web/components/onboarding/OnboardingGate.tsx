@@ -2,11 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import {
-  DiscoveryExperience,
-  emptyOnboardingPreferences,
-  type OnboardingPreferences
-} from "./DiscoveryExperience";
+import { DiscoveryExperience, type OnboardingPreferences } from "./OnboardingExperience";
 
 interface OnboardingGateProps {
   children: ReactNode;
@@ -19,6 +15,13 @@ interface StoredOnboardingState {
 }
 
 const storageKey = "wanderlust_onboarding";
+const emptyOnboardingPreferences: OnboardingPreferences = {
+  mood: [],
+  pace: "",
+  foodInterest: [],
+  vibe: [],
+  tripStyle: []
+};
 
 function sanitizeStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
@@ -116,4 +119,3 @@ export function OnboardingGate({ children }: OnboardingGateProps) {
 
   return <>{children}</>;
 }
-
