@@ -14,6 +14,8 @@
   --muted: #6f645b;
   --muted-soft: #96897d;
   --accent: #2f251d;
+  --accent-sage: #72876d;
+  --accent-sage-soft: rgba(114, 135, 109, 0.16);
   --accent-soft: rgba(47, 37, 29, 0.08);
   --shadow-soft: 0 20px 42px rgba(28, 22, 18, 0.06);
   --shadow-card: 0 28px 56px rgba(28, 22, 18, 0.1);
@@ -493,6 +495,144 @@ input {
 
 .discovery-flow-section__grid--two {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255, 255, 255, 0.78), transparent 22%),
+    radial-gradient(circle at 18% 18%, rgba(255, 250, 244, 0.68), transparent 24%),
+    radial-gradient(circle at 82% 20%, rgba(230, 221, 208, 0.58), transparent 28%),
+    linear-gradient(180deg, #faf5ee 0%, #f4ede4 56%, #eee5da 100%);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 850ms ease, visibility 850ms ease;
+}
+
+.loading-screen--exit {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-screen__inner {
+  display: grid;
+  justify-items: center;
+  gap: 2rem;
+}
+
+.loading-screen__compass-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(10rem, 22vw, 12.5rem);
+  aspect-ratio: 1;
+}
+
+.loading-screen__compass-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 9%;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.46) 0%, rgba(255, 255, 255, 0) 72%);
+  filter: blur(12px);
+}
+
+.loading-compass {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  animation: loading-compass-drift 6.8s cubic-bezier(0.45, 0.05, 0.25, 0.96) infinite;
+}
+
+.loading-compass__halo {
+  fill: rgba(255, 255, 255, 0.18);
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 1;
+}
+
+.loading-compass__ring {
+  fill: none;
+  stroke: rgba(47, 38, 30, 0.18);
+  stroke-width: 1.4;
+}
+
+.loading-compass__marks {
+  stroke: rgba(47, 38, 30, 0.4);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.loading-compass__needle-group {
+  transform-origin: 80px 80px;
+  animation: loading-compass-orient 4.9s cubic-bezier(0.42, 0.08, 0.2, 0.98) infinite;
+}
+
+.loading-compass__needle {
+  fill: var(--accent-sage);
+  filter: drop-shadow(0 8px 14px rgba(80, 97, 75, 0.18));
+}
+
+.loading-compass__needle-tail {
+  fill: rgba(47, 38, 30, 0.2);
+}
+
+.loading-compass__center {
+  fill: var(--surface-strong);
+  stroke: rgba(47, 38, 30, 0.28);
+  stroke-width: 1.2;
+}
+
+.loading-screen__copy {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+@keyframes loading-compass-orient {
+  0% {
+    transform: rotate(-26deg);
+  }
+
+  22% {
+    transform: rotate(18deg);
+  }
+
+  44% {
+    transform: rotate(-10deg);
+  }
+
+  68% {
+    transform: rotate(9deg);
+  }
+
+  100% {
+    transform: rotate(-26deg);
+  }
+}
+
+@keyframes loading-compass-drift {
+  0% {
+    transform: rotate(-2deg) scale(0.992);
+  }
+
+  50% {
+    transform: rotate(2deg) scale(1.01);
+  }
+
+  100% {
+    transform: rotate(-2deg) scale(0.992);
+  }
 }
 
 .onboarding-overlay {
