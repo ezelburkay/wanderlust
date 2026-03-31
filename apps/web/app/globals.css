@@ -1,7 +1,8 @@
 :root {
   color-scheme: light;
-  --font-body: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
+  --font-body: var(--font-sans);
+  --font-display: var(--font-serif);
+  --font-code: var(--font-mono);
   --background: #f3eee7;
   --background-deep: #e8dfd2;
   --surface: rgba(255, 251, 245, 0.8);
@@ -39,6 +40,7 @@ body {
   color: var(--text);
   font-family: var(--font-body);
   font-feature-settings: "liga" 1, "kern" 1;
+  font-weight: 400;
   line-height: 1.5;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -107,9 +109,9 @@ input {
 }
 
 .site-brand__text {
-  font-family: var(--font-body);
+  font-family: var(--font-code);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
@@ -193,8 +195,9 @@ input {
   border: 1px solid rgba(47, 38, 30, 0.08);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.46);
+  font-family: var(--font-code);
   font-size: 0.76rem;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted-soft);
@@ -279,6 +282,7 @@ input {
 }
 
 .search-form__label {
+  font-family: var(--font-code);
   font-size: 0.82rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -363,8 +367,9 @@ input {
 .discovery-card__label {
   display: inline-block;
   margin-bottom: 1.05rem;
+  font-family: var(--font-code);
   font-size: 0.76rem;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted-soft);
@@ -475,8 +480,9 @@ input {
   padding: 0;
   border: 0;
   background: transparent;
+  font-family: var(--font-code);
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(255, 244, 232, 0.74);
@@ -490,7 +496,6 @@ input {
 
 .city-card__title {
   margin: 0;
-  font-family: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
   font-size: clamp(2.5rem, 4vw, 3.6rem);
   font-weight: 500;
   line-height: 0.92;
@@ -500,8 +505,9 @@ input {
 
 .city-card__country {
   margin: 0;
+  font-family: var(--font-code);
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(255, 244, 232, 0.74);
@@ -623,8 +629,9 @@ input {
 .quick-fact__label {
   display: block;
   margin-bottom: 0.55rem;
+  font-family: var(--font-code);
   font-size: 0.76rem;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted-soft);
@@ -711,8 +718,9 @@ input {
 
 .must-see-item__hint {
   flex-shrink: 0;
+  font-family: var(--font-code);
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
