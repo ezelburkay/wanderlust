@@ -951,8 +951,51 @@ input {
   --onboarding-icon-shift-y: -1px;
 }
 
-.onboarding-chip--selected .onboarding-chip__icon-glyph {
+.onboarding-chip--selected .onboarding-chip__icon {
   filter: saturate(1.05);
+}
+
+.onboarding-chip__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.onboarding-chip__icon-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 1.85rem;
+  width: 1.85rem;
+  height: 1.85rem;
+}
+
+.onboarding-chip__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.onboarding-chip__label {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.08;
+  white-space: nowrap;
+}
+
+.onboarding-chip__icon--culture {
+  transform: translateY(-1px);
+}
+
+.onboarding-chip__icon--slow {
+  transform: translateY(-1px);
 }
 
 .onboarding-footer {
