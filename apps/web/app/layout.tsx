@@ -1,22 +1,30 @@
 import "./globals.css";
 
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { IBM_Plex_Mono, Inter, Playfair_Display } from "next/font/google";
 
-const bodyFont = Manrope({
+const sansFont = Inter({
   subsets: ["latin"],
-  variable: "--font-body"
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-sans"
 });
 
-const displayFont = Cormorant_Garamond({
+const serifFont = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-display"
+  style: ["normal", "italic"],
+  variable: "--font-serif"
+});
+
+const monoFont = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-mono"
 });
 
 export default function RootLayout({ children }: { children: any }) {
   return (
     <html lang="en">
-      <body className={`${bodyFont.variable} ${displayFont.variable}`}>{children}</body>
+      <body className={`${sansFont.variable} ${serifFont.variable} ${monoFont.variable}`}>{children}</body>
     </html>
   );
 }
