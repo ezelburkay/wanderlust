@@ -1,4 +1,4 @@
- :root {
+:root {
   color-scheme: light;
   --font-body: var(--font-sans);
   --font-display: var(--font-serif);
@@ -437,6 +437,52 @@ input {
   border: 0;
   background: transparent;
   cursor: pointer;
+}
+
+.discovery-flow {
+  padding-top: 2.75rem;
+}
+
+.discovery-flow-section + .discovery-flow-section {
+  margin-top: 4.2rem;
+  padding-top: 4rem;
+  border-top: 1px solid rgba(47, 38, 30, 0.08);
+}
+
+.discovery-flow-section__heading {
+  margin-bottom: 1.8rem;
+}
+
+.discovery-flow-section__label {
+  margin: 0 0 0.7rem;
+  font-family: var(--font-code);
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+}
+
+.discovery-flow-section__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.7rem, 5vw, 4rem);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.discovery-flow-section__grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.discovery-flow-section__grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.discovery-flow-section__grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .onboarding-overlay {
@@ -944,6 +990,8 @@ input {
 @media (max-width: 960px) {
   .search-section__panel,
   .discovery-grid,
+  .discovery-flow-section__grid--three,
+  .discovery-flow-section__grid--two,
   .city-hero__grid,
   .quick-facts__grid,
   .city-sections__grid {
@@ -973,6 +1021,15 @@ input {
 @media (max-width: 720px) {
   .site-shell {
     width: min(1180px, calc(100% - 1.25rem));
+  }
+
+  .discovery-flow-section + .discovery-flow-section {
+    margin-top: 3rem;
+    padding-top: 2.7rem;
+  }
+
+  .discovery-flow-section__title {
+    font-size: clamp(2.3rem, 10vw, 3.4rem);
   }
 
   .site-header__inner,
