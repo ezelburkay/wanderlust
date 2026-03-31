@@ -540,8 +540,8 @@ input {
   position: absolute;
   inset: 9%;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(245, 239, 231, 0.34) 0%, rgba(245, 239, 231, 0.08) 54%, rgba(245, 239, 231, 0) 76%);
-  filter: blur(10px);
+  background: radial-gradient(circle, rgba(243, 236, 228, 0.28) 0%, rgba(243, 236, 228, 0.08) 52%, rgba(243, 236, 228, 0) 78%);
+  filter: blur(12px);
 }
 
 .loading-compass {
@@ -550,45 +550,63 @@ input {
   width: 100%;
   height: auto;
   overflow: visible;
-  animation: loading-compass-drift 6.8s cubic-bezier(0.45, 0.05, 0.25, 0.96) infinite;
+  animation: loading-compass-drift 8.5s cubic-bezier(0.42, 0.12, 0.22, 0.98) infinite alternate;
 }
 
 .loading-compass__halo {
-  fill: rgba(248, 242, 235, 0.18);
-  stroke: rgba(242, 234, 225, 0.26);
-  stroke-width: 1;
+  fill: rgba(248, 242, 235, 0.12);
+  stroke: rgba(237, 229, 220, 0.22);
+  stroke-width: 0.85;
 }
 
 .loading-compass__ring {
   fill: none;
-  stroke: rgba(47, 38, 30, 0.18);
-  stroke-width: 1.4;
+  stroke: rgba(69, 58, 49, 0.24);
+  stroke-width: 1.05;
+}
+
+.loading-compass__ring-inner {
+  fill: none;
+  stroke: rgba(104, 92, 82, 0.16);
+  stroke-width: 0.8;
 }
 
 .loading-compass__base {
-  fill: rgba(247, 240, 232, 0.28);
-  stroke: rgba(47, 38, 30, 0.09);
-  stroke-width: 1.1;
+  fill: rgba(247, 240, 232, 0.14);
+  stroke: rgba(86, 74, 64, 0.08);
+  stroke-width: 0.85;
+}
+
+.loading-compass__ticks {
+  stroke: rgba(83, 72, 63, 0.24);
+  stroke-width: 0.95;
+  stroke-linecap: round;
 }
 
 .loading-compass__needle-group {
   transform-origin: 80px 80px;
-  animation: loading-compass-orient 4.9s cubic-bezier(0.42, 0.08, 0.2, 0.98) infinite;
+  animation: loading-compass-orient 5.8s cubic-bezier(0.44, 0.08, 0.2, 1) infinite alternate;
 }
 
 .loading-compass__needle {
-  fill: var(--accent-sage);
-  filter: drop-shadow(0 8px 14px rgba(80, 97, 75, 0.18));
+  fill: #6c8167;
+  filter: drop-shadow(0 8px 16px rgba(78, 93, 73, 0.12));
 }
 
 .loading-compass__needle-tail {
-  fill: rgba(47, 38, 30, 0.2);
+  fill: rgba(151, 144, 136, 0.58);
+}
+
+.loading-compass__center-halo {
+  fill: rgba(255, 250, 244, 0.72);
+  stroke: rgba(184, 172, 161, 0.16);
+  stroke-width: 0.8;
 }
 
 .loading-compass__center {
-  fill: var(--surface-strong);
-  stroke: rgba(47, 38, 30, 0.28);
-  stroke-width: 1.2;
+  fill: rgba(252, 248, 242, 0.98);
+  stroke: rgba(112, 99, 88, 0.24);
+  stroke-width: 1;
 }
 
 .loading-screen__brand {
@@ -669,37 +687,33 @@ input {
 
 @keyframes loading-compass-orient {
   0% {
-    transform: rotate(-26deg);
+    transform: rotate(-14deg);
   }
 
-  22% {
-    transform: rotate(18deg);
-  }
-
-  44% {
-    transform: rotate(-10deg);
-  }
-
-  68% {
+  28% {
     transform: rotate(9deg);
   }
 
+  52% {
+    transform: rotate(-4deg);
+  }
+
+  76% {
+    transform: rotate(2deg);
+  }
+
   100% {
-    transform: rotate(-26deg);
+    transform: rotate(0deg);
   }
 }
 
 @keyframes loading-compass-drift {
   0% {
-    transform: rotate(-2deg) scale(0.992);
-  }
-
-  50% {
-    transform: rotate(2deg) scale(1.01);
+    transform: translateY(1px) rotate(-1deg) scale(0.993);
   }
 
   100% {
-    transform: rotate(-2deg) scale(0.992);
+    transform: translateY(-1px) rotate(1deg) scale(1.006);
   }
 }
 
