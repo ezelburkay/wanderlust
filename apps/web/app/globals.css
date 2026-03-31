@@ -784,7 +784,6 @@ input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.9rem;
   min-height: 4.6rem;
   padding: 1rem 1.35rem;
   border: 1px solid rgba(47, 38, 30, 0.12);
@@ -793,6 +792,8 @@ input {
   color: var(--muted);
   cursor: pointer;
   font-weight: 500;
+  line-height: 1;
+  text-align: center;
   transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 
@@ -812,20 +813,44 @@ input {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 14px 28px rgba(28, 22, 18, 0.06);
 }
 
-.onboarding-chip__icon {
+.onboarding-chip__content {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 1.4rem;
-  width: 1.4rem;
-  height: 1.4rem;
+  gap: 0.82rem;
+  min-width: 0;
+}
+
+.onboarding-chip__icon-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.onboarding-chip__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   background: transparent;
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   line-height: 1;
-  transform: translateY(-0.02em);
+  text-align: center;
+  transform: none;
+}
+
+.onboarding-chip__label {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.02;
+  white-space: nowrap;
 }
 
 .onboarding-chip__icon--food {
@@ -838,7 +863,6 @@ input {
 
 .onboarding-chip__icon--culture {
   color: #a66f4e;
-  transform: translateY(-0.01em);
 }
 
 .onboarding-chip__icon--nature {
@@ -851,7 +875,6 @@ input {
 
 .onboarding-chip__icon--slow {
   color: #8d7daa;
-  transform: translate(-0.12em, -0.01em);
 }
 
 .onboarding-chip--selected .onboarding-chip__icon {
