@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { CityViewModel } from "@/content";
+import type { CityViewModel } from "../../content";
 
 interface CityCardProps {
   city: CityViewModel;
@@ -18,6 +18,7 @@ export function CityCard({ city }: CityCardProps) {
         <div aria-hidden="true" className="city-card__image" style={imageStyle} />
         <div aria-hidden="true" className="city-card__overlay" />
         <div className="city-card__content">
+          <span className="city-card__badge">{city.badge}</span>
           <div className="city-card__header">
             <h3 className="city-card__title">{city.name}</h3>
             <p className="city-card__country">{city.country}</p>
