@@ -11,7 +11,7 @@ interface PersonalizedDiscoveryFlowProps {
 }
 
 type VibeId = "food" | "romantic" | "culture" | "nature" | "adventure" | "slow";
-type TimeframeId = "this-month" | "next-3-months" | "just-exploring";
+type TimeframeId = "this-month" | "next-3-months";
 
 interface StoredOnboardingState {
   completed: boolean;
@@ -29,7 +29,7 @@ interface DiscoveryFlowSection {
 
 const storageKey = "wanderlust_onboarding";
 const validVibes: VibeId[] = ["food", "romantic", "culture", "nature", "adventure", "slow"];
-const validTimeframes: TimeframeId[] = ["this-month", "next-3-months", "just-exploring"];
+const validTimeframes: TimeframeId[] = ["this-month", "next-3-months"];
 
 const vibeCopy: Record<VibeId, { interestLabel: string; keywords: string[]; title: string }> = {
   adventure: {
