@@ -824,7 +824,7 @@ input {
 
 .onboarding-chip__icon--culture {
   color: #a66f4e;
-  transform: translateY(0.05em);
+  transform: translateY(-0.01em);
 }
 
 .onboarding-chip__icon--nature {
@@ -837,7 +837,7 @@ input {
 
 .onboarding-chip__icon--slow {
   color: #8d7daa;
-  transform: translateY(-0.08em);
+  transform: translateY(-0.01em);
 }
 
 .onboarding-chip--selected .onboarding-chip__icon {
