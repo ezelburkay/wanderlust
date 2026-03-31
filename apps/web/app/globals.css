@@ -597,7 +597,7 @@ input {
   align-items: baseline;
   gap: 0.04em;
   margin: 0.02rem 0 0;
-  padding-top: 0.82rem;
+  padding-top: 0.48rem;
   font-family: var(--font-code);
   font-size: clamp(1.1rem, 2.2vw, 1.35rem);
   font-weight: 500;
