@@ -3,13 +3,12 @@ export function HeroSection() {
     <section className="hero-section">
       <div className="site-shell">
         <div className="hero-section__panel">
-          <span className="hero-section__eyebrow">Calm city briefings</span>
           <h1 className="hero-section__title">
-            The story of a city.
-            <br />
-            Distilled.
-            <br />
-            Made simple to explore.
+            <span className="hero-section__title-line">The story of</span>
+            <span className="hero-section__title-line">a city.</span>
+            <span className="hero-section__title-line hero-section__title-line--accent">Distilled.</span>
+            <span className="hero-section__title-line">Made simple</span>
+            <span className="hero-section__title-line">to explore.</span>
           </h1>
           <p className="hero-section__subtitle">
             What to see, what to eat — just what really matters
