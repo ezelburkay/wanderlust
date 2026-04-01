@@ -7,13 +7,16 @@ interface SearchSectionProps {
 }
 
 const searchPromptCities = ["Paris", "Rome", "Kyoto", "Lisbon", "Seoul", "Istanbul"];
-const promptCycleDurationMs = 3600;
-const promptFadeDurationMs = 850;
+const promptCycleDurationMs = 2900;
+const promptFadeDurationMs = 560;
+const promptSettleDurationMs = 40;
+
+type PromptCityPhase = "visible" | "enter" | "exit";
 
 export function SearchSection({ query = "" }: SearchSectionProps) {
   const [value, setValue] = useState(query);
   const [cityIndex, setCityIndex] = useState(0);
-  const [isCityVisible, setIsCityVisible] = useState(true);
+  const [cityPhase, setCityPhase] = useState<PromptCityPhase>("visible");
 
   useEffect(() => {
     setValue(query);
@@ -21,18 +24,23 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
 
   useEffect(() => {
     if (value.trim().length > 0) {
-      setIsCityVisible(true);
+      setCityPhase("visible");
       return;
     }
 
     let swapTimeout: number | undefined;
+    let settleTimeout: number | undefined;
 
     const interval = window.setInterval(() => {
-      setIsCityVisible(false);
+      setCityPhase("exit");
 
       swapTimeout = window.setTimeout(() => {
         setCityIndex((currentIndex: number) => (currentIndex + 1) % searchPromptCities.length);
-        setIsCityVisible(true);
+        setCityPhase("enter");
+
+        settleTimeout = window.setTimeout(() => {
+          setCityPhase("visible");
+        }, promptSettleDurationMs);
       }, promptFadeDurationMs);
     }, promptCycleDurationMs);
 
@@ -41,6 +49,10 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
 
       if (swapTimeout !== undefined) {
         window.clearTimeout(swapTimeout);
+      }
+
+      if (settleTimeout !== undefined) {
+        window.clearTimeout(settleTimeout);
       }
     };
   }, [value]);
@@ -62,9 +74,7 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
                 {value.trim().length === 0 ? (
                   <span className="search-form__prompt">
                     <span className="search-form__prompt-prefix">In pursuit of</span>
-                    <span
-                      className={`search-form__prompt-city${isCityVisible ? " search-form__prompt-city--visible" : " search-form__prompt-city--hidden"}`}
-                    >
+                    <span className={`search-form__prompt-city search-form__prompt-city--${cityPhase}`}>
                       {searchPromptCities[cityIndex]}...
                     </span>
                   </span>
