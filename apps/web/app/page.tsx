@@ -32,10 +32,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <main className="page-main">
           <div className="page-main__guided-start">
             <HeroSection />
-            <PersonalizedDiscoveryFlow cities={cities} collections={discoveryCollections} />
+            <SearchSection query={query} />
           </div>
 
-          <SearchSection query={query} />
+          <PersonalizedDiscoveryFlow cities={cities} collections={discoveryCollections} />
           <CityBrowser cities={filteredCities} />
         </main>
       </>
