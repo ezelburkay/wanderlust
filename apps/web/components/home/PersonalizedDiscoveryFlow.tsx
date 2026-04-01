@@ -31,35 +31,41 @@ const storageKey = "wanderlust_onboarding";
 const validVibes: VibeId[] = ["food", "romantic", "culture", "nature", "adventure", "slow"];
 const validTimeframes: TimeframeId[] = ["this-month", "next-3-months"];
 
-const vibeCopy: Record<VibeId, { interestLabel: string; keywords: string[]; title: string }> = {
+const vibeCopy: Record<VibeId, { interestLabel: string; keywords: string[]; selectionCopy: string; title: string }> = {
   adventure: {
     interestLabel: "Adventure days",
     keywords: ["walk", "streets", "energy", "explore", "landmark", "iconic", "hill"],
+    selectionCopy: "more energetic city days",
     title: "Great for adventure days"
   },
   culture: {
     interestLabel: "Culture lovers",
     keywords: ["culture", "art", "museum", "cathedral", "history", "historic", "architecture"],
+    selectionCopy: "culture-led city days",
     title: "Great for culture lovers"
   },
   food: {
     interestLabel: "Food lovers",
     keywords: ["food", "dining", "dish", "bakery", "wine", "market", "bistro", "eat"],
+    selectionCopy: "food-first escapes",
     title: "Great for food lovers"
   },
   nature: {
     interestLabel: "Nature seekers",
     keywords: ["garden", "park", "river", "hill", "outdoor", "green", "nature"],
+    selectionCopy: "softer green escapes",
     title: "Great for nature seekers"
   },
   romantic: {
     interestLabel: "Romantic trips",
     keywords: ["wine", "pastry", "evening", "garden", "romantic", "bistro", "cafe"],
+    selectionCopy: "romantic city breaks",
     title: "Great for romantic trips"
   },
   slow: {
     interestLabel: "Slow travel",
     keywords: ["walking", "walk", "neighborhood", "garden", "wine", "bistro", "slow"],
+    selectionCopy: "slower city rhythms",
     title: "Great for slow travel"
   }
 };
@@ -206,6 +212,53 @@ function takeCities(cities: CityViewModel[], count: number) {
   return cities.slice(0, count);
 }
 
+function getTimeframeCopy(timeframe: TimeframeId | null) {
+  if (timeframe === "this-month") {
+    return "this month";
+  }
+
+  if (timeframe === "next-3-months") {
+    return "the next few months";
+  }
+
+  return "";
+}
+
+function getDiscoveryIntro(vibes: VibeId[], timeframe: TimeframeId | null) {
+  const primaryVibe = vibes[0];
+  const timeframeCopy = getTimeframeCopy(timeframe);
+
+  if (primaryVibe && timeframeCopy) {
+    return {
+      label: "Based on your vibe",
+      text: `A short set of city briefings shaped around ${vibeCopy[primaryVibe].selectionCopy} and tuned for ${timeframeCopy}.`,
+      title: "A more personal place to begin"
+    };
+  }
+
+  if (primaryVibe) {
+    return {
+      label: "Based on your vibe",
+      text: `A short set of city briefings shaped around ${vibeCopy[primaryVibe].selectionCopy}, before broader browsing below.`,
+      title: "A more personal place to begin"
+    };
+  }
+
+  if (timeframeCopy) {
+    return {
+      label: "Based on your timing",
+      text: `A short set of city briefings tuned for ${timeframeCopy}, with the wider collection waiting below when you want to roam further.`,
+      title: "A more personal place to begin"
+    };
+  }
+
+  return {
+    label: "Start here",
+    text: "A short edited set of city briefings first, then the wider collection once you want to explore further.",
+    title: "A calm place to begin"
+  };
+}
+
 function buildSections(
   baseCollections: HomepageDiscoveryViewModel[],
   cities: CityViewModel[],
@@ -228,14 +281,14 @@ function buildSections(
     return [
       {
         cities: pickedCities,
-        label: "Personalised",
+        label: "Picked for you",
         layout: "three",
         slug: "picked-for-you",
         title: "Picked for you"
       },
       {
         cities: timingCities,
-        label: "Timing",
+        label: "Right now",
         layout: "two",
         slug: "timing-this-month",
         title: "Best this month"
@@ -246,14 +299,14 @@ function buildSections(
   return [
     {
       cities: interestCities,
-      label: primaryVibe ? `Your interest — ${vibeCopy[primaryVibe].interestLabel}` : "Your interest",
+      label: primaryVibe ? "Based on your vibe" : "Based on your selections",
       layout: "three",
       slug: `interest-${primaryVibe ?? "custom"}`,
       title: primaryVibe ? vibeCopy[primaryVibe].title : interestBase.title
     },
     {
       cities: timingCities,
-      label: "Timing",
+      label: timeframe ? "Based on your timing" : "Right now",
       layout: "two",
       slug: "timing-this-month",
       title: "Best this month"
@@ -272,6 +325,7 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
 
   const selectedVibes = useMemo(() => getSelectedVibes(storedState), [storedState]);
   const selectedTimeframe = useMemo(() => getSelectedTimeframe(storedState), [storedState]);
+  const discoveryIntro = useMemo(() => getDiscoveryIntro(selectedVibes, selectedTimeframe), [selectedTimeframe, selectedVibes]);
   const sections = useMemo(() => {
     return buildSections(collections, cities, selectedVibes, selectedTimeframe);
   }, [cities, collections, selectedTimeframe, selectedVibes]);
@@ -283,11 +337,19 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
   return (
     <section className="discovery-flow" id="discover">
       <div className="site-shell">
-        {sections.map((section: DiscoveryFlowSection) => (
-          <div className="discovery-flow-section" key={section.slug}>
+        <div className="discovery-flow__intro">
+          <div className="discovery-flow__intro-copy">
+            <p className="discovery-flow__eyebrow">{discoveryIntro.label}</p>
+            <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
+            <p className="discovery-flow__intro-text">{discoveryIntro.text}</p>
+          </div>
+        </div>
+
+        {sections.map((section: DiscoveryFlowSection, index: number) => (
+          <div className={`discovery-flow-section${index === 0 ? " discovery-flow-section--primary" : ""}`} key={section.slug}>
             <div className="discovery-flow-section__heading">
               <p className="discovery-flow-section__label">{section.label}</p>
-              <h2 className="discovery-flow-section__title">{section.title}</h2>
+              <h3 className="discovery-flow-section__title">{section.title}</h3>
             </div>
 
             <div className={`discovery-flow-section__grid discovery-flow-section__grid--${section.layout}`}>
