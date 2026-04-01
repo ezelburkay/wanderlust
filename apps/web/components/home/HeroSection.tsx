@@ -8,12 +8,18 @@ export function HeroSection() {
             <span className="hero-section__title-line">The story of</span>
             <span className="hero-section__title-line">a city.</span>
             <span className="hero-section__title-line hero-section__title-line--accent">Distilled.</span>
-            <span className="hero-section__title-line">Made simple</span>
-            <span className="hero-section__title-line">to explore.</span>
           </h1>
           <p className="hero-section__subtitle">
             What to see. What to eat. Nothing extra.
           </p>
+          <div className="hero-section__actions">
+            <a className="hero-section__action hero-section__action--primary" href="#discover">
+              Your picks
+            </a>
+            <a className="hero-section__action" href="#search">
+              Search
+            </a>
+          </div>
         </div>
       </div>
     </section>
