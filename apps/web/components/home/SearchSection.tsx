@@ -62,7 +62,8 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
       <div className="site-shell">
         <div className="search-section__panel">
           <div className="search-section__copy">
-            <h2 className="section-title">Start with a city.</h2>
+            <span className="section-label">Quick search</span>
+            <h2 className="section-title">Or start with a city.</h2>
             <form action="/" className="search-form" role="search">
               <div className="search-form__field">
                 <span className="search-form__icon" aria-hidden="true">
