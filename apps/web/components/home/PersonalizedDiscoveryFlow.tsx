@@ -233,15 +233,11 @@ function getTimeframeLabel(timeframe: TimeframeId | null) {
 }
 
 function getPreferenceSummary(vibes: VibeId[], timeframe: TimeframeId | null) {
-  const summary = vibes.slice(0, 2).map((vibe: VibeId) => vibeCopy[vibe].interestLabel);
+  const summary = vibes.slice(vibes.length > 0 ? 1 : 0, 2).map((vibe: VibeId) => vibeCopy[vibe].interestLabel);
   const timeframeLabel = getTimeframeLabel(timeframe);
 
   if (timeframeLabel) {
     summary.push(timeframeLabel);
-  }
-
-  if (summary.length === 0) {
-    summary.push("For you");
   }
 
   return Array.from(new Set(summary));
@@ -249,18 +245,19 @@ function getPreferenceSummary(vibes: VibeId[], timeframe: TimeframeId | null) {
 
 function getDiscoveryIntro(vibes: VibeId[], timeframe: TimeframeId | null) {
   const primaryVibe = vibes[0];
+  const timeframeLabel = getTimeframeLabel(timeframe);
 
   if (primaryVibe) {
     return {
-      label: "Based on your vibe",
+      label: `Based on your vibe — ${vibeCopy[primaryVibe].interestLabel}`,
       text: "",
       title: vibeCopy[primaryVibe].title
     };
   }
 
-  if (timeframe) {
+  if (timeframeLabel) {
     return {
-      label: "Based on your timing",
+      label: `Based on your timing — ${timeframeLabel}`,
       text: "",
       title: "Cities in focus"
     };
@@ -369,13 +366,15 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
         <div className="discovery-flow__intro">
           <p className="discovery-flow__eyebrow">{discoveryIntro.label}</p>
           <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
-          <div className="discovery-flow__signals-list">
-            {preferenceSummary.map((item: string) => (
-              <span className="discovery-flow__signal" key={item}>
-                {item}
-              </span>
-            ))}
-          </div>
+          {preferenceSummary.length > 0 ? (
+            <div className="discovery-flow__signals-list">
+              {preferenceSummary.map((item: string) => (
+                <span className="discovery-flow__signal" key={item}>
+                  {item}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         {sections.map((section: DiscoveryFlowSection, index: number) => (
