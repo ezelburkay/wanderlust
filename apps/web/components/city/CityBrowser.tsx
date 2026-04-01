@@ -10,10 +10,10 @@ export function CityBrowser({ cities }: CityBrowserProps) {
     <section className="city-browser" id="cities">
       <div className="site-shell">
         <div className="section-heading section-heading--compact">
-          <span className="section-label">Browse further</span>
-          <h2 className="section-title">More cities</h2>
+          <span className="section-label">Explore later</span>
+          <h2 className="section-title">Widen the field</h2>
           <p className="section-copy">
-            The wider collection, ready when you want to roam beyond the more tailored picks above.
+            The broader collection lives here once you want to move beyond the tailored starting point above.
           </p>
         </div>
 
