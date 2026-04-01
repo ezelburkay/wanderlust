@@ -102,7 +102,7 @@ input {
 .site-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.54rem;
+  gap: 0.46rem;
   color: var(--text);
   text-decoration: none;
   transition: opacity 180ms ease;
@@ -117,9 +117,9 @@ input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 2.28rem;
-  width: 2.28rem;
-  height: 2.28rem;
+  flex: 0 0 2.22rem;
+  width: 2.22rem;
+  height: 2.22rem;
 }
 
 .site-brand__mark-svg {
@@ -175,18 +175,18 @@ input {
 .site-brand__wordmark {
   display: inline-flex;
   align-items: center;
-  min-height: 2.28rem;
+  min-height: 2.22rem;
 }
 
 .site-brand__text {
   display: inline-block;
   font-family: var(--font-code);
-  font-size: clamp(1.02rem, 2vw, 1.24rem);
+  font-size: clamp(1.03rem, 1.95vw, 1.21rem);
   font-weight: 500;
   line-height: 1;
-  letter-spacing: 0.155em;
+  letter-spacing: 0.168em;
   text-transform: uppercase;
-  color: rgba(47, 38, 30, 0.78);
+  color: rgba(47, 38, 30, 0.76);
 }
 
 .site-nav {
@@ -706,23 +706,23 @@ input {
   position: relative;
   display: grid;
   place-items: center;
-  width: clamp(9.75rem, 22vw, 11.85rem);
+  width: clamp(9.35rem, 21vw, 11.25rem);
   aspect-ratio: 1;
 }
 
 .loading-screen__compass-wrap::before {
   content: "";
   position: absolute;
-  inset: 12%;
+  inset: 13.5%;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(243, 236, 228, 0.34) 0%, rgba(243, 236, 228, 0.12) 54%, rgba(243, 236, 228, 0) 80%);
-  filter: blur(14px);
+  background: radial-gradient(circle, rgba(243, 236, 228, 0.28) 0%, rgba(243, 236, 228, 0.1) 54%, rgba(243, 236, 228, 0) 80%);
+  filter: blur(12px);
 }
 
 .loading-screen__brand-mark-shell {
   position: relative;
   z-index: 1;
-  width: 94%;
+  width: 91.5%;
   height: auto;
   margin: 0 auto;
   animation: loading-compass-drift 7.8s cubic-bezier(0.42, 0.12, 0.22, 0.98) infinite alternate;
@@ -751,7 +751,7 @@ input {
 
 .loading-screen__brand-mark .brand-mark__north {
   fill: #72876d;
-  filter: drop-shadow(0 10px 20px rgba(98, 116, 94, 0.11));
+  filter: drop-shadow(0 8px 18px rgba(98, 116, 94, 0.09));
 }
 
 .loading-screen__brand-mark .brand-mark__south {
