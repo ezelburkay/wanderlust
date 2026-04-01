@@ -137,13 +137,13 @@ input {
 
 .brand-mark__ring {
   fill: none;
-  stroke: rgba(79, 68, 59, 0.28);
-  stroke-width: 1.32;
+  stroke: rgba(79, 68, 59, 0.29);
+  stroke-width: 1.24;
 }
 
 .brand-mark__ticks {
-  stroke: rgba(79, 68, 59, 0.2);
-  stroke-width: 1.08;
+  stroke: rgba(79, 68, 59, 0.18);
+  stroke-width: 0.98;
   stroke-linecap: round;
 }
 
@@ -153,17 +153,17 @@ input {
 
 .brand-mark__north {
   fill: #72876d;
-  filter: drop-shadow(0 3px 10px rgba(83, 99, 79, 0.08));
+  filter: drop-shadow(0 2px 8px rgba(83, 99, 79, 0.08));
 }
 
 .brand-mark__south {
-  fill: rgba(142, 130, 119, 0.62);
+  fill: rgba(142, 130, 119, 0.58);
 }
 
 .brand-mark__pivot {
   fill: rgba(248, 242, 235, 0.98);
-  stroke: rgba(47, 37, 29, 0.54);
-  stroke-width: 1.35;
+  stroke: rgba(47, 37, 29, 0.5);
+  stroke-width: 1.12;
 }
 
 .site-brand__wordmark {
@@ -174,12 +174,13 @@ input {
 
 .site-brand__text {
   display: inline-block;
-  font-family: var(--font-display);
-  font-size: 1.02rem;
+  font-family: var(--font-code);
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
   font-weight: 500;
   line-height: 1;
-  letter-spacing: 0.075em;
-  color: rgba(36, 28, 23, 0.9);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(47, 38, 30, 0.82);
 }
 
 .site-nav {
@@ -712,13 +713,13 @@ input {
 }
 
 .loading-screen__brand-mark .brand-mark__ring {
-  stroke: rgba(69, 58, 49, 0.24);
-  stroke-width: 1.38;
+  stroke: rgba(69, 58, 49, 0.25);
+  stroke-width: 1.28;
 }
 
 .loading-screen__brand-mark .brand-mark__ticks {
-  stroke: rgba(83, 72, 63, 0.18);
-  stroke-width: 1.02;
+  stroke: rgba(83, 72, 63, 0.16);
+  stroke-width: 0.94;
 }
 
 .loading-screen__brand-mark .brand-mark__needle-system {
@@ -727,17 +728,17 @@ input {
 
 .loading-screen__brand-mark .brand-mark__north {
   fill: #72876d;
-  filter: drop-shadow(0 12px 24px rgba(98, 116, 94, 0.12));
+  filter: drop-shadow(0 10px 20px rgba(98, 116, 94, 0.11));
 }
 
 .loading-screen__brand-mark .brand-mark__south {
-  fill: rgba(142, 131, 121, 0.56);
+  fill: rgba(142, 131, 121, 0.54);
 }
 
 .loading-screen__brand-mark .brand-mark__pivot {
   fill: rgba(250, 244, 237, 0.98);
-  stroke: rgba(47, 38, 30, 0.52);
-  stroke-width: 1.5;
+  stroke: rgba(47, 38, 30, 0.48);
+  stroke-width: 1.22;
 }
 
 .loading-screen__brand {
