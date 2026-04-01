@@ -384,6 +384,8 @@ input {
   left: 2.9rem;
   right: 0.25rem;
   top: 50%;
+  display: flex;
+  align-items: baseline;
   overflow: hidden;
   color: rgba(111, 100, 91, 0.46);
   font-size: 1.18rem;
@@ -392,6 +394,16 @@ input {
   text-overflow: ellipsis;
   transform: translateY(-50%);
   pointer-events: none;
+}
+
+.search-form__prompt-prefix {
+  flex: 0 0 auto;
+}
+
+.search-form__prompt-city {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
   animation: search-prompt-fade 420ms ease;
 }
 
