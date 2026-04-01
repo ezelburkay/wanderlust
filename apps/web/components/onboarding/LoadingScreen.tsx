@@ -16,7 +16,8 @@ export function LoadingScreen({ isExiting = false }: LoadingScreenProps) {
           </div>
         </div>
         <p className="loading-screen__brand" aria-label="Wanderlust">
-          <span className="loading-screen__brand-wordmark">Wanderlust</span>
+          <span className="loading-screen__brand-part loading-screen__brand-part--wander">Wander</span>
+          <span className="loading-screen__brand-part loading-screen__brand-part--lust">lust</span>
         </p>
         <p className="loading-screen__copy">Loading your next destination</p>
       </div>
