@@ -28,8 +28,6 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
     return () => window.clearInterval(interval);
   }, [value]);
 
-  const promptText = `In pursuit of ${searchPromptCities[cityIndex]}...`;
-
   return (
     <section className="search-section">
       <div className="site-shell">
@@ -45,8 +43,11 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
                   </svg>
                 </span>
                 {value.trim().length === 0 ? (
-                  <span className="search-form__prompt" key={promptText}>
-                    {promptText}
+                  <span className="search-form__prompt">
+                    <span className="search-form__prompt-prefix">In pursuit of </span>
+                    <span className="search-form__prompt-city" key={searchPromptCities[cityIndex]}>
+                      {searchPromptCities[cityIndex]}...
+                    </span>
                   </span>
                 ) : null}
                 <input
