@@ -489,3 +489,4 @@ export function DiscoveryExperience({ cities, collections }: DiscoveryExperience
     </>
   );
 }
+
