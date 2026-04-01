@@ -287,7 +287,6 @@ input {
   gap: 0.55rem;
 }
 
-.hero-section__eyebrow,
 .section-label {
   display: inline-block;
   width: fit-content;
@@ -352,51 +351,6 @@ input {
   color: rgba(111, 100, 91, 0.86);
 }
 
-.hero-section__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-  padding-top: 0.35rem;
-}
-
-.hero-section__action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.6rem;
-  padding: 0.62rem 0.94rem;
-  border: 1px solid rgba(47, 38, 30, 0.1);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.48);
-  font-family: var(--font-code);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(47, 38, 30, 0.74);
-  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, color 180ms ease;
-}
-
-.hero-section__action:hover,
-.hero-section__action:focus-visible {
-  transform: translateY(-1px);
-  border-color: rgba(47, 38, 30, 0.16);
-  background: rgba(255, 255, 255, 0.62);
-  color: var(--text);
-}
-
-.hero-section__action--primary {
-  background: rgba(47, 37, 29, 0.92);
-  border-color: rgba(47, 37, 29, 0.92);
-  color: rgba(255, 249, 243, 0.96);
-}
-
-.hero-section__action--primary:hover,
-.hero-section__action--primary:focus-visible {
-  background: rgba(47, 37, 29, 1);
-  border-color: rgba(47, 37, 29, 1);
-  color: rgba(255, 249, 243, 0.98);
-}
-
 .content-panel,
 .city-browser__empty,
 .discovery-card,
@@ -426,12 +380,7 @@ input {
 
 .search-section__copy {
   max-width: 31rem;
-  gap: 0.7rem;
-}
-
-.search-section .section-label {
-  padding: 0.32rem 0.66rem;
-  background: rgba(255, 255, 255, 0.28);
+  gap: 0.5rem;
 }
 
 .search-section .section-title {
@@ -725,7 +674,7 @@ input {
 
 .discovery-flow__intro {
   display: grid;
-  gap: 0.8rem;
+  gap: 0.65rem;
   margin-bottom: 2rem;
   padding: 0 0 1.35rem;
   border-bottom: 1px solid rgba(47, 38, 30, 0.08);
@@ -736,8 +685,7 @@ input {
   font-family: var(--font-code);
   font-size: 0.8rem;
   font-weight: 400;
-  letter-spacing: 0.17em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--muted-soft);
 }
 
@@ -754,6 +702,7 @@ input {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
+  padding-top: 0.15rem;
 }
 
 .discovery-flow__signal {
