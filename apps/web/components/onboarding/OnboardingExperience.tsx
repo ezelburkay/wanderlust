@@ -98,6 +98,10 @@ export function DiscoveryExperience({ onComplete, onSkip }: DiscoveryExperienceP
     });
   }
 
+  function toggleTimeframe(nextTimeframe: TimeframeId) {
+    setTimeframe((currentTimeframe: TimeframeId | null) => (currentTimeframe === nextTimeframe ? null : nextTimeframe));
+  }
+
   function handleComplete() {
     onComplete(buildPreferences(vibes, timeframe));
   }
@@ -146,7 +150,7 @@ export function DiscoveryExperience({ onComplete, onSkip }: DiscoveryExperienceP
                 <button
                   className={`onboarding-chip${isSelected ? " onboarding-chip--selected" : ""}`}
                   key={option.id}
-                  onClick={() => setTimeframe(option.id)}
+                  onClick={() => toggleTimeframe(option.id)}
                   type="button"
                 >
                   <span>{option.label}</span>
