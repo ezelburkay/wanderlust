@@ -31,42 +31,36 @@ const storageKey = "wanderlust_onboarding";
 const validVibes: VibeId[] = ["food", "romantic", "culture", "nature", "adventure", "slow"];
 const validTimeframes: TimeframeId[] = ["this-month", "next-3-months"];
 
-const vibeCopy: Record<VibeId, { interestLabel: string; keywords: string[]; selectionCopy: string; title: string }> = {
+const vibeCopy: Record<VibeId, { interestLabel: string; keywords: string[]; title: string }> = {
   adventure: {
     interestLabel: "Adventure days",
     keywords: ["walk", "streets", "energy", "explore", "landmark", "iconic", "hill"],
-    selectionCopy: "more energetic city days",
-    title: "Great for adventure days"
+    title: "Cities with momentum"
   },
   culture: {
     interestLabel: "Culture lovers",
     keywords: ["culture", "art", "museum", "cathedral", "history", "historic", "architecture"],
-    selectionCopy: "culture-led city days",
-    title: "Great for culture lovers"
+    title: "Cities with a longer memory"
   },
   food: {
     interestLabel: "Food lovers",
     keywords: ["food", "dining", "dish", "bakery", "wine", "market", "bistro", "eat"],
-    selectionCopy: "food-first escapes",
-    title: "Great for food lovers"
+    title: "Cities worth arriving hungry"
   },
   nature: {
     interestLabel: "Nature seekers",
     keywords: ["garden", "park", "river", "hill", "outdoor", "green", "nature"],
-    selectionCopy: "softer green escapes",
-    title: "Great for nature seekers"
+    title: "Cities with room to breathe"
   },
   romantic: {
     interestLabel: "Romantic trips",
     keywords: ["wine", "pastry", "evening", "garden", "romantic", "bistro", "cafe"],
-    selectionCopy: "romantic city breaks",
-    title: "Great for romantic trips"
+    title: "Cities for late dinners"
   },
   slow: {
     interestLabel: "Slow travel",
     keywords: ["walking", "walk", "neighborhood", "garden", "wine", "bistro", "slow"],
-    selectionCopy: "slower city rhythms",
-    title: "Great for slow travel"
+    title: "Cities worth taking slowly"
   }
 };
 
@@ -212,86 +206,65 @@ function takeCities(cities: CityViewModel[], count: number) {
   return cities.slice(0, count);
 }
 
-function getTimeframeCopy(timeframe: TimeframeId | null) {
-  if (timeframe === "this-month") {
-    return "this month";
-  }
-
-  if (timeframe === "next-3-months") {
-    return "the next few months";
-  }
-
-  return "";
-}
-
 function getTimeframeLabel(timeframe: TimeframeId | null) {
   if (timeframe === "this-month") {
-    return "Traveling this month";
+    return "This month";
   }
 
   if (timeframe === "next-3-months") {
-    return "Planning for the next few months";
+    return "Next few months";
   }
 
   return "";
 }
 
 function getPreferenceSummary(vibes: VibeId[], timeframe: TimeframeId | null) {
-  const summary: string[] = [];
-  const primaryVibe = vibes[0];
+  const summary = vibes.slice(0, 2).map((vibe: VibeId) => vibeCopy[vibe].interestLabel);
   const timeframeLabel = getTimeframeLabel(timeframe);
-
-  if (primaryVibe) {
-    summary.push(vibeCopy[primaryVibe].interestLabel);
-  }
-
-  if (vibes.length > 1) {
-    summary.push(`${vibes.length} preferences shaping these picks`);
-  }
 
   if (timeframeLabel) {
     summary.push(timeframeLabel);
   }
 
   if (summary.length === 0) {
-    summary.push("Your onboarding choices will sharpen this area next time");
+    summary.push("The edit");
   }
 
-  return summary;
+  return Array.from(new Set(summary));
 }
 
 function getDiscoveryIntro(vibes: VibeId[], timeframe: TimeframeId | null) {
   const primaryVibe = vibes[0];
-  const timeframeCopy = getTimeframeCopy(timeframe);
+  const timeframeLabel = getTimeframeLabel(timeframe);
 
-  if (primaryVibe && timeframeCopy) {
+  if (primaryVibe && timeframeLabel) {
     return {
-      label: "Start here",
-      text: `A short set of city briefings shaped around ${vibeCopy[primaryVibe].selectionCopy} and tuned for ${timeframeCopy}.`,
-      title: "Your tailored starting point"
+      label: `${vibeCopy[primaryVibe].interestLabel} — ${timeframeLabel}`,
+      text: "",
+      title: vibeCopy[primaryVibe].title
     };
   }
 
   if (primaryVibe) {
     return {
-      label: "Start here",
-      text: `A short set of city briefings shaped around ${vibeCopy[primaryVibe].selectionCopy}, before broader browsing below.`,
-      title: "Your tailored starting point"
+      label: vibeCopy[primaryVibe].interestLabel,
+      text: "",
+      title: vibeCopy[primaryVibe].title
     };
   }
 
-  if (timeframeCopy) {
+  if (timeframeLabel) {
     return {
-      label: "Start here",
-      text: `A short set of city briefings tuned for ${timeframeCopy}, with the wider collection waiting below when you want to roam further.`,
-      title: "Your tailored starting point"
+      label: timeframeLabel,
+      text: "",
+      title: "Cities in focus"
     };
   }
 
   return {
-    label: "Start here",
-    text: "A short edited set of city briefings first, then the wider collection once you want to explore further.",
-    title: "Your starting point"
+    label: "The edit",
+    text: "",
+    title: "Cities in focus"
   };
 }
 
@@ -303,7 +276,6 @@ function buildSections(
 ): DiscoveryFlowSection[] {
   const pickedBase = baseCollections[0];
   const timingBase = baseCollections[1] ?? baseCollections[0];
-  const interestBase = baseCollections[2] ?? baseCollections[0];
   const primaryVibe = vibes[0];
   const hasSelections = vibes.length > 0 || timeframe !== null;
 
@@ -317,17 +289,17 @@ function buildSections(
     return [
       {
         cities: pickedCities,
-        label: "Picked for you",
+        label: "The edit",
         layout: "three",
         slug: "picked-for-you",
-        title: "Picked for you"
+        title: "Cities in focus"
       },
       {
         cities: timingCities,
-        label: "Right now",
+        label: "This month",
         layout: "two",
         slug: "timing-this-month",
-        title: "Best this month"
+        title: "In season now"
       }
     ];
   }
@@ -335,17 +307,17 @@ function buildSections(
   return [
     {
       cities: interestCities,
-      label: primaryVibe ? "Based on your vibe" : "Based on your selections",
+      label: primaryVibe ? vibeCopy[primaryVibe].interestLabel : "The edit",
       layout: "three",
       slug: `interest-${primaryVibe ?? "custom"}`,
-      title: primaryVibe ? vibeCopy[primaryVibe].title : interestBase.title
+      title: primaryVibe ? vibeCopy[primaryVibe].title : "Cities in focus"
     },
     {
       cities: timingCities,
-      label: timeframe ? "Based on your timing" : "Right now",
+      label: timeframe ? getTimeframeLabel(timeframe) : "This month",
       layout: "two",
       slug: "timing-this-month",
-      title: "Best this month"
+      title: "In season now"
     }
   ];
 }
@@ -379,12 +351,10 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
             <div className="discovery-flow__intro-copy">
               <p className="discovery-flow__eyebrow">{discoveryIntro.label}</p>
               <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
-              <p className="discovery-flow__intro-text">{discoveryIntro.text}</p>
+              {discoveryIntro.text ? <p className="discovery-flow__intro-text">{discoveryIntro.text}</p> : null}
             </div>
 
             <div className="discovery-flow__signals">
-              <p className="discovery-flow__signals-label">Why these picks</p>
-
               <div className="discovery-flow__signals-list">
                 {preferenceSummary.map((item: string) => (
                   <span className="discovery-flow__signal" key={item}>
