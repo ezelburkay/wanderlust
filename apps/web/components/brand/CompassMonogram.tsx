@@ -7,21 +7,18 @@ export function CompassMonogram({ className = "" }: CompassMonogramProps) {
 
   return (
     <svg aria-hidden="true" className={svgClassName} viewBox="0 0 100 100">
-      <circle className="brand-mark__ring" cx="50" cy="50" r="44" />
+      <circle className="brand-mark__ring" cx="50" cy="50" r="43.25" />
       <g className="brand-mark__ticks">
-        <line x1="50" y1="8" x2="50" y2="14" />
-        <line x1="92" y1="50" x2="86" y2="50" />
-        <line x1="50" y1="92" x2="50" y2="86" />
-        <line x1="8" y1="50" x2="14" y2="50" />
+        <line x1="50" y1="9.25" x2="50" y2="14.25" />
+        <line x1="90.75" y1="50" x2="85.75" y2="50" />
+        <line x1="50" y1="90.75" x2="50" y2="85.75" />
+        <line x1="9.25" y1="50" x2="14.25" y2="50" />
       </g>
       <g className="brand-mark__needle-system">
-        <path className="brand-mark__north" d="M50 16 57.1 50 50 58.2 42.9 50Z" />
-        <path className="brand-mark__north-monogram" d="M42.9 49.2 46.8 33.5 50 42.4 53.2 33.5 57.1 49.2" />
-        <path className="brand-mark__south" d="M50 84 54.1 52 50 44 45.9 52Z" />
+        <path className="brand-mark__north" d="M50 15.5 57.25 49.85 53.65 46.35 50 52.25 46.35 46.35 42.75 49.85Z" />
+        <path className="brand-mark__south" d="M50 84.5 53.35 52.45 50 45.75 46.65 52.45Z" />
       </g>
-      <circle className="brand-mark__pivot-surface" cx="50" cy="50" r="4.1" />
-      <circle className="brand-mark__pivot" cx="50" cy="50" r="2.3" />
+      <circle className="brand-mark__pivot" cx="50" cy="50" r="3" />
     </svg>
   );
 }
-
