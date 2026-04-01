@@ -116,9 +116,9 @@ input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 2.5rem;
-  width: 2.5rem;
-  height: 2.5rem;
+  flex: 0 0 2.36rem;
+  width: 2.36rem;
+  height: 2.36rem;
 }
 
 .site-brand__mark-svg {
@@ -135,15 +135,20 @@ input {
   overflow: visible;
 }
 
+.brand-mark__core {
+  transform-origin: 50px 50px;
+  transform: scale(0.92);
+}
+
 .brand-mark__ring {
   fill: none;
-  stroke: rgba(79, 68, 59, 0.29);
-  stroke-width: 1.24;
+  stroke: rgba(79, 68, 59, 0.22);
+  stroke-width: 1.12;
 }
 
 .brand-mark__ticks {
-  stroke: rgba(79, 68, 59, 0.18);
-  stroke-width: 0.98;
+  stroke: rgba(79, 68, 59, 0.12);
+  stroke-width: 0.82;
   stroke-linecap: round;
 }
 
@@ -169,7 +174,7 @@ input {
 .site-brand__wordmark {
   display: inline-flex;
   align-items: center;
-  min-height: 2.5rem;
+  min-height: 2.36rem;
 }
 
 .site-brand__text {
@@ -715,8 +720,9 @@ input {
 .loading-screen__brand-mark-shell {
   position: relative;
   z-index: 1;
-  width: 100%;
+  width: 94%;
   height: auto;
+  margin: 0 auto;
   animation: loading-compass-drift 7.8s cubic-bezier(0.42, 0.12, 0.22, 0.98) infinite alternate;
 }
 
@@ -728,13 +734,13 @@ input {
 }
 
 .loading-screen__brand-mark .brand-mark__ring {
-  stroke: rgba(69, 58, 49, 0.25);
-  stroke-width: 1.28;
+  stroke: rgba(69, 58, 49, 0.2);
+  stroke-width: 1.14;
 }
 
 .loading-screen__brand-mark .brand-mark__ticks {
-  stroke: rgba(83, 72, 63, 0.16);
-  stroke-width: 0.94;
+  stroke: rgba(83, 72, 63, 0.11);
+  stroke-width: 0.78;
 }
 
 .loading-screen__brand-mark .brand-mark__needle-system {
