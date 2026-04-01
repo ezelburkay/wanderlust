@@ -22,7 +22,7 @@ interface StoredOnboardingState {
 interface DiscoveryFlowSection {
   cities: CityViewModel[];
   label: string;
-  layout: "two" | "three";
+  layout: "three" | "four";
   slug: string;
   title: string;
 }
@@ -202,8 +202,22 @@ function prioritizeCollectionCities(collection: HomepageDiscoveryViewModel, rank
   });
 }
 
-function takeCities(cities: CityViewModel[], count: number) {
-  return cities.slice(0, count);
+function collectUniqueCities(sources: CityViewModel[][], count: number, excludedSlugs: Set<string> = new Set()) {
+  const seenSlugs = new Set(excludedSlugs);
+  const selectedCities: CityViewModel[] = [];
+
+  sources.forEach((source) => {
+    source.forEach((city) => {
+      if (selectedCities.length >= count || seenSlugs.has(city.slug)) {
+        return;
+      }
+
+      selectedCities.push(city);
+      seenSlugs.add(city.slug);
+    });
+  });
+
+  return selectedCities;
 }
 
 function getTimeframeLabel(timeframe: TimeframeId | null) {
@@ -227,7 +241,7 @@ function getPreferenceSummary(vibes: VibeId[], timeframe: TimeframeId | null) {
   }
 
   if (summary.length === 0) {
-    summary.push("The edit");
+    summary.push("For you");
   }
 
   return Array.from(new Set(summary));
@@ -235,34 +249,25 @@ function getPreferenceSummary(vibes: VibeId[], timeframe: TimeframeId | null) {
 
 function getDiscoveryIntro(vibes: VibeId[], timeframe: TimeframeId | null) {
   const primaryVibe = vibes[0];
-  const timeframeLabel = getTimeframeLabel(timeframe);
-
-  if (primaryVibe && timeframeLabel) {
-    return {
-      label: `${vibeCopy[primaryVibe].interestLabel} — ${timeframeLabel}`,
-      text: "",
-      title: vibeCopy[primaryVibe].title
-    };
-  }
 
   if (primaryVibe) {
     return {
-      label: vibeCopy[primaryVibe].interestLabel,
+      label: "Based on your vibe",
       text: "",
       title: vibeCopy[primaryVibe].title
     };
   }
 
-  if (timeframeLabel) {
+  if (timeframe) {
     return {
-      label: timeframeLabel,
+      label: "Based on your timing",
       text: "",
       title: "Cities in focus"
     };
   }
 
   return {
-    label: "The edit",
+    label: "For you",
     text: "",
     title: "Cities in focus"
   };
@@ -279,47 +284,62 @@ function buildSections(
   const primaryVibe = vibes[0];
   const hasSelections = vibes.length > 0 || timeframe !== null;
 
-  const pickedCities = takeCities(pickedBase.cities, 3);
-  const timingCities = takeCities(prioritizeCollectionCities(timingBase, rankCities(cities, [], "this-month")), 2);
-  const interestCities = primaryVibe
-    ? takeCities(rankCities(cities, [primaryVibe], timeframe), 3)
-    : takeCities(rankCities(cities, vibes, timeframe), 3);
+  const rankedBySelections = rankCities(cities, primaryVibe ? [primaryVibe] : vibes, timeframe);
+  const rankedThisMonth = rankCities(cities, [], "this-month");
+  const primaryCities = hasSelections
+    ? collectUniqueCities([rankedBySelections, prioritizeCollectionCities(pickedBase, rankedBySelections), pickedBase.cities], 4)
+    : collectUniqueCities([prioritizeCollectionCities(pickedBase, rankedThisMonth), rankedThisMonth], 4);
+  const primaryCitySlugs = new Set(primaryCities.map((city) => city.slug));
+  const expandedCities = collectUniqueCities(
+    [
+      prioritizeCollectionCities(timingBase, timeframe ? rankCities(cities, [], timeframe) : rankedThisMonth),
+      timeframe ? rankCities(cities, [], timeframe) : rankedThisMonth,
+      pickedBase.cities,
+      cities
+    ],
+    3,
+    primaryCitySlugs
+  );
 
   if (!hasSelections) {
-    return [
+    const fallbackSections: DiscoveryFlowSection[] = [
       {
-        cities: pickedCities,
-        label: "The edit",
-        layout: "three",
+        cities: primaryCities,
+        label: "For you",
+        layout: "four",
         slug: "picked-for-you",
         title: "Cities in focus"
       },
       {
-        cities: timingCities,
-        label: "This month",
-        layout: "two",
+        cities: expandedCities,
+        label: "Expanded discovery",
+        layout: "three",
         slug: "timing-this-month",
         title: "In season now"
       }
     ];
+
+    return fallbackSections.filter((section) => section.cities.length > 0);
   }
 
-  return [
+  const personalizedSections: DiscoveryFlowSection[] = [
     {
-      cities: interestCities,
-      label: primaryVibe ? vibeCopy[primaryVibe].interestLabel : "The edit",
-      layout: "three",
+      cities: primaryCities,
+      label: primaryVibe ? "Based on your vibe" : "For you",
+      layout: "four",
       slug: `interest-${primaryVibe ?? "custom"}`,
       title: primaryVibe ? vibeCopy[primaryVibe].title : "Cities in focus"
     },
     {
-      cities: timingCities,
-      label: timeframe ? getTimeframeLabel(timeframe) : "This month",
-      layout: "two",
+      cities: expandedCities,
+      label: "Expanded discovery",
+      layout: "three",
       slug: "timing-this-month",
       title: "In season now"
     }
   ];
+
+  return personalizedSections.filter((section) => section.cities.length > 0);
 }
 
 export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedDiscoveryFlowProps) {
@@ -347,31 +367,25 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
     <section className="discovery-flow" id="discover">
       <div className="site-shell">
         <div className="discovery-flow__intro">
-          <div className="discovery-flow__intro-layout">
-            <div className="discovery-flow__intro-copy">
-              <p className="discovery-flow__eyebrow">{discoveryIntro.label}</p>
-              <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
-              {discoveryIntro.text ? <p className="discovery-flow__intro-text">{discoveryIntro.text}</p> : null}
-            </div>
-
-            <div className="discovery-flow__signals">
-              <div className="discovery-flow__signals-list">
-                {preferenceSummary.map((item: string) => (
-                  <span className="discovery-flow__signal" key={item}>
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
+          <p className="discovery-flow__eyebrow">{discoveryIntro.label}</p>
+          <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
+          <div className="discovery-flow__signals-list">
+            {preferenceSummary.map((item: string) => (
+              <span className="discovery-flow__signal" key={item}>
+                {item}
+              </span>
+            ))}
           </div>
         </div>
 
         {sections.map((section: DiscoveryFlowSection, index: number) => (
           <div className={`discovery-flow-section${index === 0 ? " discovery-flow-section--primary" : ""}`} key={section.slug}>
-            <div className="discovery-flow-section__heading">
-              <p className="discovery-flow-section__label">{section.label}</p>
-              <h3 className="discovery-flow-section__title">{section.title}</h3>
-            </div>
+            {index > 0 ? (
+              <div className="discovery-flow-section__heading">
+                <p className="discovery-flow-section__label">{section.label}</p>
+                <h3 className="discovery-flow-section__title">{section.title}</h3>
+              </div>
+            ) : null}
 
             <div className={`discovery-flow-section__grid discovery-flow-section__grid--${section.layout}`}>
               {section.cities.map((city: CityViewModel) => (
