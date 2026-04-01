@@ -7,10 +7,13 @@ interface SearchSectionProps {
 }
 
 const searchPromptCities = ["Paris", "Rome", "Kyoto", "Lisbon", "Seoul", "Istanbul"];
+const promptCycleDurationMs = 3600;
+const promptFadeDurationMs = 850;
 
 export function SearchSection({ query = "" }: SearchSectionProps) {
   const [value, setValue] = useState(query);
   const [cityIndex, setCityIndex] = useState(0);
+  const [isCityVisible, setIsCityVisible] = useState(true);
 
   useEffect(() => {
     setValue(query);
@@ -18,14 +21,28 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
 
   useEffect(() => {
     if (value.trim().length > 0) {
+      setIsCityVisible(true);
       return;
     }
 
-    const interval = window.setInterval(() => {
-      setCityIndex((currentIndex: number) => (currentIndex + 1) % searchPromptCities.length);
-    }, 2200);
+    let swapTimeout: number | undefined;
 
-    return () => window.clearInterval(interval);
+    const interval = window.setInterval(() => {
+      setIsCityVisible(false);
+
+      swapTimeout = window.setTimeout(() => {
+        setCityIndex((currentIndex: number) => (currentIndex + 1) % searchPromptCities.length);
+        setIsCityVisible(true);
+      }, promptFadeDurationMs);
+    }, promptCycleDurationMs);
+
+    return () => {
+      window.clearInterval(interval);
+
+      if (swapTimeout !== undefined) {
+        window.clearTimeout(swapTimeout);
+      }
+    };
   }, [value]);
 
   return (
@@ -44,8 +61,10 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
                 </span>
                 {value.trim().length === 0 ? (
                   <span className="search-form__prompt">
-                    <span className="search-form__prompt-prefix">In pursuit of </span>
-                    <span className="search-form__prompt-city" key={searchPromptCities[cityIndex]}>
+                    <span className="search-form__prompt-prefix">In pursuit of</span>
+                    <span
+                      className={`search-form__prompt-city${isCityVisible ? " search-form__prompt-city--visible" : " search-form__prompt-city--hidden"}`}
+                    >
                       {searchPromptCities[cityIndex]}...
                     </span>
                   </span>
