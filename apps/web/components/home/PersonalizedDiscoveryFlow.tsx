@@ -224,38 +224,74 @@ function getTimeframeCopy(timeframe: TimeframeId | null) {
   return "";
 }
 
+function getTimeframeLabel(timeframe: TimeframeId | null) {
+  if (timeframe === "this-month") {
+    return "Traveling this month";
+  }
+
+  if (timeframe === "next-3-months") {
+    return "Planning for the next few months";
+  }
+
+  return "";
+}
+
+function getPreferenceSummary(vibes: VibeId[], timeframe: TimeframeId | null) {
+  const summary: string[] = [];
+  const primaryVibe = vibes[0];
+  const timeframeLabel = getTimeframeLabel(timeframe);
+
+  if (primaryVibe) {
+    summary.push(vibeCopy[primaryVibe].interestLabel);
+  }
+
+  if (vibes.length > 1) {
+    summary.push(`${vibes.length} preferences shaping these picks`);
+  }
+
+  if (timeframeLabel) {
+    summary.push(timeframeLabel);
+  }
+
+  if (summary.length === 0) {
+    summary.push("Your onboarding choices will sharpen this area next time");
+  }
+
+  return summary;
+}
+
 function getDiscoveryIntro(vibes: VibeId[], timeframe: TimeframeId | null) {
   const primaryVibe = vibes[0];
   const timeframeCopy = getTimeframeCopy(timeframe);
 
   if (primaryVibe && timeframeCopy) {
     return {
-      label: "Based on your vibe",
+      label: "Start here",
       text: `A short set of city briefings shaped around ${vibeCopy[primaryVibe].selectionCopy} and tuned for ${timeframeCopy}.`,
-      title: "A more personal place to begin"
+      title: "Your tailored starting point"
     };
   }
 
   if (primaryVibe) {
     return {
-      label: "Based on your vibe",
+      label: "Start here",
       text: `A short set of city briefings shaped around ${vibeCopy[primaryVibe].selectionCopy}, before broader browsing below.`,
-      title: "A more personal place to begin"
+      title: "Your tailored starting point"
     };
   }
 
   if (timeframeCopy) {
     return {
-      label: "Based on your timing",
+      label: "Start here",
       text: `A short set of city briefings tuned for ${timeframeCopy}, with the wider collection waiting below when you want to roam further.`,
-      title: "A more personal place to begin"
+      title: "Your tailored starting point"
     };
   }
 
   return {
     label: "Start here",
     text: "A short edited set of city briefings first, then the wider collection once you want to explore further.",
-    title: "A calm place to begin"
+    title: "Your starting point"
   };
 }
 
@@ -326,6 +362,7 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
   const selectedVibes = useMemo(() => getSelectedVibes(storedState), [storedState]);
   const selectedTimeframe = useMemo(() => getSelectedTimeframe(storedState), [storedState]);
   const discoveryIntro = useMemo(() => getDiscoveryIntro(selectedVibes, selectedTimeframe), [selectedTimeframe, selectedVibes]);
+  const preferenceSummary = useMemo(() => getPreferenceSummary(selectedVibes, selectedTimeframe), [selectedTimeframe, selectedVibes]);
   const sections = useMemo(() => {
     return buildSections(collections, cities, selectedVibes, selectedTimeframe);
   }, [cities, collections, selectedTimeframe, selectedVibes]);
@@ -338,10 +375,24 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
     <section className="discovery-flow" id="discover">
       <div className="site-shell">
         <div className="discovery-flow__intro">
-          <div className="discovery-flow__intro-copy">
-            <p className="discovery-flow__eyebrow">{discoveryIntro.label}</p>
-            <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
-            <p className="discovery-flow__intro-text">{discoveryIntro.text}</p>
+          <div className="discovery-flow__intro-layout">
+            <div className="discovery-flow__intro-copy">
+              <p className="discovery-flow__eyebrow">{discoveryIntro.label}</p>
+              <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
+              <p className="discovery-flow__intro-text">{discoveryIntro.text}</p>
+            </div>
+
+            <div className="discovery-flow__signals">
+              <p className="discovery-flow__signals-label">Why these picks</p>
+
+              <div className="discovery-flow__signals-list">
+                {preferenceSummary.map((item: string) => (
+                  <span className="discovery-flow__signal" key={item}>
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
