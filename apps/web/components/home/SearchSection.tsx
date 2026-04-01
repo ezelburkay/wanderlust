@@ -62,9 +62,8 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
       <div className="site-shell">
         <div className="search-section__panel">
           <div className="search-section__copy">
-            <span className="section-label">Direct search</span>
-            <h2 className="section-title">Already have a city in mind?</h2>
-            <p className="search-section__support">Go straight to its briefing if you already know where you&apos;re headed.</p>
+            <span className="section-label">Search</span>
+            <h2 className="section-title">Know the city?</h2>
             <form action="/" className="search-form" role="search">
               <div className="search-form__field">
                 <span className="search-form__icon" aria-hidden="true">
@@ -75,7 +74,6 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
                 </span>
                 {value.trim().length === 0 ? (
                   <span className="search-form__prompt">
-                    <span className="search-form__prompt-prefix">In pursuit of</span>
                     <span className={`search-form__prompt-city search-form__prompt-city--${cityPhase}`}>
                       {searchPromptCities[cityIndex]}...
                     </span>
