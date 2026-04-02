@@ -20,7 +20,15 @@ interface StoredOnboardingState {
 
 const storageKey = "wanderlust_onboarding";
 
-function getStoredOnboarding(): StoredOnboardingState | null {
+function sanitizeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function readStoredOnboarding(): StoredOnboardingState | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -32,16 +40,34 @@ function getStoredOnboarding(): StoredOnboardingState | null {
   }
 
   try {
-    const parsedValue = JSON.parse(rawValue) as StoredOnboardingState;
+    const parsedValue = JSON.parse(rawValue) as Partial<StoredOnboardingState> & {
+      preferences?: Partial<OnboardingPreferences>;
+    };
 
     return {
-      completed: Boolean(parsedValue.completed),
-      skipped: Boolean(parsedValue.skipped),
-      preferences: parsedValue.preferences || { timeframe: null, vibes: [] }
+      completed: parsedValue.completed === true,
+      skipped: parsedValue.skipped === true,
+      preferences: {
+        mood: sanitizeStringArray(parsedValue.preferences?.mood),
+        pace: typeof parsedValue.preferences?.pace === "string" ? parsedValue.preferences.pace : "",
+        foodInterest: sanitizeStringArray(parsedValue.preferences?.foodInterest),
+        vibe: sanitizeStringArray(parsedValue.preferences?.vibe),
+        tripStyle: sanitizeStringArray(parsedValue.preferences?.tripStyle)
+      }
     };
   } catch {
     return null;
   }
+}
+
+function getSelectedTimeframe(state: StoredOnboardingState | null): TimeframeId | null {
+  const validTimeframes: TimeframeId[] = ["this-month", "next-3-months"];
+  
+  const selectedTimeframe = state?.preferences.tripStyle.find((value): value is TimeframeId => {
+    return validTimeframes.includes(value as TimeframeId);
+  });
+
+  return selectedTimeframe ?? null;
 }
 
 function getSeasonalCities(cities: CityViewModel[], timeframe: TimeframeId | null): CityViewModel[] {
@@ -77,11 +103,11 @@ export function SeasonalDiscoverySection({ cities, collections }: SeasonalDiscov
   const [storedState, setStoredState] = useState<StoredOnboardingState | null>(null);
 
   useEffect(() => {
-    setStoredState(getStoredOnboarding());
+    setStoredState(readStoredOnboarding());
     setHasHydrated(true);
   }, []);
 
-  const selectedTimeframe = useMemo(() => storedState?.preferences.timeframe ?? null, [storedState]);
+  const selectedTimeframe = useMemo(() => getSelectedTimeframe(storedState), [storedState]);
   const seasonalCities = useMemo(() => {
     return getSeasonalCities(cities, selectedTimeframe);
   }, [cities, selectedTimeframe]);
@@ -109,4 +135,3 @@ export function SeasonalDiscoverySection({ cities, collections }: SeasonalDiscov
     </section>
   );
 }
-
