@@ -668,17 +668,17 @@ input {
 .discovery-flow {
   position: relative;
   z-index: 1;
-  margin-top: 0.8rem;
+  margin-top: 3.2rem;
   padding-top: 0.8rem;
 }
 
+/* Remove conflicting borders from discovery flow intro */
 .discovery-flow__intro {
   display: grid;
   gap: 0.72rem;
   max-width: 52ch;
   margin-bottom: 2.5rem;
   padding: 0 0 2.1rem;
-  border-bottom: 1px solid rgba(47, 38, 30, 0.08);
 }
 
 .discovery-flow__eyebrow {
@@ -719,10 +719,10 @@ input {
   color: rgba(111, 100, 91, 0.9);
 }
 
+/* Remove conflicting borders between discovery flow sections */
 .discovery-flow-section + .discovery-flow-section {
   margin-top: 4.1rem;
   padding-top: 3.8rem;
-  border-top: 1px solid rgba(47, 38, 30, 0.06);
 }
 
 .discovery-flow-section--primary {
@@ -1391,7 +1391,7 @@ input {
 
 .city-browser .city-card__surface,
 .city-browser .city-card__content {
-  min-height: 420px;
+  min-height: 380px;
 }
 
 .city-browser .city-card__surface {
@@ -1409,7 +1409,6 @@ input {
   gap: 0.5rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(47, 38, 30, 0.06);
 }
 
 .search-section__example {
@@ -1434,53 +1433,54 @@ input {
   border-color: rgba(47, 38, 30, 0.12);
 }
 
-/* Section dividers - consistent thin lines between major sections */
-.search-section,
-.discovery-flow,
-.seasonal-discovery,
-.preference-season,
-.city-browser {
+/* Clean unified section divider system */
+.site-shell {
   position: relative;
 }
 
+.section-divider {
+  position: relative;
+  margin: 3.2rem 0;
+  padding: 0;
+}
+
+.section-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(47, 38, 30, 0.08);
+  opacity: 0.7;
+}
+
+/* Apply dividers to major homepage sections */
 .search-section::after,
 .discovery-flow::after,
 .seasonal-discovery::after,
 .preference-season::after {
   content: "";
   position: absolute;
-  bottom: -1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
+  bottom: -1.6rem;
+  left: 0;
+  right: 0;
   height: 1px;
   background: rgba(47, 38, 30, 0.08);
-  opacity: 0.6;
-}
-
-.city-browser::before {
-  content: "";
-  position: absolute;
-  top: -1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 1px;
-  background: rgba(47, 38, 30, 0.08);
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .seasonal-discovery {
   position: relative;
   z-index: 1;
-  margin-top: 0.6rem;
+  margin-top: 3.2rem;
   padding-top: 0.6rem;
 }
 
 .preference-season {
   position: relative;
   z-index: 1;
-  margin-top: 2.4rem;
+  margin-top: 3.2rem;
   padding-top: 0.6rem;
 }
 
@@ -2003,7 +2003,7 @@ input {
 
   .city-card__surface,
   .city-card__content {
-    min-height: 420px;
+    min-height: 380px;
   }
 
   .onboarding-panel {
