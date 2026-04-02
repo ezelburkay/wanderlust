@@ -57,7 +57,15 @@ const vibeKeywords: Record<VibeId, string[]> = {
   slow: ["walking", "walk", "neighborhood", "garden", "wine", "bistro", "slow"]
 };
 
-function getStoredOnboarding(): StoredOnboardingState | null {
+function sanitizeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function readStoredOnboarding(): StoredOnboardingState | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -69,16 +77,39 @@ function getStoredOnboarding(): StoredOnboardingState | null {
   }
 
   try {
-    const parsedValue = JSON.parse(rawValue) as StoredOnboardingState;
+    const parsedValue = JSON.parse(rawValue) as Partial<StoredOnboardingState> & {
+      preferences?: Partial<OnboardingPreferences>;
+    };
 
     return {
-      completed: Boolean(parsedValue.completed),
-      skipped: Boolean(parsedValue.skipped),
-      preferences: parsedValue.preferences || { timeframe: null, vibes: [] }
+      completed: parsedValue.completed === true,
+      skipped: parsedValue.skipped === true,
+      preferences: {
+        mood: sanitizeStringArray(parsedValue.preferences?.mood),
+        pace: typeof parsedValue.preferences?.pace === "string" ? parsedValue.preferences.pace : "",
+        foodInterest: sanitizeStringArray(parsedValue.preferences?.foodInterest),
+        vibe: sanitizeStringArray(parsedValue.preferences?.vibe),
+        tripStyle: sanitizeStringArray(parsedValue.preferences?.tripStyle)
+      }
     };
   } catch {
     return null;
   }
+}
+
+function getSelectedVibes(state: StoredOnboardingState | null): VibeId[] {
+  const validVibes: VibeId[] = ["food", "romantic", "culture", "nature", "adventure", "slow"];
+  return state?.preferences.vibe.filter((value): value is VibeId => validVibes.includes(value as VibeId)) ?? [];
+}
+
+function getSelectedTimeframe(state: StoredOnboardingState | null): TimeframeId | null {
+  const validTimeframes: TimeframeId[] = ["this-month", "next-3-months"];
+  
+  const selectedTimeframe = state?.preferences.tripStyle.find((value): value is TimeframeId => {
+    return validTimeframes.includes(value as TimeframeId);
+  });
+
+  return selectedTimeframe ?? null;
 }
 
 function getSeasonalKeywords(): string[] {
@@ -124,39 +155,7 @@ export function PreferenceSeasonSection({ cities, collections }: PreferenceSeaso
   const [storedState, setStoredState] = useState<StoredOnboardingState | null>(null);
 
   useEffect(() => {
-    setStoredState(getStoredOnboarding());
+    setStoredState(readStoredOnboarding());
     setHasHydrated(true);
   }, []);
-
-  const selectedVibes = useMemo(() => storedState?.preferences.vibes ?? [], [storedState]);
-  const primaryVibe = useMemo(() => selectedVibes[0] ?? null, [selectedVibes]);
-  const preferenceSeasonCities = useMemo(() => {
-    return getPreferenceSeasonCities(cities, primaryVibe);
-  }, [cities, primaryVibe]);
-
-  if (!hasHydrated || !primaryVibe || preferenceSeasonCities.length === 0) {
-    return null;
-  }
-
-  const copy = preferenceSeasonCopy[primaryVibe];
-
-  return (
-    <section className="preference-season" id="preference-season">
-      <div className="site-shell">
-        <div className="section-heading">
-          <h2 className="section-title">{copy.title}</h2>
-          <p className="section-copy">
-            {copy.description}
-          </p>
-        </div>
-
-        <div className="preference-season__grid">
-          {preferenceSeasonCities.map((city) => (
-            <CityCard city={city} key={city.slug} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
