@@ -88,9 +88,10 @@ input {
   pointer-events: none;
 }
 
+/* Remove conflicting site-shell borders that create double lines */
 .search-section .site-shell,
 .city-browser .site-shell {
-  border-top: 1px solid rgba(47, 38, 30, 0.08);
+  border-top: none;
 }
 
 .search-section .site-shell {
@@ -1464,28 +1465,28 @@ input {
 /* Adjust section spacing for clean divider placement */
 .search-section {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   margin-top: 2.4rem;
   padding-bottom: 2.4rem;
 }
 
 .discovery-flow {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   margin-top: 2.4rem;
   padding-bottom: 2.4rem;
 }
 
 .seasonal-discovery {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   margin-top: 2.4rem;
   padding-bottom: 2.4rem;
 }
 
 .preference-season {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   margin-top: 2.4rem;
   padding-bottom: 2.4rem;
 }
