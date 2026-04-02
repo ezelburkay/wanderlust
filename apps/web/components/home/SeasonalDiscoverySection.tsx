@@ -128,7 +128,7 @@ export function SeasonalDiscoverySection({ cities, collections }: SeasonalDiscov
 
         <div className="seasonal-discovery__grid">
           {seasonalCities.map((city) => (
-            <CityCard city={city} key={city.slug} />
+            <CityCard key={city.slug} city={city} />
           ))}
         </div>
       </div>
