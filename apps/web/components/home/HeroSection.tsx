@@ -9,7 +9,7 @@ export function HeroSection() {
             <span className="hero-section__title-line">Made simple to explore.</span>
           </h1>
           <p className="hero-section__subtitle">
-            What to see. What to eat — just what really matters.
+            What to see. What to eat. What really matters.
           </p>
         </div>
       </div>
