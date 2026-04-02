@@ -30,7 +30,6 @@ export function CityCard({ badgeText, city, descriptorText, sentenceText, varian
             <h3 className="city-card__title">{city.name}</h3>
             <p className="city-card__descriptor">{resolvedDescriptorText}</p>
           </div>
-          <p className="city-card__sentence">{resolvedSentenceText}</p>
         </div>
       </article>
     </Link>
