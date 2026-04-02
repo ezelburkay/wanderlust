@@ -483,12 +483,6 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
             </div>
           </div>
         ))}
-
-        <div className="discovery-flow__continuation">
-          <a className="discovery-flow__continuation-link" href="#cities">
-            Explore beyond this edit →
-          </a>
-        </div>
       </div>
     </section>
   );
