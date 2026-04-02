@@ -6,10 +6,10 @@ export function HeroSection() {
           <h1 className="hero-section__title">
             <span className="hero-section__title-line">The story of a city.</span>
             <span className="hero-section__title-line hero-section__title-line--accent">Distilled.</span>
-            <span className="hero-section__title-line">Simple to explore.</span>
+            <span className="hero-section__title-line">Made simple to explore.</span>
           </h1>
           <p className="hero-section__subtitle">
-            What to see. What to eat. Just what really matters.
+            What to see. What to eat — just what really matters.
           </p>
         </div>
       </div>
