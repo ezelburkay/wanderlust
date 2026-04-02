@@ -63,9 +63,31 @@ input {
   font: inherit;
 }
 
+/* Shared divider system - all dividers render from site-shell for consistent alignment */
 .site-shell {
   width: min(1180px, calc(100% - 2rem));
   margin: 0 auto;
+  position: relative;
+}
+
+/* Section dividers rendered at site-shell level for consistent alignment */
+.search-section .site-shell::after,
+.discovery-flow .site-shell::after,
+.seasonal-discovery .site-shell::after,
+.preference-season .site-shell::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border);
+  opacity: 1;
+}
+
+/* City browser is last section - no divider */
+.city-browser .site-shell::after {
+  display: none;
 }
 
 .page-main {
@@ -94,16 +116,25 @@ input {
   border-top: none;
 }
 
+/* Adjust site-shell padding for proper divider spacing */
 .search-section .site-shell {
-  padding-top: 1.6rem;
-}
-
-.city-browser .site-shell {
-  padding-top: 5.8rem;
+  padding: 1.6rem 0 2.4rem;
 }
 
 .discovery-flow .site-shell {
-  padding-top: 0;
+  padding: 0.8rem 0 2.4rem;
+}
+
+.seasonal-discovery .site-shell {
+  padding: 0.6rem 0 2.4rem;
+}
+
+.preference-season .site-shell {
+  padding: 0.6rem 0 2.4rem;
+}
+
+.city-browser .site-shell {
+  padding: 5.8rem 0 0;
 }
 
 .site-header {
@@ -1429,29 +1460,9 @@ input {
   border-color: rgba(47, 38, 30, 0.12);
 }
 
-/* Unified section divider system - matches design system borders */
+/* Unified section divider system - now rendered at site-shell level */
 .site-shell {
   position: relative;
-}
-
-/* Single divider rule for all homepage sections except last */
-.search-section::after,
-.discovery-flow::after,
-.seasonal-discovery::after,
-.preference-season::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--border);
-  opacity: 1;
-}
-
-/* City browser is last section - no divider */
-.city-browser::after {
-  display: none;
 }
 
 /* City browser spacing - no divider needed for last section */
@@ -1462,33 +1473,29 @@ input {
   padding-top: 0.6rem;
 }
 
-/* Adjust section spacing for clean divider placement */
+/* Section spacing - dividers now handled at site-shell level */
 .search-section {
   position: relative;
   z-index: 2;
   margin-top: 2.4rem;
-  padding-bottom: 2.4rem;
 }
 
 .discovery-flow {
   position: relative;
   z-index: 2;
   margin-top: 2.4rem;
-  padding-bottom: 2.4rem;
 }
 
 .seasonal-discovery {
   position: relative;
   z-index: 2;
   margin-top: 2.4rem;
-  padding-bottom: 2.4rem;
 }
 
 .preference-season {
   position: relative;
   z-index: 2;
   margin-top: 2.4rem;
-  padding-bottom: 2.4rem;
 }
 
 .seasonal-discovery__grid,
