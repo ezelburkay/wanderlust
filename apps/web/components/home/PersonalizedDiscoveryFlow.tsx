@@ -27,40 +27,123 @@ interface DiscoveryFlowSection {
   title: string;
 }
 
+interface DiscoveryIntro {
+  eyebrow: string;
+  identity: string;
+  text: string;
+  title: string;
+}
+
+interface EditorialCardTone {
+  descriptor: string;
+  sentence: string;
+}
+
 const storageKey = "wanderlust_onboarding";
 const validVibes: VibeId[] = ["food", "romantic", "culture", "nature", "adventure", "slow"];
 const validTimeframes: TimeframeId[] = ["this-month", "next-3-months"];
 
-const vibeCopy: Record<VibeId, { interestLabel: string; keywords: string[]; title: string }> = {
+const defaultDiscoverySupport = "Not more options — just a more thoughtful edit of places that match how you want to travel next.";
+
+const vibeCopy: Record<VibeId, { identity: string; keywords: string[]; supportingLine: string; title: string }> = {
   adventure: {
-    interestLabel: "Adventure days",
+    identity: "For adventure seekers",
     keywords: ["walk", "streets", "energy", "explore", "landmark", "iconic", "hill"],
+    supportingLine: "Not more options — just a more thoughtful edit of places that keep the day moving and the route open.",
     title: "Cities with momentum"
   },
   culture: {
-    interestLabel: "Culture lovers",
+    identity: "For culture lovers",
     keywords: ["culture", "art", "museum", "cathedral", "history", "historic", "architecture"],
-    title: "Cities with a longer memory"
+    supportingLine: "Not more options — just a more thoughtful edit of cities that reward time, attention, and curiosity.",
+    title: "Cities that reward curiosity"
   },
   food: {
-    interestLabel: "Food lovers",
+    identity: "For food lovers",
     keywords: ["food", "dining", "dish", "bakery", "wine", "market", "bistro", "eat"],
+    supportingLine: defaultDiscoverySupport,
     title: "Cities worth arriving hungry"
   },
   nature: {
-    interestLabel: "Nature seekers",
+    identity: "For nature seekers",
     keywords: ["garden", "park", "river", "hill", "outdoor", "green", "nature"],
-    title: "Cities with room to breathe"
+    supportingLine: "Not more options — just a more thoughtful edit of places that open into airier days and quieter landscapes.",
+    title: "Cities that open into quieter landscapes"
   },
   romantic: {
-    interestLabel: "Romantic trips",
+    identity: "For romantics",
     keywords: ["wine", "pastry", "evening", "garden", "romantic", "bistro", "cafe"],
-    title: "Cities for late dinners"
+    supportingLine: "Not more options — just a more thoughtful edit of places with softer light, longer meals, and room to linger.",
+    title: "Cities worth slowing down for"
   },
   slow: {
-    interestLabel: "Slow travel",
+    identity: "For slow travelers",
     keywords: ["walking", "walk", "neighborhood", "garden", "wine", "bistro", "slow"],
+    supportingLine: "Not more options — just a more thoughtful edit of places that unfold well at an unhurried pace.",
     title: "Cities worth taking slowly"
+  }
+};
+
+const editorialCardToneByVibe: Partial<Record<VibeId, Partial<Record<string, EditorialCardTone>>>> = {
+  adventure: {
+    paris: {
+      descriptor: "Fast walks and landmark momentum",
+      sentence: "The city keeps moving well on foot, with long routes, iconic stops, and energy that rarely settles."
+    },
+    rome: {
+      descriptor: "Stairs, ruins, and walking days",
+      sentence: "Every turn asks for one more climb, one more detour, and one more hour before dinner."
+    }
+  },
+  culture: {
+    paris: {
+      descriptor: "Museums, boulevards, and patient looking",
+      sentence: "Masterpieces, facades, and neighborhood life reward the kind of trip built around curiosity."
+    },
+    rome: {
+      descriptor: "Ruins layered into daily life",
+      sentence: "History never feels sealed off here; it keeps unfolding between walks, meals, and ordinary streets."
+    }
+  },
+  food: {
+    paris: {
+      descriptor: "Bakeries, bistros, and softer starts",
+      sentence: "Corner tables and long evenings make eating feel woven into the shape of the day."
+    },
+    rome: {
+      descriptor: "Late dinners and louder tables",
+      sentence: "Markets, trattorias, and a restless appetite carry the city naturally into the night."
+    }
+  },
+  nature: {
+    paris: {
+      descriptor: "Gardens between the city rush",
+      sentence: "Parks, river light, and long walks give the city more room to breathe than it first suggests."
+    },
+    rome: {
+      descriptor: "Open air and slower edges",
+      sentence: "Ruins, hills, and warmer light open the city into days that feel broader and less hurried."
+    }
+  },
+  romantic: {
+    paris: {
+      descriptor: "Soft light and closer tables",
+      sentence: "Boulevards, river walks, and slower dinners make the city feel made for lingering."
+    },
+    rome: {
+      descriptor: "Warm stone after dark",
+      sentence: "The city glows into the evening, where grand ruins and late meals share the same rhythm."
+    }
+  },
+  slow: {
+    paris: {
+      descriptor: "Neighborhood mornings and unhurried dinners",
+      sentence: "It rewards a patient pace: markets, side streets, and long meals that blur into the afternoon."
+    },
+    rome: {
+      descriptor: "Long afternoons, later dinners",
+      sentence: "The best version of Rome arrives slowly, through side streets, quiet pauses, and meals that stretch well past dark."
+    }
   }
 };
 
@@ -232,41 +315,48 @@ function getTimeframeLabel(timeframe: TimeframeId | null) {
   return "";
 }
 
-function getPreferenceSummary(vibes: VibeId[], timeframe: TimeframeId | null) {
-  const summary = vibes.slice(vibes.length > 0 ? 1 : 0, 2).map((vibe: VibeId) => vibeCopy[vibe].interestLabel);
-  const timeframeLabel = getTimeframeLabel(timeframe);
-
-  if (timeframeLabel) {
-    summary.push(timeframeLabel);
-  }
-
-  return Array.from(new Set(summary));
-}
-
-function getDiscoveryIntro(vibes: VibeId[], timeframe: TimeframeId | null) {
+function getDiscoveryIntro(vibes: VibeId[], timeframe: TimeframeId | null): DiscoveryIntro {
   const primaryVibe = vibes[0];
   const timeframeLabel = getTimeframeLabel(timeframe);
 
   if (primaryVibe) {
     return {
-      label: `Based on your vibe — ${vibeCopy[primaryVibe].interestLabel}`,
-      text: "",
+      eyebrow: "For you",
+      identity: vibeCopy[primaryVibe].identity,
+      text: vibeCopy[primaryVibe].supportingLine,
       title: vibeCopy[primaryVibe].title
     };
   }
 
   if (timeframeLabel) {
     return {
-      label: `Based on your timing — ${timeframeLabel}`,
-      text: "",
+      eyebrow: "For you",
+      identity: `For ${timeframeLabel.toLowerCase()}`,
+      text: defaultDiscoverySupport,
       title: "Cities in focus"
     };
   }
 
   return {
-    label: "For you",
-    text: "",
+    eyebrow: "For you",
+    identity: "For your next trip",
+    text: defaultDiscoverySupport,
     title: "Cities in focus"
+  };
+}
+
+function getEditorialCardTone(city: CityViewModel, primaryVibe: VibeId | null): EditorialCardTone {
+  if (primaryVibe) {
+    const override = editorialCardToneByVibe[primaryVibe]?.[city.slug];
+
+    if (override) {
+      return override;
+    }
+  }
+
+  return {
+    descriptor: city.badge,
+    sentence: city.essence
   };
 }
 
@@ -351,7 +441,7 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
   const selectedVibes = useMemo(() => getSelectedVibes(storedState), [storedState]);
   const selectedTimeframe = useMemo(() => getSelectedTimeframe(storedState), [storedState]);
   const discoveryIntro = useMemo(() => getDiscoveryIntro(selectedVibes, selectedTimeframe), [selectedTimeframe, selectedVibes]);
-  const preferenceSummary = useMemo(() => getPreferenceSummary(selectedVibes, selectedTimeframe), [selectedTimeframe, selectedVibes]);
+  const primaryVibe = selectedVibes[0] ?? null;
   const sections = useMemo(() => {
     return buildSections(collections, cities, selectedVibes, selectedTimeframe);
   }, [cities, collections, selectedTimeframe, selectedVibes]);
@@ -364,17 +454,10 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
     <section className="discovery-flow" id="discover">
       <div className="site-shell">
         <div className="discovery-flow__intro">
-          <p className="discovery-flow__eyebrow">{discoveryIntro.label}</p>
+          <p className="discovery-flow__eyebrow">{discoveryIntro.eyebrow}</p>
+          <p className="discovery-flow__intro-identity">{discoveryIntro.identity}</p>
           <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
-          {preferenceSummary.length > 0 ? (
-            <div className="discovery-flow__signals-list">
-              {preferenceSummary.map((item: string) => (
-                <span className="discovery-flow__signal" key={item}>
-                  {item}
-                </span>
-              ))}
-            </div>
-          ) : null}
+          <p className="discovery-flow__intro-text">{discoveryIntro.text}</p>
         </div>
 
         {sections.map((section: DiscoveryFlowSection, index: number) => (
@@ -388,11 +471,24 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
 
             <div className={`discovery-flow-section__grid discovery-flow-section__grid--${section.layout}`}>
               {section.cities.map((city: CityViewModel) => (
-                <CityCard city={city} key={`${section.slug}-${city.slug}`} />
+                <CityCard
+                  badgeText={index === 0 ? null : undefined}
+                  city={city}
+                  descriptorText={index === 0 ? getEditorialCardTone(city, primaryVibe).descriptor : undefined}
+                  key={`${section.slug}-${city.slug}`}
+                  sentenceText={index === 0 ? getEditorialCardTone(city, primaryVibe).sentence : undefined}
+                  variant={index === 0 ? "editorial" : "default"}
+                />
               ))}
             </div>
           </div>
         ))}
+
+        <div className="discovery-flow__continuation">
+          <a className="discovery-flow__continuation-link" href="#cities">
+            Explore beyond this edit →
+          </a>
+        </div>
       </div>
     </section>
   );
