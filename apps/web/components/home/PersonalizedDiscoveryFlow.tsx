@@ -321,25 +321,25 @@ function getDiscoveryIntro(vibes: VibeId[], timeframe: TimeframeId | null): Disc
 
   if (primaryVibe) {
     return {
-      eyebrow: "For you",
-      identity: vibeCopy[primaryVibe].identity,
-      text: vibeCopy[primaryVibe].supportingLine,
+      eyebrow: vibeCopy[primaryVibe].identity,
+      identity: "",
+      text: defaultDiscoverySupport,
       title: vibeCopy[primaryVibe].title
     };
   }
 
   if (timeframeLabel) {
     return {
-      eyebrow: "For you",
-      identity: `For ${timeframeLabel.toLowerCase()}`,
+      eyebrow: `For ${timeframeLabel.toLowerCase()}`,
+      identity: "",
       text: defaultDiscoverySupport,
       title: "Cities in focus"
     };
   }
 
   return {
-    eyebrow: "For you",
-    identity: "For your next trip",
+    eyebrow: "For your next trip",
+    identity: "",
     text: defaultDiscoverySupport,
     title: "Cities in focus"
   };
@@ -455,7 +455,7 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
       <div className="site-shell">
         <div className="discovery-flow__intro">
           <p className="discovery-flow__eyebrow">{discoveryIntro.eyebrow}</p>
-          <p className="discovery-flow__intro-identity">{discoveryIntro.identity}</p>
+          {discoveryIntro.identity && <p className="discovery-flow__intro-identity">{discoveryIntro.identity}</p>}
           <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
           <p className="discovery-flow__intro-text">{discoveryIntro.text}</p>
         </div>
