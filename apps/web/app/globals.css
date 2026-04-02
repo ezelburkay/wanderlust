@@ -1398,9 +1398,73 @@ input {
   font-size: clamp(1.95rem, 3vw, 2.65rem);
 }
 
-.city-browser .city-card__sentence {
-  max-width: 20ch;
-  font-size: 0.9rem;
+.search-section__examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(47, 38, 30, 0.06);
+}
+
+.search-section__example {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid rgba(47, 38, 30, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: var(--muted-soft);
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+.search-section__example:hover,
+.search-section__example:focus-visible {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.46);
+  border-color: rgba(47, 38, 30, 0.12);
+}
+
+.seasonal-discovery,
+.preference-season {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+}
+
+.seasonal-discovery__grid,
+.preference-season__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.seasonal-discovery .section-title,
+.preference-season .section-title {
+  max-width: 24ch;
+  font-size: clamp(1.6rem, 3.2vw, 2.1rem);
+  line-height: 1.15;
+}
+
+.seasonal-discovery .section-copy,
+.preference-season .section-copy {
+  max-width: 32ch;
+  margin-top: 0.8rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.city-browser .section-title {
+  font-size: clamp(1.4rem, 2.8vw, 1.8rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--muted-soft);
 }
 
 .city-card__surface {
