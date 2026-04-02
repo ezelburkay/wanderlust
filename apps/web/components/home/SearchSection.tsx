@@ -6,58 +6,26 @@ interface SearchSectionProps {
   query?: string;
 }
 
-const searchPromptCities = ["Paris", "Rome", "Kyoto", "Lisbon", "Seoul", "Istanbul"];
-const promptCycleDurationMs = 2900;
-const promptFadeDurationMs = 560;
-const promptSettleDurationMs = 40;
-
 const searchExamples = ["Romantic", "Food", "Slow", "Summer", "Coastal", "Weekend"];
-
-type PromptCityPhase = "visible" | "enter" | "exit";
 
 export function SearchSection({ query = "" }: SearchSectionProps) {
   const [value, setValue] = useState(query);
-  const [cityIndex, setCityIndex] = useState(0);
-  const [cityPhase, setCityPhase] = useState<PromptCityPhase>("visible");
 
   useEffect(() => {
     setValue(query);
   }, [query]);
 
-  useEffect(() => {
-    if (value.trim().length > 0) {
-      setCityPhase("visible");
-      return;
+  const handleExampleClick = (example: string) => {
+    setValue(example.toLowerCase());
+    window.location.href = `/?q=${encodeURIComponent(example.toLowerCase())}`;
+  };
+
+  const handleSubmit = (event: any) => {
+    event.preventDefault();
+    if (value.trim()) {
+      window.location.href = `/?q=${encodeURIComponent(value.trim())}`;
     }
-
-    let swapTimeout: number | undefined;
-    let settleTimeout: number | undefined;
-
-    const interval = window.setInterval(() => {
-      setCityPhase("exit");
-
-      swapTimeout = window.setTimeout(() => {
-        setCityIndex((currentIndex: number) => (currentIndex + 1) % searchPromptCities.length);
-        setCityPhase("enter");
-
-        settleTimeout = window.setTimeout(() => {
-          setCityPhase("visible");
-        }, promptSettleDurationMs);
-      }, promptFadeDurationMs);
-    }, promptCycleDurationMs);
-
-    return () => {
-      window.clearInterval(interval);
-
-      if (swapTimeout !== undefined) {
-        window.clearTimeout(swapTimeout);
-      }
-
-      if (settleTimeout !== undefined) {
-        window.clearTimeout(settleTimeout);
-      }
-    };
-  }, [value]);
+  };
 
   return (
     <section className="search-section" id="search">
@@ -65,7 +33,7 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
         <div className="search-section__panel">
           <div className="search-section__copy">
             <h2 className="section-title">Search by city, season, or mood</h2>
-            <form action="/" className="search-form" role="search">
+            <form action="/" className="search-form" role="search" onSubmit={handleSubmit}>
               <div className="search-form__field">
                 <span className="search-form__icon" aria-hidden="true">
                   <svg viewBox="0 0 20 20">
@@ -73,13 +41,6 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
                     <path d="M12.45 12.45 16.2 16.2" />
                   </svg>
                 </span>
-                {value.trim().length === 0 ? (
-                  <span className="search-form__prompt">
-                    <span className={`search-form__prompt-city search-form__prompt-city--${cityPhase}`}>
-                      {searchPromptCities[cityIndex]}...
-                    </span>
-                  </span>
-                ) : null}
                 <input
                   aria-label="Search by city, season, or mood"
                   autoComplete="off"
@@ -95,9 +56,14 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
             </form>
             <div className="search-section__examples">
               {searchExamples.map((example) => (
-                <span className="search-section__example" key={example}>
+                <button
+                  className="search-section__example"
+                  key={example}
+                  onClick={() => handleExampleClick(example)}
+                  type="button"
+                >
                   {example}
-                </span>
+                </button>
               ))}
             </div>
           </div>
