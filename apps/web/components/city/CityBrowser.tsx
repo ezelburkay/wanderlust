@@ -10,7 +10,7 @@ export function CityBrowser({ cities }: CityBrowserProps) {
     <section className="city-browser" id="cities">
       <div className="site-shell">
         <div className="section-heading section-heading--compact">
-          <h2 className="section-title">More cities</h2>
+          <h2 className="section-title">Explore more cities</h2>
         </div>
 
         {cities.length > 0 ? (
