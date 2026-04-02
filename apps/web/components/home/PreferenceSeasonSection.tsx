@@ -159,3 +159,34 @@ export function PreferenceSeasonSection({ cities, collections }: PreferenceSeaso
     setHasHydrated(true);
   }, []);
 
+  const selectedVibes = useMemo(() => getSelectedVibes(storedState), [storedState]);
+  const primaryVibe = useMemo(() => selectedVibes[0] ?? null, [selectedVibes]);
+  const preferenceSeasonCities = useMemo(() => {
+    return getPreferenceSeasonCities(cities, primaryVibe);
+  }, [cities, primaryVibe]);
+
+  if (!hasHydrated || !primaryVibe || preferenceSeasonCities.length === 0) {
+    return null;
+  }
+
+  const copy = preferenceSeasonCopy[primaryVibe as VibeId];
+
+  return (
+    <section className="preference-season" id="preference-season">
+      <div className="site-shell">
+        <div className="section-heading">
+          <h2 className="section-title">{copy.title}</h2>
+          <p className="section-copy">
+            {copy.description}
+          </p>
+        </div>
+
+        <div className="preference-season__grid">
+          {preferenceSeasonCities.map((city) => (
+            <CityCard key={city.slug} city={city} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
