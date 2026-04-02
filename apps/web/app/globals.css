@@ -665,12 +665,7 @@ input {
   cursor: pointer;
 }
 
-.discovery-flow {
-  position: relative;
-  z-index: 1;
-  margin-top: 3.2rem;
-  padding-top: 0.8rem;
-}
+/* Remove conflicting old discovery-flow styles */
 
 /* Remove conflicting borders from discovery flow intro */
 .discovery-flow__intro {
@@ -1433,55 +1428,66 @@ input {
   border-color: rgba(47, 38, 30, 0.12);
 }
 
-/* Clean unified section divider system */
+/* Unified section divider system - matches design system borders */
 .site-shell {
   position: relative;
 }
 
-.section-divider {
-  position: relative;
-  margin: 3.2rem 0;
-  padding: 0;
-}
-
-.section-divider::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: rgba(47, 38, 30, 0.08);
-  opacity: 0.7;
-}
-
-/* Apply dividers to major homepage sections */
+/* Single divider rule for all homepage sections except last */
 .search-section::after,
 .discovery-flow::after,
 .seasonal-discovery::after,
 .preference-season::after {
   content: "";
   position: absolute;
-  bottom: -1.6rem;
+  bottom: -1px;
   left: 0;
   right: 0;
   height: 1px;
-  background: rgba(47, 38, 30, 0.08);
-  opacity: 0.7;
+  background: var(--border);
+  opacity: 1;
+}
+
+/* City browser is last section - no divider */
+.city-browser::after {
+  display: none;
+}
+
+/* City browser spacing - no divider needed for last section */
+.city-browser {
+  position: relative;
+  z-index: 1;
+  margin-top: 2.4rem;
+  padding-top: 0.6rem;
+}
+
+/* Adjust section spacing for clean divider placement */
+.search-section {
+  position: relative;
+  z-index: 1;
+  margin-top: 2.4rem;
+  padding-bottom: 2.4rem;
+}
+
+.discovery-flow {
+  position: relative;
+  z-index: 1;
+  margin-top: 2.4rem;
+  padding-bottom: 2.4rem;
 }
 
 .seasonal-discovery {
   position: relative;
   z-index: 1;
-  margin-top: 3.2rem;
-  padding-top: 0.6rem;
+  margin-top: 2.4rem;
+  padding-bottom: 2.4rem;
 }
 
 .preference-season {
   position: relative;
   z-index: 1;
-  margin-top: 3.2rem;
-  padding-top: 0.6rem;
+  margin-top: 2.4rem;
+  padding-bottom: 2.4rem;
 }
 
 .seasonal-discovery__grid,
