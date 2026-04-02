@@ -3,6 +3,8 @@ import { CityBrowser } from "../components/city/CityBrowser";
 import { HeroSection } from "../components/home/HeroSection";
 import { PersonalizedDiscoveryFlow } from "../components/home/PersonalizedDiscoveryFlow";
 import { SearchSection } from "../components/home/SearchSection";
+import { SeasonalDiscoverySection } from "../components/home/SeasonalDiscoverySection";
+import { PreferenceSeasonSection } from "../components/home/PreferenceSeasonSection";
 import { Header } from "../components/layout/Header";
 import { OnboardingGate } from "../components/onboarding/OnboardingGate";
 
@@ -36,6 +38,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
 
           <PersonalizedDiscoveryFlow cities={cities} collections={discoveryCollections} />
+          <SeasonalDiscoverySection cities={cities} collections={discoveryCollections} />
+          <PreferenceSeasonSection cities={cities} collections={discoveryCollections} />
           <CityBrowser cities={filteredCities} />
         </main>
       </>
