@@ -7,6 +7,7 @@ interface CityCardProps {
   descriptorText?: string;
   sentenceText?: string;
   variant?: "default" | "editorial";
+  key?: string;
 }
 
 export function CityCard({ badgeText, city, descriptorText, sentenceText, variant = "default" }: CityCardProps) {
