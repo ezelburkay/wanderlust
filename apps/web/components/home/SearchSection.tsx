@@ -11,6 +11,8 @@ const promptCycleDurationMs = 2900;
 const promptFadeDurationMs = 560;
 const promptSettleDurationMs = 40;
 
+const searchExamples = ["Romantic", "Food", "Slow", "Summer", "Coastal", "Weekend"];
+
 type PromptCityPhase = "visible" | "enter" | "exit";
 
 export function SearchSection({ query = "" }: SearchSectionProps) {
@@ -62,7 +64,7 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
       <div className="site-shell">
         <div className="search-section__panel">
           <div className="search-section__copy">
-            <h2 className="section-title">Search a city</h2>
+            <h2 className="section-title">Search by city, season, or mood</h2>
             <form action="/" className="search-form" role="search">
               <div className="search-form__field">
                 <span className="search-form__icon" aria-hidden="true">
@@ -79,17 +81,25 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
                   </span>
                 ) : null}
                 <input
-                  aria-label="Search for a city"
+                  aria-label="Search by city, season, or mood"
                   autoComplete="off"
                   className="search-form__input"
                   id="city-search"
                   name="q"
                   onChange={(event: { target: { value: string } }) => setValue(event.target.value)}
+                  placeholder="Try Paris, romantic weekends, slow cities, spring food trips..."
                   type="search"
                   value={value}
                 />
               </div>
             </form>
+            <div className="search-section__examples">
+              {searchExamples.map((example) => (
+                <span className="search-section__example" key={example}>
+                  {example}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
