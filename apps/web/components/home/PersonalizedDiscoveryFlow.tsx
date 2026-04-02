@@ -472,10 +472,10 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
             <div className={`discovery-flow-section__grid discovery-flow-section__grid--${section.layout}`}>
               {section.cities.map((city: CityViewModel) => (
                 <CityCard
+                  key={`${section.slug}-${city.slug}`}
                   badgeText={index === 0 ? null : undefined}
                   city={city}
                   descriptorText={index === 0 ? getEditorialCardTone(city, primaryVibe).descriptor : undefined}
-                  key={`${section.slug}-${city.slug}`}
                   sentenceText={index === 0 ? getEditorialCardTone(city, primaryVibe).sentence : undefined}
                   variant={index === 0 ? "editorial" : "default"}
                 />
