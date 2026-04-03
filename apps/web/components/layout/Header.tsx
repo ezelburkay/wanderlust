@@ -11,6 +11,7 @@ export function Header() {
           </span>
           <span className="site-brand__wordmark">
             <span className="site-brand__text">Wanderlust</span>
+            <span className="site-brand__essence">Curated. Distilled.</span>
           </span>
         </Link>
 
@@ -26,4 +27,3 @@ export function Header() {
     </header>
   );
 }
-
