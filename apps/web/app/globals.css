@@ -118,7 +118,7 @@ input {
 
 /* Adjust site-shell padding for proper divider spacing */
 .search-section .site-shell {
-  padding: 1.6rem 0 2.4rem;
+  padding: 1.2rem 0 2.4rem;
 }
 
 .discovery-flow .site-shell {
@@ -235,6 +235,14 @@ input {
   min-height: 2.22rem;
 }
 
+.site-brand__lockup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 2.22rem;
+  justify-content: center;
+}
+
 .site-brand__text {
   display: inline-block;
   font-family: var(--font-code);
@@ -249,13 +257,13 @@ input {
 .site-brand__essence {
   display: block;
   font-family: var(--font-code);
-  font-size: clamp(0.64rem, 1.2vw, 0.75rem);
+  font-size: clamp(0.58rem, 1.1vw, 0.68rem);
   font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: 0.12em;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
   text-transform: capitalize;
-  color: rgba(111, 100, 91, 0.5);
-  margin-top: 0.15rem;
+  color: rgba(111, 100, 91, 0.42);
+  margin-top: 0.1rem;
 }
 
 .site-nav {
@@ -316,8 +324,8 @@ input {
 .hero-section__panel {
   position: relative;
   overflow: visible;
-  min-height: 308px;
-  padding: clamp(1rem, 2.2vw, 1.5rem) 0 clamp(2rem, 4vw, 2.8rem);
+  min-height: 240px;
+  padding: clamp(1rem, 2.2vw, 1.5rem) 0 clamp(1.5rem, 3.2vw, 2.2rem);
   border: 0;
   border-radius: 0;
   background:
@@ -1489,7 +1497,7 @@ input {
 .search-section {
   position: relative;
   z-index: 2;
-  margin-top: 2.4rem;
+  margin-top: 1.8rem;
 }
 
 .discovery-flow {
