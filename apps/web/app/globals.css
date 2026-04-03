@@ -246,6 +246,18 @@ input {
   color: rgba(47, 38, 30, 0.76);
 }
 
+.site-brand__essence {
+  display: block;
+  font-family: var(--font-code);
+  font-size: clamp(0.64rem, 1.2vw, 0.75rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: capitalize;
+  color: rgba(111, 100, 91, 0.5);
+  margin-top: 0.15rem;
+}
+
 .site-nav {
   display: inline-flex;
   align-items: center;
@@ -346,8 +358,8 @@ input {
 }
 
 .hero-section__title {
-  max-width: 14.5ch;
-  font-size: clamp(2.18rem, 4.3vw, 3.7rem);
+  max-width: 18ch;
+  font-size: clamp(2.4rem, 4.8vw, 4.1rem);
   line-height: 0.94;
 }
 
