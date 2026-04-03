@@ -9,10 +9,10 @@ export function Header() {
           <span aria-hidden="true" className="site-brand__mark">
             <CompassMonogram className="site-brand__mark-svg" />
           </span>
-          <span className="site-brand__wordmark">
+          <div className="site-brand__lockup">
             <span className="site-brand__text">Wanderlust</span>
             <span className="site-brand__essence">Curated. Distilled.</span>
-          </span>
+          </div>
         </Link>
 
         <nav aria-label="Primary" className="site-nav">
