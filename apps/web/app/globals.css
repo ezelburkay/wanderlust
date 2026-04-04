@@ -2022,6 +2022,45 @@ input {
     flex-wrap: wrap;
   }
 
+  .search-state-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 1.6rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .search-state-indicator__text {
+    font-style: italic;
+  }
+
+  .search-state-indicator__text strong {
+    color: var(--text);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  .search-state-indicator__clear {
+    background: none;
+    border: none;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .search-state-indicator__clear:hover {
+    background: var(--accent-soft);
+    color: var(--text);
+  }
+
   .hero-section__panel,
   .search-section__panel,
   .discovery-card,
@@ -2038,6 +2077,45 @@ input {
   .city-card__surface,
   .city-card__content {
     min-height: 380px;
+  }
+
+  .search-state-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 1.6rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .search-state-indicator__text {
+    font-style: italic;
+  }
+
+  .search-state-indicator__text strong {
+    color: var(--text);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  .search-state-indicator__clear {
+    background: none;
+    border: none;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .search-state-indicator__clear:hover {
+    background: var(--accent-soft);
+    color: var(--text);
   }
 
   .onboarding-panel {
