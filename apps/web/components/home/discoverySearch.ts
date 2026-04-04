@@ -245,4 +245,3 @@ export function getQueryType(parsedQuery: ParsedQuery): 'city' | 'mood' | 'seaso
   }
   return 'mixed';
 }
-
