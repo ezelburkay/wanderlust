@@ -8,6 +8,7 @@ import { CityCard } from "../city/CityCard";
 interface PersonalizedDiscoveryFlowProps {
   cities: CityViewModel[];
   collections: HomepageDiscoveryViewModel[];
+  activeSearchQuery?: string; // New prop to detect active search
 }
 
 type VibeId = "food" | "romantic" | "culture" | "nature" | "adventure" | "slow";
@@ -429,7 +430,7 @@ function buildSections(
   return personalizedSections.filter((section) => section.cities.length > 0);
 }
 
-export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedDiscoveryFlowProps) {
+export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQuery }: PersonalizedDiscoveryFlowProps) {
   const [hasHydrated, setHasHydrated] = useState(false);
   const [storedState, setStoredState] = useState<StoredOnboardingState | null>(null);
 
@@ -438,13 +439,47 @@ export function PersonalizedDiscoveryFlow({ cities, collections }: PersonalizedD
     setHasHydrated(true);
   }, []);
 
+  // Check if this is search-driven content
+  const isSearchDriven = activeSearchQuery && activeSearchQuery.trim() !== '';
+  
+  // For search-driven content, create appropriate intro
+  const getSearchIntro = (): DiscoveryIntro => {
+    if (!isSearchDriven || collections.length === 0) {
+      return {
+        eyebrow: "For you",
+        identity: "",
+        title: "Cities in focus",
+        text: defaultDiscoverySupport
+      };
+    }
+
+    const primaryCollection = collections[0];
+    
+    return {
+      eyebrow: primaryCollection.label || "Search results",
+      identity: `Based on your search`,
+      title: primaryCollection.title || `Results for "${activeSearchQuery}"`,
+      text: primaryCollection.subtitle || `Cities matching "${activeSearchQuery}"`
+    };
+  };
+
   const selectedVibes = useMemo(() => getSelectedVibes(storedState), [storedState]);
   const selectedTimeframe = useMemo(() => getSelectedTimeframe(storedState), [storedState]);
-  const discoveryIntro = useMemo(() => getDiscoveryIntro(selectedVibes, selectedTimeframe), [selectedTimeframe, selectedVibes]);
-  const primaryVibe = selectedVibes[0] ?? null;
+  const discoveryIntro = isSearchDriven ? getSearchIntro() : useMemo(() => getDiscoveryIntro(selectedVibes, selectedTimeframe), [selectedTimeframe, selectedVibes]);
+  const primaryVibe = isSearchDriven ? null : selectedVibes[0] ?? null;
   const sections = useMemo(() => {
+    if (isSearchDriven) {
+      // For search-driven content, convert collections to sections
+      return collections.map((collection, index) => ({
+        cities: collection.cities,
+        label: collection.label,
+        layout: index === 0 ? "four" as const : "three" as const,
+        slug: collection.slug,
+        title: collection.title
+      }));
+    }
     return buildSections(collections, cities, selectedVibes, selectedTimeframe);
-  }, [cities, collections, selectedTimeframe, selectedVibes]);
+  }, [cities, collections, selectedTimeframe, selectedVibes, isSearchDriven]);
 
   if (!hasHydrated) {
     return null;
