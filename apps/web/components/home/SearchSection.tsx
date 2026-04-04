@@ -1,29 +1,62 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { parseDiscoveryQuery, isValidQuery } from "./discoverySearch";
 
 interface SearchSectionProps {
   query?: string;
+  onSearchChange?: (query: string, parsedQuery: any) => void;
 }
 
 const searchExamples = ["Romantic", "Food", "Slow", "Summer", "Coastal", "Weekend"];
 
-export function SearchSection({ query = "" }: SearchSectionProps) {
+export function SearchSection({ query = "", onSearchChange }: SearchSectionProps) {
   const [value, setValue] = useState(query);
 
   useEffect(() => {
     setValue(query);
   }, [query]);
 
+  const handleSearch = (searchQuery: string) => {
+    if (searchQuery.trim()) {
+      const trimmedQuery = searchQuery.trim();
+      const parsedQuery = parseDiscoveryQuery(trimmedQuery);
+      
+      // Only proceed if we have valid intents
+      if (isValidQuery(trimmedQuery)) {
+        setValue(trimmedQuery);
+        onSearchChange?.(trimmedQuery, parsedQuery);
+        
+        // Update URL for sharing/bookmarking
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', trimmedQuery);
+        window.history.replaceState({}, '', url.toString());
+      }
+    }
+  };
+
   const handleExampleClick = (example: string) => {
-    setValue(example.toLowerCase());
-    window.location.href = `/?q=${encodeURIComponent(example.toLowerCase())}`;
+    handleSearch(example.toLowerCase());
   };
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
-    if (value.trim()) {
-      window.location.href = `/?q=${encodeURIComponent(value.trim())}`;
+    handleSearch(value);
+  };
+
+  const handleInputChange = (event: { target: { value: string } }) => {
+    const newValue = event.target.value;
+    setValue(newValue);
+    
+    // Real-time search as user types (debounced could be added)
+    if (newValue.length > 2) {
+      handleSearch(newValue);
+    } else if (newValue.length === 0) {
+      // Clear search when input is empty
+      onSearchChange?.("", null);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('q');
+      window.history.replaceState({}, '', url.toString());
     }
   };
 
@@ -47,7 +80,7 @@ export function SearchSection({ query = "" }: SearchSectionProps) {
                   className="search-form__input"
                   id="city-search"
                   name="q"
-                  onChange={(event: { target: { value: string } }) => setValue(event.target.value)}
+                  onChange={handleInputChange}
                   placeholder="Try Paris, romantic weekends, slow cities, spring food trips..."
                   type="search"
                   value={value}
