@@ -69,8 +69,77 @@ export default function HomePage({ searchParams }: HomePageProps) {
     window.history.replaceState({}, '', window.location.pathname);
   };
 
+  // Resolve active discovery lens based on priority
+  const getActiveDiscoveryLens = () => {
+    // Priority 1: Active search query
+    if (query && query.trim()) {
+      const parsedQuery = parseDiscoveryQuery(query);
+      return {
+        type: 'search',
+        query,
+        parsedQuery,
+        isActive: true
+      };
+    }
+    
+    // Priority 2: Onboarding preferences (would need to read from localStorage)
+    // For now, fallback to default
+    return {
+      type: 'default',
+      query: '',
+      parsedQuery: null,
+      isActive: false
+    };
+  };
+
+  // Generate search-driven discovery collections
+  const getSearchDrivenCollections = (activeLens: any) => {
+    if (activeLens.type !== 'search') {
+      return [];
+    }
+
+    const cities = getAllCities();
+    const rankedResults = rankCitiesByQuery(cities, activeLens.parsedQuery);
+    
+    const collections = [];
+    
+    // Primary search results collection
+    if (rankedResults.length > 0) {
+      const topResults = rankedResults.slice(0, 6);
+      collections.push({
+        cities: topResults.map(result => result.city),
+        label: "Search results",
+        slug: "search-results",
+        subtitle: `Found ${rankedResults.length} cities matching "${activeLens.query}"`,
+        title: `Best matches for "${activeLens.query}"`
+      });
+    }
+
+    // Mood-specific collection if mood intent detected
+    if (activeLens.parsedQuery.intents.mood.length > 0) {
+      const moodResults = rankedResults.filter(result => result.matches.mood > 0).slice(0, 4);
+      if (moodResults.length > 0) {
+        const mood = activeLens.parsedQuery.intents.mood[0];
+        collections.push({
+          cities: moodResults.map(result => result.city),
+          label: mood,
+          slug: `mood-${mood}`,
+          subtitle: `Cities perfect for ${mood} experiences`,
+          title: `${mood.charAt(0).toUpperCase() + mood.slice(1)} destinations`
+        });
+      }
+    }
+
+    return collections;
+  };
+
   const cities = getAllCities();
-  const discoveryCollections = getHomepageDiscovery();
+  const defaultCollections = getHomepageDiscovery();
+  const activeLens = getActiveDiscoveryLens();
+  const searchCollections = getSearchDrivenCollections(activeLens);
+  
+  // Use search collections if search is active, otherwise use default
+  const activeCollections = activeLens.type === 'search' ? searchCollections : defaultCollections;
 
   return (
     <OnboardingGate>
@@ -83,9 +152,9 @@ export default function HomePage({ searchParams }: HomePageProps) {
             <SearchSection query={query} onSearchChange={handleSearchChange} />
           </div>
 
-          <PersonalizedDiscoveryFlow cities={cities} collections={discoveryCollections} />
-          <SeasonalDiscoverySection cities={cities} collections={discoveryCollections} />
-          <PreferenceSeasonSection cities={cities} collections={discoveryCollections} />
+          <PersonalizedDiscoveryFlow cities={cities} collections={activeCollections} activeSearchQuery={query} />
+          <SeasonalDiscoverySection cities={cities} collections={activeCollections} />
+          <PreferenceSeasonSection cities={cities} collections={activeCollections} />
           
           {/* Search state indicator */}
           {query && (
