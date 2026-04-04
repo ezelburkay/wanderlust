@@ -53,6 +53,7 @@ export function SearchSection({ query = "", onSearchChange }: SearchSectionProps
       handleSearch(newValue);
     } else if (newValue.length === 0) {
       // Clear search when input is empty
+      setValue("");
       onSearchChange?.("", null);
       const url = new URL(window.location.href);
       url.searchParams.delete('q');
