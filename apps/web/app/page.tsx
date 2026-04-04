@@ -61,6 +61,14 @@ export default function HomePage({ searchParams }: HomePageProps) {
     }
   };
 
+  // Clear search functionality
+  const handleClearSearch = () => {
+    setQuery("");
+    setFilteredCities(getAllCities());
+    // Update URL to remove query parameter
+    window.history.replaceState({}, '', window.location.pathname);
+  };
+
   const cities = getAllCities();
   const discoveryCollections = getHomepageDiscovery();
 
@@ -78,6 +86,25 @@ export default function HomePage({ searchParams }: HomePageProps) {
           <PersonalizedDiscoveryFlow cities={cities} collections={discoveryCollections} />
           <SeasonalDiscoverySection cities={cities} collections={discoveryCollections} />
           <PreferenceSeasonSection cities={cities} collections={discoveryCollections} />
+          
+          {/* Search state indicator */}
+          {query && (
+            <div className="site-shell">
+              <div className="search-state-indicator">
+                <span className="search-state-indicator__text">
+                  Showing results for <strong>"{query}"</strong>
+                </span>
+                <button 
+                  className="search-state-indicator__clear"
+                  onClick={handleClearSearch}
+                  type="button"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
+          
           <CityBrowser cities={filteredCities} />
         </main>
       </>
