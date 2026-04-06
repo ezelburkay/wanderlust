@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CityViewModel, HomepageDiscoveryViewModel } from "../../content";
 import type { OnboardingPreferences } from "../onboarding/OnboardingExperience";
-import { CityCard } from "../city/CityCard";
+import { CityCard } from "../city";
 
 interface PersonalizedDiscoveryFlowProps {
   cities: CityViewModel[];
@@ -455,11 +455,16 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
 
     const primaryCollection = collections[0];
     
+    // Safety checks for collection properties
+    const label = primaryCollection?.label || "Search results";
+    const title = primaryCollection?.title || `Results for "${activeSearchQuery}"`;
+    const subtitle = primaryCollection?.subtitle || `Cities matching "${activeSearchQuery}"`;
+    
     return {
-      eyebrow: primaryCollection.label || "Search results",
+      eyebrow: label,
       identity: `Based on your search`,
-      title: primaryCollection.title || `Results for "${activeSearchQuery}"`,
-      text: primaryCollection.subtitle || `Cities matching "${activeSearchQuery}"`
+      title: title,
+      text: subtitle
     };
   };
 
@@ -470,13 +475,25 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
   const sections = useMemo(() => {
     if (isSearchDriven) {
       // For search-driven content, convert collections to sections
-      return collections.map((collection, index) => ({
-        cities: collection.cities,
-        label: collection.label,
-        layout: index === 0 ? "four" as const : "three" as const,
-        slug: collection.slug,
-        title: collection.title
-      }));
+      if (!collections || collections.length === 0) {
+        return [];
+      }
+      
+      return collections.map((collection, index) => {
+        // Safety checks for collection properties
+        if (!collection || !collection.cities || !Array.isArray(collection.cities)) {
+          console.warn('Invalid collection in search-driven content:', collection);
+          return null;
+        }
+        
+        return {
+          cities: collection.cities.filter(Boolean),
+          label: collection.label || `Collection ${index + 1}`,
+          layout: index === 0 ? "four" as const : "three" as const,
+          slug: collection.slug || `search-collection-${index}`,
+          title: collection.title || "Cities"
+        };
+      }).filter(Boolean);
     }
     return buildSections(collections, cities, selectedVibes, selectedTimeframe);
   }, [cities, collections, selectedTimeframe, selectedVibes, isSearchDriven]);
