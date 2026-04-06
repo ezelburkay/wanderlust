@@ -434,8 +434,8 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
   // Simplified: use page-level resolved state instead of independent onboarding reading
   const isSearchDriven = activeSearchQuery && activeSearchQuery.trim() !== '';
   
-  // For search-driven content, create appropriate intro
-  const getSearchIntro = (): DiscoveryIntro => {
+  // Editorial intro based on active lens - no search-results utility copy
+  const discoveryIntro = useMemo(() => {
     if (!isSearchDriven || collections.length === 0) {
       return {
         eyebrow: "For you",
@@ -445,28 +445,21 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
       };
     }
 
+    // For active search lens, use the first collection's identity as the intro
     const primaryCollection = collections[0];
     
     // Safety checks for collection properties
-    const label = primaryCollection?.label || "Search results";
-    const title = primaryCollection?.title || `Results for "${activeSearchQuery}"`;
-    const subtitle = primaryCollection?.subtitle || `Cities matching "${activeSearchQuery}"`;
+    const label = primaryCollection?.label || "Discovery";
+    const title = primaryCollection?.title || "Cities";
+    const text = primaryCollection?.subtitle || defaultDiscoverySupport;
     
     return {
       eyebrow: label,
-      identity: `Based on your search`,
+      identity: "", // No "Based on your search" utility copy
       title: title,
-      text: subtitle
+      text: text
     };
-  };
-
-  // Use search intro if search is active, otherwise use default intro
-  const discoveryIntro = isSearchDriven ? getSearchIntro() : {
-    eyebrow: "For you",
-    identity: "",
-    title: "Cities in focus", 
-    text: defaultDiscoverySupport
-  };
+  }, [isSearchDriven, collections]);
 
   // Simplified sections generation - no independent onboarding reading
   const sections = useMemo(() => {
