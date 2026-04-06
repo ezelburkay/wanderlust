@@ -118,32 +118,45 @@ export default function HomePage() {
       
       const collections = [];
       
-      // Primary search results collection
+      // Primary editorial collection based on search intent
       if (rankedResults && rankedResults.length > 0) {
         const topResults = rankedResults.slice(0, 6);
+        
+        // Editorial title based on primary intent
+        let title = "Cities to explore";
+        let label = "Discovery";
+        let subtitle = "Curated destinations for your journey";
+        
+        if (activeDiscoveryLens.parsedQuery.intents.mood && activeDiscoveryLens.parsedQuery.intents.mood.length > 0) {
+          const mood = activeDiscoveryLens.parsedQuery.intents.mood[0];
+          title = `${mood.charAt(0).toUpperCase() + mood.slice(1)} destinations`;
+          label = mood;
+          subtitle = `Perfect for ${mood} experiences`;
+        }
+        
         collections.push({
           cities: topResults.map(result => result?.city).filter(Boolean),
-          label: "Search results",
-          slug: "search-results",
-          subtitle: `Found ${rankedResults.length} cities matching "${activeDiscoveryLens.query}"`,
-          title: `Best matches for "${activeDiscoveryLens.query}"`
+          label: label,
+          slug: "primary-discovery",
+          subtitle: subtitle,
+          title: title
         });
       }
 
-      // Mood-specific collection if mood intent detected
+      // Mood-specific continuation if mood intent detected
       if (activeDiscoveryLens.parsedQuery.intents.mood && activeDiscoveryLens.parsedQuery.intents.mood.length > 0) {
         const moodResults = rankedResults.filter(result => 
           result && result.matches && result.matches.mood > 0
-        ).slice(0, 4);
+        ).slice(4, 8); // Continue with more results
         
         if (moodResults.length > 0) {
           const mood = activeDiscoveryLens.parsedQuery.intents.mood[0];
           collections.push({
             cities: moodResults.map(result => result?.city).filter(Boolean),
-            label: mood,
-            slug: `mood-${mood}`,
-            subtitle: `Cities perfect for ${mood} experiences`,
-            title: `${mood.charAt(0).toUpperCase() + mood.slice(1)} destinations`
+            label: `More ${mood}`,
+            slug: `more-${mood}`,
+            subtitle: `Additional ${mood} destinations`,
+            title: `More ${mood.charAt(0).toUpperCase() + mood.slice(1)} cities`
           });
         }
       }
@@ -152,10 +165,10 @@ export default function HomePage() {
       if (collections.length === 0) {
         collections.push({
           cities: getAllCities().slice(0, 6),
-          label: "All cities",
-          slug: "fallback-cities",
-          subtitle: `Showing cities for "${activeDiscoveryLens.query}"`,
-          title: "City destinations"
+          label: "Explore",
+          slug: "explore-cities",
+          subtitle: "Discover amazing destinations",
+          title: "Cities to explore"
         });
       }
 
@@ -187,15 +200,15 @@ export default function HomePage() {
           <SeasonalDiscoverySection cities={cities} collections={activeCollections} />
           <PreferenceSeasonSection cities={cities} collections={activeCollections} />
           
-          {/* Search state indicator */}
+          {/* Subtle active lens indicator */}
           {query && (
             <div className="site-shell">
-              <div className="search-state-indicator">
-                <span className="search-state-indicator__text">
-                  Showing results for <strong>"{query}"</strong>
+              <div className="discovery-lens-indicator">
+                <span className="discovery-lens-indicator__text">
+                  Curated for <strong>{activeDiscoveryLens.parsedQuery?.intents?.mood?.[0] || query}</strong>
                 </span>
                 <button 
-                  className="search-state-indicator__clear"
+                  className="discovery-lens-indicator__clear"
                   onClick={handleClearSearch}
                   type="button"
                 >
