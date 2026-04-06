@@ -200,24 +200,6 @@ export default function HomePage() {
           <SeasonalDiscoverySection cities={cities} collections={activeCollections} />
           <PreferenceSeasonSection cities={cities} collections={activeCollections} />
           
-          {/* Subtle active lens indicator */}
-          {query && (
-            <div className="site-shell">
-              <div className="discovery-lens-indicator">
-                <span className="discovery-lens-indicator__text">
-                  Curated for <strong>{activeDiscoveryLens.parsedQuery?.intents?.mood?.[0] || query}</strong>
-                </span>
-                <button 
-                  className="discovery-lens-indicator__clear"
-                  onClick={handleClearSearch}
-                  type="button"
-                >
-                  Clear
-                </button>
-              </div>
-            </div>
-          )}
-          
           <CityBrowser cities={filteredCities} />
         </main>
       </>
