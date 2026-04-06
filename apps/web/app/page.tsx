@@ -10,12 +10,12 @@ import { SeasonalDiscoverySection } from "../components/home/SeasonalDiscoverySe
 import { PreferenceSeasonSection } from "../components/home/PreferenceSeasonSection";
 import { Header } from "../components/layout/Header";
 import { OnboardingGate } from "../components/onboarding/OnboardingGate";
-import { parseDiscoveryQuery, rankCitiesByQuery } from "../components/home/discoverySearch";
+import { parseDiscoveryQuery, rankCitiesByQuery, type ParsedQuery } from "../components/home/discoverySearch";
 
 export default function HomePage() {
   // Stable client-side search state
   const [query, setQuery] = useState("");
-  const [parsedQuery, setParsedQuery] = useState(null);
+  const [parsedQuery, setParsedQuery] = useState<ParsedQuery | null>(null);
   const [filteredCities, setFilteredCities] = useState(getAllCities());
 
   // Safe URL sync - read URL on mount only
@@ -53,7 +53,7 @@ export default function HomePage() {
   };
 
   // Handle search changes - unified state management
-  const handleSearchChange = (newQuery: string, newParsedQuery: any) => {
+  const handleSearchChange = (newQuery: string, newParsedQuery: ParsedQuery | null) => {
     setQuery(newQuery);
     setParsedQuery(newParsedQuery);
     
