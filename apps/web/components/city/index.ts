@@ -1,2 +1,2 @@
-export { CityCard } from './CityCard';
-export { CityBrowser } from './CityBrowser';
+export * from './CityCard';
+export * from './CityBrowser';
