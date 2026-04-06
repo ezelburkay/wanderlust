@@ -431,15 +431,7 @@ function buildSections(
 }
 
 export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQuery }: PersonalizedDiscoveryFlowProps) {
-  const [hasHydrated, setHasHydrated] = useState(false);
-  const [storedState, setStoredState] = useState<StoredOnboardingState | null>(null);
-
-  useEffect(() => {
-    setStoredState(readStoredOnboarding());
-    setHasHydrated(true);
-  }, []);
-
-  // Check if this is search-driven content
+  // Simplified: use page-level resolved state instead of independent onboarding reading
   const isSearchDriven = activeSearchQuery && activeSearchQuery.trim() !== '';
   
   // For search-driven content, create appropriate intro
@@ -468,42 +460,40 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
     };
   };
 
-  const selectedVibes = useMemo(() => getSelectedVibes(storedState), [storedState]);
-  const selectedTimeframe = useMemo(() => getSelectedTimeframe(storedState), [storedState]);
-  const discoveryIntro = isSearchDriven ? getSearchIntro() : useMemo(() => getDiscoveryIntro(selectedVibes, selectedTimeframe), [selectedTimeframe, selectedVibes]);
-  const primaryVibe = isSearchDriven ? null : selectedVibes[0] ?? null;
+  // Use search intro if search is active, otherwise use default intro
+  const discoveryIntro = isSearchDriven ? getSearchIntro() : {
+    eyebrow: "For you",
+    identity: "",
+    title: "Cities in focus", 
+    text: defaultDiscoverySupport
+  };
+
+  // Simplified sections generation - no independent onboarding reading
   const sections = useMemo(() => {
-    if (isSearchDriven) {
-      // For search-driven content, convert collections to sections
-      if (!collections || collections.length === 0) {
-        return [];
+    if (!collections || collections.length === 0) {
+      return [];
+    }
+    
+    // Convert collections to sections with safety checks
+    const sectionCandidates = collections.map((collection, index) => {
+      // Safety checks for collection properties
+      if (!collection || !collection.cities || !Array.isArray(collection.cities)) {
+        console.warn('Invalid collection in discovery content:', collection);
+        return null;
       }
       
-      const sectionCandidates = collections.map((collection, index) => {
-        // Safety checks for collection properties
-        if (!collection || !collection.cities || !Array.isArray(collection.cities)) {
-          console.warn('Invalid collection in search-driven content:', collection);
-          return null;
-        }
-        
-        return {
-          cities: collection.cities.filter(Boolean),
-          label: collection.label || `Collection ${index + 1}`,
-          layout: index === 0 ? "four" as const : "three" as const,
-          slug: collection.slug || `search-collection-${index}`,
-          title: collection.title || "Cities"
-        };
-      });
-      
-      // Type-safe filter to remove null values
-      return sectionCandidates.filter((section): section is DiscoveryFlowSection => section !== null);
-    }
-    return buildSections(collections, cities, selectedVibes, selectedTimeframe);
-  }, [cities, collections, selectedTimeframe, selectedVibes, isSearchDriven]);
-
-  if (!hasHydrated) {
-    return null;
-  }
+      return {
+        cities: collection.cities.filter(Boolean),
+        label: collection.label || `Collection ${index + 1}`,
+        layout: index === 0 ? "four" as const : "three" as const,
+        slug: collection.slug || `collection-${index}`,
+        title: collection.title || "Cities"
+      };
+    });
+    
+    // Type-safe filter to remove null values
+    return sectionCandidates.filter((section): section is DiscoveryFlowSection => section !== null);
+  }, [collections]);
 
   return (
     <section className="discovery-flow" id="discover">
@@ -530,8 +520,8 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
                   key={`${section.slug}-${city.slug}`}
                   badgeText={index === 0 ? null : undefined}
                   city={city}
-                  descriptorText={index === 0 ? getEditorialCardTone(city, primaryVibe).descriptor : undefined}
-                  sentenceText={index === 0 ? getEditorialCardTone(city, primaryVibe).sentence : undefined}
+                  descriptorText={index === 0 ? city.country : undefined}
+                  sentenceText={index === 0 ? city.cardSentence : undefined}
                   variant={index === 0 ? "editorial" : "default"}
                 />
               ))}
