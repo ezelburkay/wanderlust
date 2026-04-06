@@ -1,37 +1,134 @@
-import Link from "next/link";
-import type { HomepageDiscoveryViewModel } from "@/content";
+"use client";
 
-interface DiscoverySectionProps {
+import { useEffect, useMemo, useState } from "react";
+import type { CityViewModel, HomepageDiscoveryViewModel } from "../../content";
+import type { OnboardingPreferences } from "../onboarding/OnboardingExperience";
+import { CityCard } from "../city/CityCard";
+
+interface SeasonalDiscoverySectionProps {
+  cities: CityViewModel[];
   collections: HomepageDiscoveryViewModel[];
 }
 
-export function DiscoverySection({ collections }: DiscoverySectionProps) {
+type TimeframeId = "this-month" | "next-3-months";
+
+interface StoredOnboardingState {
+  completed: boolean;
+  skipped: boolean;
+  preferences: OnboardingPreferences;
+}
+
+const storageKey = "wanderlust_onboarding";
+
+function sanitizeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function readStoredOnboarding(): StoredOnboardingState | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const rawValue = window.localStorage.getItem(storageKey);
+
+  if (!rawValue) {
+    return null;
+  }
+
+  try {
+    const parsedValue = JSON.parse(rawValue) as Partial<StoredOnboardingState> & {
+      preferences?: Partial<OnboardingPreferences>;
+    };
+
+    return {
+      completed: parsedValue.completed === true,
+      skipped: parsedValue.skipped === true,
+      preferences: {
+        mood: sanitizeStringArray(parsedValue.preferences?.mood),
+        pace: typeof parsedValue.preferences?.pace === "string" ? parsedValue.preferences.pace : "",
+        foodInterest: sanitizeStringArray(parsedValue.preferences?.foodInterest),
+        vibe: sanitizeStringArray(parsedValue.preferences?.vibe),
+        tripStyle: sanitizeStringArray(parsedValue.preferences?.tripStyle)
+      }
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getSelectedTimeframe(state: StoredOnboardingState | null): TimeframeId | null {
+  const validTimeframes: TimeframeId[] = ["this-month", "next-3-months"];
+  
+  const selectedTimeframe = state?.preferences.tripStyle.find((value): value is TimeframeId => {
+    return validTimeframes.includes(value as TimeframeId);
+  });
+
+  return selectedTimeframe ?? null;
+}
+
+function getSeasonalCities(cities: CityViewModel[], timeframe: TimeframeId | null): CityViewModel[] {
+  const currentMonth = new Date().getMonth();
+  const seasonalKeywords = {
+    spring: ["march", "april", "may", "bloom", "garden", "outdoor"],
+    summer: ["june", "july", "august", "warm", "outdoor", "terrace"],
+    fall: ["september", "october", "november", "autumn", "foliage", "cozy"],
+    winter: ["december", "january", "february", "cold", "indoor", "cozy"]
+  };
+
+  const season = currentMonth >= 2 && currentMonth <= 4 ? "spring" :
+                currentMonth >= 5 && currentMonth <= 7 ? "summer" :
+                currentMonth >= 8 && currentMonth <= 10 ? "fall" : "winter";
+
+  const keywords = seasonalKeywords[season] || [];
+
+  return cities
+    .map(city => {
+      const score = keywords.reduce((acc, keyword) => {
+        return acc + (city.searchText.includes(keyword) ? 1 : 0);
+      }, 0);
+      return { city, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map(({ city }) => city);
+}
+
+export function SeasonalDiscoverySection({ cities, collections }: SeasonalDiscoverySectionProps) {
+  const [hasHydrated, setHasHydrated] = useState(false);
+  const [storedState, setStoredState] = useState<StoredOnboardingState | null>(null);
+
+  useEffect(() => {
+    setStoredState(readStoredOnboarding());
+    setHasHydrated(true);
+  }, []);
+
+  const selectedTimeframe = useMemo(() => getSelectedTimeframe(storedState), [storedState]);
+  const seasonalCities = useMemo(() => {
+    return getSeasonalCities(cities, selectedTimeframe);
+  }, [cities, selectedTimeframe]);
+
+  if (!hasHydrated || seasonalCities.length === 0) {
+    return null;
+  }
+
   return (
-    <section className="discovery-section" id="discover">
+    <section className="seasonal-discovery" id="seasonal">
       <div className="site-shell">
         <div className="section-heading">
-          <span className="section-label">Discovery</span>
-          <h2 className="section-title">A few good places to begin.</h2>
+          <h2 className="section-title">Cities that feel right this season</h2>
           <p className="section-copy">
-            A calm set of starting points for choosing the next city to open.
+            A timely edit shaped by weather, pace, and what's best experienced now.
           </p>
         </div>
 
-        <div className="discovery-grid">
-          {collections.map((collection) => (
-            <article className="discovery-card" key={collection.slug}>
-              <span className="discovery-card__label">{collection.label}</span>
-              <h3 className="discovery-card__title">{collection.title}</h3>
-              <p className="discovery-card__subtitle">{collection.subtitle}</p>
-              <div className="discovery-card__cities">
-                {collection.cities.map((city) => (
-                  <Link className="discovery-card__city" href={`/cities/${city.slug}`} key={city.slug}>
-                    <span className="discovery-card__city-name">{city.name}</span>
-                    <span className="discovery-card__city-country">{city.country}</span>
-                  </Link>
-                ))}
-              </div>
-            </article>
+        <div className="seasonal-discovery__grid">
+          {seasonalCities.map((city) => (
+            <CityCard key={city.slug} city={city} />
           ))}
         </div>
       </div>
