@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getAllCities, getHomepageDiscovery } from "../content";
 import { CityBrowser } from "../components/city";
 import { HeroSection } from "../components/home/HeroSection";
@@ -12,183 +12,165 @@ import { Header } from "../components/layout/Header";
 import { OnboardingGate } from "../components/onboarding/OnboardingGate";
 import { parseDiscoveryQuery, rankCitiesByQuery } from "../components/home/discoverySearch";
 
-interface HomePageProps {
-  searchParams?: Promise<{
-    q?: string | string[];
-  }>;
-}
-
-export default function HomePage({ searchParams }: HomePageProps) {
+export default function HomePage() {
+  // Stable client-side search state
   const [query, setQuery] = useState("");
+  const [parsedQuery, setParsedQuery] = useState(null);
   const [filteredCities, setFilteredCities] = useState(getAllCities());
 
-  // Handle URL params on mount
+  // Safe URL sync - read URL on mount only
   useEffect(() => {
-    const loadSearchParams = async () => {
-      try {
-        const resolvedSearchParams = await searchParams;
-        const rawQuery = Array.isArray(resolvedSearchParams?.q)
-          ? resolvedSearchParams.q[0]
-          : resolvedSearchParams?.q;
-        const initialQuery = rawQuery?.trim() ?? "";
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlQuery = urlParams.get('q')?.trim() ?? "";
+      
+      if (urlQuery) {
+        setQuery(urlQuery);
+        const parsed = parseDiscoveryQuery(urlQuery);
+        setParsedQuery(parsed);
         
-        setQuery(initialQuery);
-        
-        if (initialQuery) {
-          const cities = getAllCities();
-          const parsedQuery = parseDiscoveryQuery(initialQuery);
-          if (parsedQuery && parsedQuery.intents) {
-            const rankedResults = rankCitiesByQuery(cities, parsedQuery);
-            const results = rankedResults && rankedResults.length > 0 
-              ? rankedResults.map(result => result?.city).filter(Boolean)
-              : cities;
-            setFilteredCities(results);
-          } else {
-            setFilteredCities(cities);
-          }
-        } else {
-          setFilteredCities(getAllCities());
-        }
-      } catch (error) {
-        console.warn('Error loading search params:', error);
-        // Fallback to default state
-        setQuery("");
-        setFilteredCities(getAllCities());
+        const cities = getAllCities();
+        const rankedResults = rankCitiesByQuery(cities, parsed);
+        const results = rankedResults && rankedResults.length > 0 
+          ? rankedResults.map(result => result?.city).filter(Boolean)
+          : cities;
+        setFilteredCities(results);
       }
-    };
-    
-    loadSearchParams();
-  }, [searchParams]);
+    }
+  }, []);
 
-  // Handle search changes from SearchSection
-  const handleSearchChange = (newQuery: string, parsedQuery: any) => {
+  // Safe URL update function
+  const updateURL = (newQuery: string) => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (newQuery.trim()) {
+        url.searchParams.set('q', newQuery.trim());
+      } else {
+        url.searchParams.delete('q');
+      }
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
+
+  // Handle search changes - unified state management
+  const handleSearchChange = (newQuery: string, newParsedQuery: any) => {
     setQuery(newQuery);
+    setParsedQuery(newParsedQuery);
     
-    if (newQuery && parsedQuery) {
+    if (newQuery && newParsedQuery) {
       try {
         const cities = getAllCities();
-        const rankedResults = rankCitiesByQuery(cities, parsedQuery);
+        const rankedResults = rankCitiesByQuery(cities, newParsedQuery);
         const results = rankedResults && rankedResults.length > 0 
           ? rankedResults.map(result => result?.city).filter(Boolean)
           : cities;
         setFilteredCities(results);
       } catch (error) {
         console.warn('Error during search processing:', error);
-        // Fallback to all cities if search processing fails
         setFilteredCities(getAllCities());
       }
     } else {
       setFilteredCities(getAllCities());
     }
+    
+    // Safe URL sync
+    updateURL(newQuery);
   };
 
   // Clear search functionality
   const handleClearSearch = () => {
     setQuery("");
+    setParsedQuery(null);
     setFilteredCities(getAllCities());
-    // Update URL to remove query parameter
-    window.history.replaceState({}, '', window.location.pathname);
+    updateURL("");
   };
 
-  // Resolve active discovery lens based on priority
-  const getActiveDiscoveryLens = () => {
+  // Resolve active discovery lens at page level
+  const activeDiscoveryLens = useMemo(() => {
     // Priority 1: Active search query
-    if (query && query.trim()) {
-      try {
-        const parsedQuery = parseDiscoveryQuery(query);
-        if (parsedQuery && parsedQuery.intents) {
-          return {
-            type: 'search',
-            query,
-            parsedQuery,
-            isActive: true
-          };
-        }
-      } catch (error) {
-        console.warn('Failed to parse search query:', query, error);
-        // Fall back to default if parsing fails
-      }
+    if (query && query.trim() && parsedQuery) {
+      return {
+        type: 'search',
+        query,
+        parsedQuery,
+        isActive: true
+      };
     }
     
-    // Priority 2: Onboarding preferences (would need to read from localStorage)
-    // For now, fallback to default
+    // Priority 2: Default (onboarding could be added here later)
     return {
       type: 'default',
       query: '',
       parsedQuery: null,
       isActive: false
     };
-  };
+  }, [query, parsedQuery]);
 
-  // Generate search-driven discovery collections
-  const getSearchDrivenCollections = (activeLens: any) => {
-    if (activeLens.type !== 'search') {
+  // Generate search-driven collections safely
+  const searchCollections = useMemo(() => {
+    if (activeDiscoveryLens.type !== 'search' || !activeDiscoveryLens.parsedQuery) {
       return [];
     }
 
-    // Safety check: ensure parsedQuery exists and has expected structure
-    if (!activeLens.parsedQuery || !activeLens.parsedQuery.intents) {
-      console.warn('Invalid parsedQuery in activeLens:', activeLens);
-      return [];
-    }
-
-    const cities = getAllCities();
-    const rankedResults = rankCitiesByQuery(cities, activeLens.parsedQuery);
-    
-    const collections = [];
-    
-    // Primary search results collection
-    if (rankedResults && rankedResults.length > 0) {
-      const topResults = rankedResults.slice(0, 6);
-      collections.push({
-        cities: topResults.map(result => result?.city).filter(Boolean),
-        label: "Search results",
-        slug: "search-results",
-        subtitle: `Found ${rankedResults.length} cities matching "${activeLens.query}"`,
-        title: `Best matches for "${activeLens.query}"`
-      });
-    }
-
-    // Mood-specific collection if mood intent detected
-    if (activeLens.parsedQuery.intents.mood && activeLens.parsedQuery.intents.mood.length > 0) {
-      const moodResults = rankedResults.filter(result => 
-        result && result.matches && result.matches.mood > 0
-      ).slice(0, 4);
+    try {
+      const cities = getAllCities();
+      const rankedResults = rankCitiesByQuery(cities, activeDiscoveryLens.parsedQuery);
       
-      if (moodResults.length > 0) {
-        const mood = activeLens.parsedQuery.intents.mood[0];
+      const collections = [];
+      
+      // Primary search results collection
+      if (rankedResults && rankedResults.length > 0) {
+        const topResults = rankedResults.slice(0, 6);
         collections.push({
-          cities: moodResults.map(result => result?.city).filter(Boolean),
-          label: mood,
-          slug: `mood-${mood}`,
-          subtitle: `Cities perfect for ${mood} experiences`,
-          title: `${mood.charAt(0).toUpperCase() + mood.slice(1)} destinations`
+          cities: topResults.map(result => result?.city).filter(Boolean),
+          label: "Search results",
+          slug: "search-results",
+          subtitle: `Found ${rankedResults.length} cities matching "${activeDiscoveryLens.query}"`,
+          title: `Best matches for "${activeDiscoveryLens.query}"`
         });
       }
+
+      // Mood-specific collection if mood intent detected
+      if (activeDiscoveryLens.parsedQuery.intents.mood && activeDiscoveryLens.parsedQuery.intents.mood.length > 0) {
+        const moodResults = rankedResults.filter(result => 
+          result && result.matches && result.matches.mood > 0
+        ).slice(0, 4);
+        
+        if (moodResults.length > 0) {
+          const mood = activeDiscoveryLens.parsedQuery.intents.mood[0];
+          collections.push({
+            cities: moodResults.map(result => result?.city).filter(Boolean),
+            label: mood,
+            slug: `mood-${mood}`,
+            subtitle: `Cities perfect for ${mood} experiences`,
+            title: `${mood.charAt(0).toUpperCase() + mood.slice(1)} destinations`
+          });
+        }
+      }
+
+      // Fallback collection if no results
+      if (collections.length === 0) {
+        collections.push({
+          cities: getAllCities().slice(0, 6),
+          label: "All cities",
+          slug: "fallback-cities",
+          subtitle: `Showing cities for "${activeDiscoveryLens.query}"`,
+          title: "City destinations"
+        });
+      }
+
+      return collections;
+    } catch (error) {
+      console.warn('Error generating search collections:', error);
+      return [];
     }
+  }, [activeDiscoveryLens]);
 
-    // Ensure we have at least some collections if search is active
-    if (collections.length === 0 && activeLens.query) {
-      // Fallback collection with all cities
-      collections.push({
-        cities: cities.slice(0, 6),
-        label: "All cities",
-        slug: "fallback-cities",
-        subtitle: `Showing all cities for "${activeLens.query}"`,
-        title: "City destinations"
-      });
-    }
-
-    return collections;
-  };
-
-  const cities = getAllCities();
-  const defaultCollections = getHomepageDiscovery();
-  const activeLens = getActiveDiscoveryLens();
-  const searchCollections = getSearchDrivenCollections(activeLens);
-  
   // Use search collections if search is active, otherwise use default
-  const activeCollections = activeLens.type === 'search' ? searchCollections : defaultCollections;
+  const activeCollections = activeDiscoveryLens.type === 'search' ? searchCollections : getHomepageDiscovery();
+  
+  // Get all cities for components that need it
+  const cities = getAllCities();
 
   return (
     <OnboardingGate>
