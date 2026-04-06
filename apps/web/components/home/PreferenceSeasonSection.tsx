@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CityViewModel, HomepageDiscoveryViewModel } from "../../content";
 import type { OnboardingPreferences } from "../onboarding/OnboardingExperience";
-import { CityCard } from "../city/CityCard";
+import { CityCard } from "../city";
 
 interface PreferenceSeasonSectionProps {
   cities: CityViewModel[];
