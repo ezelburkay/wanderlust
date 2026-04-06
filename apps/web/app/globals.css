@@ -1,5 +1,8 @@
 :root {
   color-scheme: light;
+  --font-sans: "Inter", "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Playfair Display", "Iowan Old Style", "Times New Roman", Times, serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --font-body: var(--font-sans);
   --font-display: var(--font-serif);
   --font-code: var(--font-mono);
