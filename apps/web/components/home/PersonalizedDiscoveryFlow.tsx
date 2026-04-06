@@ -467,8 +467,12 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
       return [];
     }
     
+    // When search is active, only show the first (primary) section
+    // Other sections will be handled by separate components
+    const collectionsToUse = isSearchDriven ? [collections[0]] : collections;
+    
     // Convert collections to sections with safety checks
-    const sectionCandidates = collections.map((collection, index) => {
+    const sectionCandidates = collectionsToUse.map((collection, index) => {
       // Safety checks for collection properties
       if (!collection || !collection.cities || !Array.isArray(collection.cities)) {
         console.warn('Invalid collection in discovery content:', collection);
@@ -486,7 +490,7 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
     
     // Type-safe filter to remove null values
     return sectionCandidates.filter((section): section is DiscoveryFlowSection => section !== null);
-  }, [collections]);
+  }, [collections, isSearchDriven]);
 
   return (
     <section className="discovery-flow" id="discover">
