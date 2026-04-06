@@ -479,7 +479,7 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
         return [];
       }
       
-      return collections.map((collection, index) => {
+      const sectionCandidates = collections.map((collection, index) => {
         // Safety checks for collection properties
         if (!collection || !collection.cities || !Array.isArray(collection.cities)) {
           console.warn('Invalid collection in search-driven content:', collection);
@@ -493,7 +493,10 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
           slug: collection.slug || `search-collection-${index}`,
           title: collection.title || "Cities"
         };
-      }).filter(Boolean);
+      });
+      
+      // Type-safe filter to remove null values
+      return sectionCandidates.filter((section): section is DiscoveryFlowSection => section !== null);
     }
     return buildSections(collections, cities, selectedVibes, selectedTimeframe);
   }, [cities, collections, selectedTimeframe, selectedVibes, isSearchDriven]);
