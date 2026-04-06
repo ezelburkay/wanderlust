@@ -123,7 +123,7 @@ export default function HomePage() {
                            activeDiscoveryLens.parsedQuery.intents.season?.[0] || 
                            "Discovery";
       
-      // Section 1 — Primary active-lens section
+      // Section 1 — Primary active-lens section (for PersonalizedDiscoveryFlow)
       if (rankedResults && rankedResults.length > 0) {
         const topResults = rankedResults.slice(0, 6);
         
@@ -136,6 +136,30 @@ export default function HomePage() {
         });
       }
 
+      return collections;
+    } catch (error) {
+      console.warn('Error generating search collections:', error);
+      return [];
+    }
+  }, [activeDiscoveryLens]);
+
+  // Generate seasonal continuation collections for SeasonalDiscoverySection
+  const seasonalCollections = useMemo(() => {
+    if (activeDiscoveryLens.type !== 'search' || !activeDiscoveryLens.parsedQuery) {
+      return getHomepageDiscovery(); // Default when not searching
+    }
+
+    try {
+      const cities = getAllCities();
+      const rankedResults = rankCitiesByQuery(cities, activeDiscoveryLens.parsedQuery);
+      
+      const collections = [];
+      
+      // Get primary intent for editorial direction
+      const primaryIntent = activeDiscoveryLens.parsedQuery.intents.mood?.[0] || 
+                           activeDiscoveryLens.parsedQuery.intents.season?.[0] || 
+                           "Discovery";
+      
       // Section 2 — Seasonal continuation with active lens
       const seasonalResults = rankedResults.slice(6, 10);
       if (seasonalResults.length > 0) {
@@ -148,49 +172,10 @@ export default function HomePage() {
         });
       }
 
-      // Section 3 — Supporting discovery section
-      const supportingResults = rankedResults.slice(10, 14);
-      if (supportingResults.length > 0) {
-        // Create editorial supporting title based on primary intent
-        let supportingTitle = "More destinations to explore";
-        let supportingSubtitle = "Continue your journey";
-        
-        if (primaryIntent === "romantic") {
-          supportingTitle = "Weekend escapes for two";
-          supportingSubtitle = "Cities perfect for slower moments";
-        } else if (primaryIntent === "food") {
-          supportingTitle = "Culinary discoveries";
-          supportingSubtitle = "Cities for memorable meals";
-        } else if (primaryIntent === "slow") {
-          supportingTitle = "Gentle explorations";
-          supportingSubtitle = "Cities for longer stays";
-        }
-        
-        collections.push({
-          cities: supportingResults.map(result => result?.city).filter(Boolean),
-          label: "Discover",
-          slug: "supporting-discovery",
-          subtitle: supportingSubtitle,
-          title: supportingTitle
-        });
-      }
-
-      // Section 4 — Explore more (broader browsing)
-      const exploreResults = rankedResults.slice(14, 20);
-      if (exploreResults.length > 0) {
-        collections.push({
-          cities: exploreResults.map(result => result?.city).filter(Boolean),
-          label: "Explore",
-          slug: "explore-more",
-          subtitle: "More cities to discover",
-          title: "Explore more cities"
-        });
-      }
-
-      return collections;
+      return collections.length > 0 ? collections : getHomepageDiscovery();
     } catch (error) {
-      console.warn('Error generating search collections:', error);
-      return [];
+      console.warn('Error generating seasonal collections:', error);
+      return getHomepageDiscovery();
     }
   }, [activeDiscoveryLens]);
 
@@ -211,11 +196,19 @@ export default function HomePage() {
             <SearchSection query={query} onSearchChange={handleSearchChange} />
           </div>
 
-          {/* Search-active flow: show only search-driven sections */}
+          {/* Search-active flow: active pill → seasonal → onboarding preference → explore */}
           {activeDiscoveryLens.type === 'search' ? (
             <>
+              {/* 1. Active selected-pill section (primary) */}
               <PersonalizedDiscoveryFlow cities={cities} collections={activeCollections} activeSearchQuery={query} />
-              {/* CityBrowser shows search-weighted cities as the explore layer */}
+              
+              {/* 2. Seasonal continuation section */}
+              <SeasonalDiscoverySection cities={cities} collections={seasonalCollections} />
+              
+              {/* 3. Onboarding preference section (secondary, preserved) */}
+              <PreferenceSeasonSection cities={cities} collections={getHomepageDiscovery()} />
+              
+              {/* 4. Explore more cities (final broader browsing) */}
               <CityBrowser cities={filteredCities} />
             </>
           ) : (
