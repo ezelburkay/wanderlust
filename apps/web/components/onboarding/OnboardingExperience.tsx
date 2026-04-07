@@ -25,12 +25,12 @@ export const emptyOnboardingPreferences: OnboardingPreferences = {
 };
 
 const vibeOptions: Array<{ icon: string; id: VibeId; label: string }> = [
-  { icon: "??", id: "food", label: "Food" },
-  { icon: "??", id: "romantic", label: "Romantic" },
-  { icon: "??", id: "culture", label: "Culture" },
-  { icon: "??", id: "nature", label: "Nature" },
-  { icon: "??", id: "adventure", label: "Adventure" },
-  { icon: "??", id: "slow", label: "Slow" }
+  { icon: "\ud83c\udf7d\ufe0f", id: "food", label: "Food" },
+  { icon: "\u2726", id: "romantic", label: "Romantic" },
+  { icon: "\ud83c\udfdb\ufe0f", id: "culture", label: "Culture" },
+  { icon: "\ud83c\udf3f", id: "nature", label: "Nature" },
+  { icon: "\u26a1", id: "adventure", label: "Adventure" },
+  { icon: "\u263e", id: "slow", label: "Slow" }
 ];
 
 const timeframeOptions: Array<{ id: TimeframeId; label: string }> = [
@@ -131,14 +131,11 @@ export function DiscoveryExperience({ onComplete, onSkip }: DiscoveryExperienceP
           <div className="onboarding-chip-grid">
             {vibeOptions.map((option) => {
               const isSelected = vibes.includes(option.id);
-              const selectionIndex = vibes.indexOf(option.id);
-              const isPrimary = selectionIndex === 0;
-              const isSecondary = selectionIndex > 0 && selectionIndex < MAX_VIBE_SELECTIONS;
               const iconClassName = getVibeIcon(option.id);
 
               return (
                 <button
-                  className={`onboarding-chip${isSelected ? " onboarding-chip--selected" : ""}${isPrimary ? " onboarding-chip--primary" : ""}${isSecondary ? " onboarding-chip--secondary" : ""}`}
+                  className={`onboarding-chip${isSelected ? " onboarding-chip--selected" : ""}`}
                   key={option.id}
                   onClick={() => toggleVibe(option.id)}
                   type="button"
@@ -147,8 +144,6 @@ export function DiscoveryExperience({ onComplete, onSkip }: DiscoveryExperienceP
                   <span className="onboarding-chip__content">
                     <span className="onboarding-chip__icon-slot">
                       <span className={`onboarding-chip__icon ${iconClassName}`}>{option.icon}</span>
-                      {isPrimary && <span className="onboarding-chip__indicator">1</span>}
-                      {isSecondary && <span className="onboarding-chip__indicator">{selectionIndex + 1}</span>}
                     </span>
                     <span className="onboarding-chip__label">{option.label}</span>
                   </span>
