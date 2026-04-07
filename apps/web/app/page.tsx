@@ -14,27 +14,24 @@ import { parseDiscoveryQuery, rankCitiesByQuery, type ParsedQuery } from "../com
 
 export default function HomePage() {
   // Stable client-side search state
-  const [query, setQuery] = useState("");
-  const [parsedQuery, setParsedQuery] = useState<ParsedQuery | null>(null);
+  const [draftQuery, setDraftQuery] = useState("");
+  const [committedQuery, setCommittedQuery] = useState("");
+  const [committedParsedQuery, setCommittedParsedQuery] = useState<ParsedQuery | null>(null);
   const [filteredCities, setFilteredCities] = useState(getAllCities());
 
-  // Safe URL sync - read URL on mount only
+  // Safe URL query parameter sync
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlQuery = urlParams.get('q')?.trim() ?? "";
-      
+      const params = new URLSearchParams(window.location.search);
+      const urlQuery = params.get('q') || '';
       if (urlQuery) {
-        setQuery(urlQuery);
-        const parsed = parseDiscoveryQuery(urlQuery);
-        setParsedQuery(parsed);
-        
-        const cities = getAllCities();
-        const rankedResults = rankCitiesByQuery(cities, parsed);
-        const results = rankedResults && rankedResults.length > 0 
-          ? rankedResults.map(result => result?.city).filter(Boolean)
-          : cities;
-        setFilteredCities(results);
+        try {
+          const parsed = parseDiscoveryQuery(urlQuery);
+          setCommittedQuery(urlQuery);
+          setCommittedParsedQuery(parsed);
+        } catch (error) {
+          console.warn('Failed to parse URL query:', urlQuery, error);
+        }
       }
     }
   }, []);
@@ -52,10 +49,15 @@ export default function HomePage() {
     }
   };
 
-  // Handle search changes - unified state management
-  const handleSearchChange = (newQuery: string, newParsedQuery: ParsedQuery | null) => {
-    setQuery(newQuery);
-    setParsedQuery(newParsedQuery);
+  // Handle draft input changes - only updates visual state, not discovery
+  const handleDraftChange = (newDraftQuery: string) => {
+    setDraftQuery(newDraftQuery);
+  };
+
+  // Handle search submission - commits the query and updates discovery
+  const handleSearchSubmit = (newQuery: string, newParsedQuery: ParsedQuery | null) => {
+    setCommittedQuery(newQuery);
+    setCommittedParsedQuery(newParsedQuery);
     
     if (newQuery && newParsedQuery) {
       try {
@@ -73,26 +75,50 @@ export default function HomePage() {
       setFilteredCities(getAllCities());
     }
     
-    // Safe URL sync
+    // Update URL to reflect committed state
     updateURL(newQuery);
+    
+    // Sync draft with committed
+    setDraftQuery(newQuery);
+  };
+
+  // Handle pill click - immediate commit
+  const handlePillClick = (pillQuery: string) => {
+    try {
+      const parsed = parseDiscoveryQuery(pillQuery);
+      handleSearchSubmit(pillQuery, parsed);
+    } catch (error) {
+      console.warn('Failed to parse pill query:', pillQuery, error);
+    }
+  };
+
+  // Handle suggestion selection - commit the query
+  const handleSuggestionSelect = (suggestionQuery: string) => {
+    try {
+      const parsed = parseDiscoveryQuery(suggestionQuery);
+      handleSearchSubmit(suggestionQuery, parsed);
+    } catch (error) {
+      console.warn('Failed to parse suggestion query:', suggestionQuery, error);
+    }
   };
 
   // Clear search functionality
   const handleClearSearch = () => {
-    setQuery("");
-    setParsedQuery(null);
+    setDraftQuery("");
+    setCommittedQuery("");
+    setCommittedParsedQuery(null);
     setFilteredCities(getAllCities());
     updateURL("");
   };
 
-  // Resolve active discovery lens at page level
+  // Resolve active discovery lens at page level using committed state
   const activeDiscoveryLens = useMemo(() => {
-    // Priority 1: Active search query
-    if (query && query.trim() && parsedQuery) {
+    // Priority 1: Active search query (committed state)
+    if (committedQuery && committedQuery.trim() && committedParsedQuery) {
       return {
         type: 'search',
-        query,
-        parsedQuery,
+        query: committedQuery,
+        parsedQuery: committedParsedQuery,
         isActive: true
       };
     }
@@ -104,7 +130,7 @@ export default function HomePage() {
       parsedQuery: null,
       isActive: false
     };
-  }, [query, parsedQuery]);
+  }, [committedQuery, committedParsedQuery]);
 
   // Generate search-driven collections with fallback system
   const searchCollections = useMemo(() => {
@@ -345,14 +371,22 @@ export default function HomePage() {
         <main className="page-main">
           <div className="page-main__guided-start">
             <HeroSection />
-            <SearchSection query={query} onSearchChange={handleSearchChange} />
+            <SearchSection 
+              draftQuery={draftQuery}
+              committedQuery={committedQuery}
+              onDraftChange={handleDraftChange}
+              onSubmit={handleSearchSubmit}
+              onPillClick={handlePillClick}
+              onSuggestionSelect={handleSuggestionSelect}
+              onClear={handleClearSearch}
+            />
           </div>
 
           {/* Search-active flow: active pill → seasonal → onboarding preference → explore */}
           {activeDiscoveryLens.type === 'search' ? (
             <>
               {/* 1. Active selected-pill section (primary) */}
-              <PersonalizedDiscoveryFlow cities={cities} collections={activeCollections} activeSearchQuery={query} />
+              <PersonalizedDiscoveryFlow cities={cities} collections={activeCollections} activeSearchQuery={committedQuery} />
               
               {/* 2. Seasonal continuation section */}
               <SeasonalDiscoverySection cities={cities} collections={seasonalCollections} />
