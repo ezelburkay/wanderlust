@@ -1,22 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-export interface OnboardingPreferences {
-  mood: string[];
-  pace: string;
-  foodInterest: string[];
-  vibe: string[];
-  tripStyle: string[];
-}
+import { type VibeId, type TimeframeId, type OnboardingPreferences, getVibePreferences } from "./onboarding-types";
 
 interface DiscoveryExperienceProps {
   onComplete: (preferences: OnboardingPreferences) => void;
   onSkip: () => void;
 }
-
-type VibeId = "food" | "romantic" | "culture" | "nature" | "adventure" | "slow";
-type TimeframeId = "this-month" | "next-3-months";
 
 export const emptyOnboardingPreferences: OnboardingPreferences = {
   mood: [],
@@ -27,18 +17,21 @@ export const emptyOnboardingPreferences: OnboardingPreferences = {
 };
 
 const vibeOptions: Array<{ icon: string; id: VibeId; label: string }> = [
-  { icon: "🍽️", id: "food", label: "Food" },
-  { icon: "✦", id: "romantic", label: "Romantic" },
-  { icon: "🏛️", id: "culture", label: "Culture" },
-  { icon: "🌿", id: "nature", label: "Nature" },
-  { icon: "⚡", id: "adventure", label: "Adventure" },
-  { icon: "☾", id: "slow", label: "Slow" }
+  { icon: "??", id: "food", label: "Food" },
+  { icon: "??", id: "romantic", label: "Romantic" },
+  { icon: "??", id: "culture", label: "Culture" },
+  { icon: "??", id: "nature", label: "Nature" },
+  { icon: "??", id: "adventure", label: "Adventure" },
+  { icon: "??", id: "slow", label: "Slow" }
 ];
 
 const timeframeOptions: Array<{ id: TimeframeId; label: string }> = [
   { id: "this-month", label: "This month" },
   { id: "next-3-months", label: "Next 3 months" }
 ];
+
+// Constants for selection limits
+const MAX_VIBE_SELECTIONS = 3;
 
 function getVibeIcon(vibe: VibeId) {
   switch (vibe) {
@@ -87,13 +80,21 @@ export function DiscoveryExperience({ onComplete, onSkip }: DiscoveryExperienceP
   }, []);
 
   const canContinue = vibes.length > 0 || timeframe !== null;
+  const isMaxSelectionsReached = vibes.length >= MAX_VIBE_SELECTIONS;
 
   function toggleVibe(vibe: VibeId) {
     setVibes((currentVibes: VibeId[]) => {
       if (currentVibes.includes(vibe)) {
+        // Remove vibe if already selected
         return currentVibes.filter((currentVibe: VibeId) => currentVibe !== vibe);
       }
 
+      // Only add if under the limit
+      if (currentVibes.length >= MAX_VIBE_SELECTIONS) {
+        return currentVibes; // Don't add if limit reached
+      }
+
+      // Add new vibe to end (preserves selection order)
       return [...currentVibes, vibe];
     });
   }
@@ -106,6 +107,9 @@ export function DiscoveryExperience({ onComplete, onSkip }: DiscoveryExperienceP
     onComplete(buildPreferences(vibes, timeframe));
   }
 
+  // Get preference hierarchy for UI feedback
+  const vibePreferences = getVibePreferences(vibes);
+
   return (
     <div className="onboarding-overlay">
       <div className="onboarding-panel">
@@ -115,22 +119,28 @@ export function DiscoveryExperience({ onComplete, onSkip }: DiscoveryExperienceP
         </h1>
 
         <div className="onboarding-group">
-          <p className="onboarding-group__label">Your vibe — pick all that fit</p>
+          <p className="onboarding-group__label">Pick up to 3 {vibePreferences.primary && '· your first choice shapes the journey most'}</p>
           <div className="onboarding-chip-grid">
             {vibeOptions.map((option) => {
               const isSelected = vibes.includes(option.id);
+              const selectionIndex = vibes.indexOf(option.id);
+              const isPrimary = selectionIndex === 0;
+              const isSecondary = selectionIndex > 0 && selectionIndex < MAX_VIBE_SELECTIONS;
               const iconClassName = getVibeIcon(option.id);
 
               return (
                 <button
-                  className={`onboarding-chip${isSelected ? " onboarding-chip--selected" : ""}`}
+                  className={`onboarding-chip${isSelected ? " onboarding-chip--selected" : ""}${isPrimary ? " onboarding-chip--primary" : ""}${isSecondary ? " onboarding-chip--secondary" : ""}`}
                   key={option.id}
                   onClick={() => toggleVibe(option.id)}
                   type="button"
+                  disabled={!isSelected && isMaxSelectionsReached}
                 >
                   <span className="onboarding-chip__content">
                     <span className="onboarding-chip__icon-slot">
                       <span className={`onboarding-chip__icon ${iconClassName}`}>{option.icon}</span>
+                      {isPrimary && <span className="onboarding-chip__indicator">1</span>}
+                      {isSecondary && <span className="onboarding-chip__indicator">{selectionIndex + 1}</span>}
                     </span>
                     <span className="onboarding-chip__label">{option.label}</span>
                   </span>
@@ -138,6 +148,9 @@ export function DiscoveryExperience({ onComplete, onSkip }: DiscoveryExperienceP
               );
             })}
           </div>
+          {isMaxSelectionsReached && (
+            <p className="onboarding-group__hint">Maximum selections reached</p>
+          )}
         </div>
 
         <div className="onboarding-group">
