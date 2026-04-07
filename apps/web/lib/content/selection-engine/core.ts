@@ -160,9 +160,11 @@ export function selectCitiesForSection(
     let bestIndex = -1;
     
     // Find best candidate considering current selection
-    availableCandidates.forEach((candidate, index) => {
+    for (let i = 0; i < availableCandidates.length; i++) {
+      const candidate = availableCandidates[i];
+      
       if (!allowDuplicates && context.usedCityIds.has(candidate.id)) {
-        return; // Skip if duplicates not allowed and already used
+        continue; // Skip if duplicates not allowed and already used
       }
       
       // Calculate diversity score (prefer different countries/regions)
@@ -179,9 +181,9 @@ export function selectCitiesForSection(
       if (selectionScore > bestScore) {
         bestScore = selectionScore;
         bestCandidate = candidate;
-        bestIndex = index;
+        bestIndex = i;
       }
-    });
+    }
     
     if (bestCandidate) {
       selected.push(bestCandidate);
@@ -218,4 +220,3 @@ export function getSectionContent(type: HomepageSection['type'], lens?: PrimaryL
   
   return titleMap as { title: string; subtitle: string };
 }
-
