@@ -11,6 +11,14 @@ import { PreferenceSeasonSection } from "../components/home/PreferenceSeasonSect
 import { Header } from "../components/layout/Header";
 import { OnboardingGate } from "../components/onboarding/OnboardingGate";
 import { parseDiscoveryQuery, rankCitiesByQuery, type ParsedQuery } from "../components/home/discoverySearch";
+import { 
+  generateDiscoverySections, 
+  getDiscoveryMode, 
+  extractOnboardingHierarchy,
+  type DiscoveryMode,
+  type DiscoverySection 
+} from "../components/home/post-onboarding-behavior";
+import type { OnboardingPreferences } from "../components/onboarding/onboarding-types";
 
 export default function HomePage() {
   // Stable client-side search state
@@ -33,6 +41,35 @@ export default function HomePage() {
           console.warn('Failed to parse URL query:', urlQuery, error);
         }
       }
+    }
+  }, []);
+
+  // Read onboarding preferences from localStorage
+  const onboardingPreferences = useMemo((): OnboardingPreferences | null => {
+    if (typeof window === 'undefined') return null;
+    
+    try {
+      const storageKey = "wanderlust_onboarding";
+      const rawValue = window.localStorage.getItem(storageKey);
+      
+      if (!rawValue) return null;
+      
+      const parsedValue = JSON.parse(rawValue);
+      
+      if (parsedValue.completed !== true && parsedValue.skipped !== true) {
+        return null;
+      }
+      
+      return {
+        mood: Array.isArray(parsedValue.preferences?.mood) ? parsedValue.preferences.mood : [],
+        pace: typeof parsedValue.preferences?.pace === 'string' ? parsedValue.preferences.pace : "",
+        foodInterest: Array.isArray(parsedValue.preferences?.foodInterest) ? parsedValue.preferences.foodInterest : [],
+        vibe: Array.isArray(parsedValue.preferences?.vibe) ? parsedValue.preferences.vibe : [],
+        tripStyle: Array.isArray(parsedValue.preferences?.tripStyle) ? parsedValue.preferences.tripStyle : []
+      };
+    } catch (error) {
+      console.warn('Failed to read onboarding preferences:', error);
+      return null;
     }
   }, []);
 
@@ -131,6 +168,28 @@ export default function HomePage() {
       isActive: false
     };
   }, [committedQuery, committedParsedQuery]);
+
+  // Determine discovery mode
+  const discoveryMode = useMemo((): DiscoveryMode => {
+    return getDiscoveryMode(committedQuery);
+  }, [committedQuery]);
+
+  // Generate discovery sections based on mode and preferences
+  const discoverySections = useMemo((): DiscoverySection[] => {
+    const allCities = getAllCities();
+    const searchResults = activeDiscoveryLens.type === 'search' 
+      ? rankCitiesByQuery(allCities, activeDiscoveryLens.parsedQuery!)
+      : null;
+    
+    return generateDiscoverySections(
+      discoveryMode,
+      onboardingPreferences,
+      committedQuery,
+      committedParsedQuery,
+      allCities,
+      searchResults
+    );
+  }, [discoveryMode, onboardingPreferences, committedQuery, committedParsedQuery, activeDiscoveryLens]);
 
   // Generate search-driven collections with fallback system
   const searchCollections = useMemo(() => {
