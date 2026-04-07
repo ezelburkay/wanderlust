@@ -4,39 +4,52 @@ import { useEffect, useState } from "react";
 import { parseDiscoveryQuery, isValidQuery } from "./discoverySearch";
 
 interface SearchSectionProps {
-  query?: string;
-  onSearchChange?: (query: string, parsedQuery: any) => void;
+  draftQuery?: string;
+  committedQuery?: string;
+  onDraftChange?: (draftQuery: string) => void;
+  onSubmit?: (query: string, parsedQuery: any) => void;
+  onPillClick?: (pillQuery: string) => void;
+  onSuggestionSelect?: (suggestionQuery: string) => void;
+  onClear?: () => void;
 }
 
 const searchExamples = ["Romantic", "Food", "Slow", "Summer", "Coastal", "Weekend"];
 
-export function SearchSection({ query = "", onSearchChange }: SearchSectionProps) {
-  const [value, setValue] = useState(query);
+export function SearchSection({ 
+  draftQuery = "", 
+  committedQuery = "",
+  onDraftChange,
+  onSubmit,
+  onPillClick,
+  onSuggestionSelect,
+  onClear
+}: SearchSectionProps) {
+  const [value, setValue] = useState(draftQuery);
 
   useEffect(() => {
-    setValue(query);
-  }, [query]);
+    setValue(draftQuery);
+  }, [draftQuery]);
 
   const handleSearch = (searchQuery: string) => {
-    if (searchQuery.trim()) {
-      const trimmedQuery = searchQuery.trim();
-      const parsedQuery = parseDiscoveryQuery(trimmedQuery);
-      
-      // Only proceed if we have valid intents
-      if (isValidQuery(trimmedQuery)) {
-        setValue(trimmedQuery);
-        onSearchChange?.(trimmedQuery, parsedQuery);
-        
-        // Update URL for sharing/bookmarking
-        const url = new URL(window.location.href);
-        url.searchParams.set('q', trimmedQuery);
-        window.history.replaceState({}, '', url.toString());
-      }
+    if (!isValidQuery(searchQuery)) return;
+    
+    try {
+      const parsed = parseDiscoveryQuery(searchQuery);
+      onSubmit?.(searchQuery, parsed);
+    } catch (error) {
+      console.warn('Failed to parse search query:', searchQuery, error);
     }
   };
 
-  const handleExampleClick = (example: string) => {
-    handleSearch(example.toLowerCase());
+  const handleInputChange = (event: { target: { value: string } }) => {
+    const newValue = event.target.value;
+    setValue(newValue);
+    onDraftChange?.(newValue);
+    
+    // Only clear if input is empty, don't trigger real-time search
+    if (newValue.length === 0) {
+      handleClear();
+    }
   };
 
   const handleSubmit = (event: any) => {
@@ -44,21 +57,25 @@ export function SearchSection({ query = "", onSearchChange }: SearchSectionProps
     handleSearch(value);
   };
 
-  const handleInputChange = (event: { target: { value: string } }) => {
-    const newValue = event.target.value;
-    setValue(newValue);
-    
-    // Real-time search as user types (debounced could be added)
-    if (newValue.length > 2) {
-      handleSearch(newValue);
-    } else if (newValue.length === 0) {
-      // Clear search when input is empty
-      setValue("");
-      onSearchChange?.("", null);
-      const url = new URL(window.location.href);
-      url.searchParams.delete('q');
-      window.history.replaceState({}, '', url.toString());
+  const handleKeyDown = (e: any) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch(value);
     }
+  };
+
+  const handlePillClick = (pillQuery: string) => {
+    setValue(pillQuery);
+    onPillClick?.(pillQuery);
+  };
+
+  const handleClear = () => {
+    setValue("");
+    onClear?.();
+  };
+
+  const handleExampleClick = (example: string) => {
+    handlePillClick(example);
   };
 
   return (
