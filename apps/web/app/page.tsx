@@ -548,6 +548,22 @@ export default function HomePage() {
   // Get all cities for components that need it
   const cities = getAllCities();
 
+  // Log full section sequence before render
+  console.log('=== FULL HOMEPAGE SECTION SEQUENCE ===');
+  console.log('Discovery mode:', activeDiscoveryLens.type === 'search' ? 'search-active' : 'search-inactive');
+  console.log('Sections to be rendered:');
+  
+  if (activeDiscoveryLens.type === 'search') {
+    console.log('1. PersonalizedDiscoveryFlow (search-active) - collections:', activeCollections.length);
+    console.log('2. SeasonalDiscoverySection - collections:', seasonalCollections.length);
+    console.log('3. PreferenceSeasonSection - collections:', onboardingCollections.length);
+    console.log('4. CityBrowser - cities:', filteredCities.length);
+  } else {
+    console.log('1. PersonalizedDiscoveryFlow (search-inactive) - collections:', activeCollections.length);
+    console.log('2. SeasonalDiscoverySection - collections:', seasonalCollections.length);
+    console.log('3. CityBrowser - cities:', filteredCities.length);
+  }
+
   return (
     <OnboardingGate>
       <>
