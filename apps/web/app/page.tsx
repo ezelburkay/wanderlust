@@ -106,7 +106,7 @@ export default function HomePage() {
     };
   }, [query, parsedQuery]);
 
-  // Generate search-driven collections with specific copy for each pill
+  // Generate search-driven collections with fallback system
   const searchCollections = useMemo(() => {
     if (activeDiscoveryLens.type !== 'search' || !activeDiscoveryLens.parsedQuery) {
       return [];
@@ -163,12 +163,60 @@ export default function HomePage() {
         subcopy: "A curated edit of places shaped by your interests."
       };
       
-      // Section 1 - Primary active-lens section
+      // Editorial fallback mapping for weak matches
+      const editorialFallbackMap: Record<string, string[]> = {
+        romantic: ["slow", "food", "coastal"],
+        food: ["market", "slow", "wine"],
+        slow: ["romantic", "coastal"],
+        summer: ["coastal", "weekend"],
+        coastal: ["summer", "slow"],
+        weekend: ["compact", "food", "romantic"]
+      };
+      
+      // Section 1 - Primary active-lens section with fallback
+      let primaryCities: any[] = [];
+      
       if (rankedResults && rankedResults.length > 0) {
-        const topResults = rankedResults.slice(0, 6);
+        // Take top matches
+        primaryCities = rankedResults.slice(0, 4).map(result => result?.city).filter(Boolean);
+      }
+      
+      // Fallback: if not enough cities, expand with editorial relevance
+      if (primaryCities.length < 3) {
+        const fallbackIntents = editorialFallbackMap[primaryIntent.toLowerCase()] || [];
+        const allCities = getAllCities();
         
+        // Add cities that match fallback intents (simple editorial expansion)
+        fallbackIntents.forEach(fallbackIntent => {
+          if (primaryCities.length >= 4) return;
+          
+          const fallbackCities = allCities.filter(city => 
+            !primaryCities.some(pc => pc.slug === city.slug) &&
+            (
+              city.searchText?.includes(fallbackIntent) ||
+              city.name?.toLowerCase().includes(fallbackIntent) ||
+              city.cardSentence?.toLowerCase().includes(fallbackIntent) ||
+              city.essence?.toLowerCase().includes(fallbackIntent)
+            )
+          ).slice(0, 4 - primaryCities.length);
+          
+          primaryCities.push(...fallbackCities);
+        });
+      }
+      
+      // Final fallback: if still not enough, add diverse cities
+      if (primaryCities.length < 3) {
+        const allCities = getAllCities();
+        const remainingCities = allCities.filter(city => 
+          !primaryCities.some(pc => pc.slug === city.slug)
+        ).slice(0, 4 - primaryCities.length);
+        
+        primaryCities.push(...remainingCities);
+      }
+      
+      if (primaryCities.length > 0) {
         collections.push({
-          cities: topResults.map(result => result?.city).filter(Boolean),
+          cities: primaryCities,
           label: copy.eyebrow,
           slug: "primary-lens",
           subtitle: copy.subcopy,
@@ -183,7 +231,7 @@ export default function HomePage() {
     }
   }, [activeDiscoveryLens]);
 
-  // Generate seasonal continuation collections with specified copy
+  // Generate seasonal continuation collections with fallback system
   const seasonalCollections = useMemo(() => {
     if (activeDiscoveryLens.type !== 'search' || !activeDiscoveryLens.parsedQuery) {
       return getHomepageDiscovery(); // Default when not searching
@@ -195,11 +243,35 @@ export default function HomePage() {
       
       const collections = [];
       
-      // Section 2 - Shared seasonal continuation
-      const seasonalResults = rankedResults.slice(6, 10);
-      if (seasonalResults.length > 0) {
+      // Section 2 - Seasonal continuation with fallback
+      let seasonalCities: any[] = [];
+      
+      // Start with seasonal results (skip primary cities)
+      if (rankedResults && rankedResults.length > 4) {
+        seasonalCities = rankedResults.slice(4, 8).map(result => result?.city).filter(Boolean);
+      }
+      
+      // Fallback: if not enough seasonal cities, add more from ranked results
+      if (seasonalCities.length < 3 && rankedResults && rankedResults.length > 8) {
+        const additionalCities = rankedResults.slice(8, 11).map(result => result?.city).filter(Boolean);
+        seasonalCities.push(...additionalCities);
+      }
+      
+      // Final fallback: if still not enough, add diverse cities
+      if (seasonalCities.length < 3) {
+        const allCities = getAllCities();
+        const primaryCities = rankedResults?.slice(0, 4).map(result => result?.city).filter(Boolean) || [];
+        const remainingCities = allCities.filter(city => 
+          !primaryCities.some(pc => pc.slug === city.slug) &&
+          !seasonalCities.some(sc => sc.slug === city.slug)
+        ).slice(0, 4 - seasonalCities.length);
+        
+        seasonalCities.push(...remainingCities);
+      }
+      
+      if (seasonalCities.length > 0) {
         collections.push({
-          cities: seasonalResults.map(result => result?.city).filter(Boolean),
+          cities: seasonalCities,
           label: "Seasonal",
           slug: "seasonal-continuation",
           subtitle: "A timely edit of places where mood, season, and setting come together naturally.",
