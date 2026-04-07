@@ -430,60 +430,35 @@ function buildSections(
 }
 
 export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQuery }: PersonalizedDiscoveryFlowProps) {
-  // Simplified: use page-level resolved state instead of independent onboarding reading
   const isSearchDriven = activeSearchQuery && activeSearchQuery.trim() !== '';
-  
-  console.log('=== PERSONALIZED DISCOVERY FLOW DEBUG ===');
-  console.log('Incoming props:', {
-    citiesCount: cities.length,
-    collectionsCount: collections.length,
-    activeSearchQuery: activeSearchQuery || 'none'
-  });
-  console.log('Collections received:', collections);
-  console.log('isSearchDriven:', isSearchDriven);
   
   // Editorial intro based on collections - use passed data instead of hardcoded fallback
   const discoveryIntro = useMemo(() => {
-    console.log('Generating discoveryIntro...');
-    console.log('collections.length:', collections.length);
-    
     // Use the first collection's data if available
     if (collections.length > 0) {
       const primaryCollection = collections[0];
-      console.log('Primary collection:', primaryCollection);
-      
-      const intro = {
+      return {
         eyebrow: primaryCollection?.label || "For you",
         identity: "",
         title: primaryCollection?.title || "Cities in focus",
         text: primaryCollection?.subtitle || defaultDiscoverySupport
       };
-      
-      console.log('Generated discoveryIntro from collection:', intro);
-      return intro;
     }
 
     // Fallback only if no collections
-    console.log('No collections available - using fallback');
-    const fallbackIntro = {
+    return {
       eyebrow: "For you",
       identity: "",
       title: "Cities in focus",
       text: defaultDiscoverySupport
     };
-    
-    console.log('Generated fallback discoveryIntro:', fallbackIntro);
-    return fallbackIntro;
   }, [collections]);
 
   // Simplified sections generation - use passed collections directly
   const sections = useMemo(() => {
     if (!collections || collections.length === 0) {
-      console.log('PersonalizedDiscoveryFlow: no collections to process');
       return [];
     }
-    
-    console.log('PersonalizedDiscoveryFlow: processing', collections.length, 'collections into sections');
     
     // Convert collections to sections with safety checks
     const sectionCandidates = collections.map((collection, index) => {
@@ -493,30 +468,17 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
         return null;
       }
       
-      const section = {
+      return {
         cities: collection.cities.filter(Boolean),
         label: collection.label || `Collection ${index + 1}`,
         layout: index === 0 ? "four" as const : "three" as const,
         slug: collection.slug || `collection-${index}`,
         title: collection.title || "Cities"
       };
-      
-      console.log(`PersonalizedDiscoveryFlow section ${index}:`, {
-        slug: section.slug,
-        title: section.title,
-        label: section.label,
-        cityCount: section.cities.length,
-        layout: section.layout
-      });
-      
-      return section;
     });
     
     // Type-safe filter to remove null values
-    const validSections = sectionCandidates.filter((section): section is DiscoveryFlowSection => section !== null);
-    console.log('PersonalizedDiscoveryFlow: final sections count:', validSections.length);
-    
-    return validSections;
+    return sectionCandidates.filter((section): section is DiscoveryFlowSection => section !== null);
   }, [collections]);
 
   return (
@@ -528,39 +490,24 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
           <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
           <p className="discovery-flow__intro-text">{discoveryIntro.text}</p>
         </div>
-        
-        {/* Debug log right before render */}
-        {(() => {
-          console.log('=== FINAL RENDER DEBUG ===');
-          console.log('Final discoveryIntro.title being rendered:', discoveryIntro.title);
-          console.log('Branch used:', collections.length > 0 ? 'collection-based' : 'fallback');
-          console.log('Section 1 final title:', discoveryIntro.title);
-          return null;
-        })()}
 
-        {sections.map((section: DiscoveryFlowSection, index: number) => (
-          <div className={`discovery-flow-section${index === 0 ? " discovery-flow-section--primary" : ""}`} key={section.slug}>
-            {index > 0 ? (
-              <div className="discovery-flow-section__heading">
-                <p className="discovery-flow-section__label">{section.label}</p>
-                <h3 className="discovery-flow-section__title">{section.title}</h3>
-              </div>
-            ) : null}
-
-            <div className={`discovery-flow-section__grid discovery-flow-section__grid--${section.layout}`}>
-              {section.cities.map((city: CityViewModel) => (
+        {/* Only render the first section in search-inactive mode */}
+        {sections.length > 0 && (
+          <div className="discovery-flow-section discovery-flow-section--primary" key={sections[0].slug}>
+            <div className={`discovery-flow-section__grid discovery-flow-section__grid--${sections[0].layout}`}>
+              {sections[0].cities.map((city: CityViewModel) => (
                 <CityCard
-                  key={`${section.slug}-${city.slug}`}
-                  badgeText={index === 0 ? null : undefined}
+                  key={`${sections[0].slug}-${city.slug}`}
+                  badgeText={null}
                   city={city}
-                  descriptorText={index === 0 ? city.country : undefined}
-                  sentenceText={index === 0 ? city.cardSentence : undefined}
-                  variant={index === 0 ? "editorial" : "default"}
+                  descriptorText={city.country}
+                  sentenceText={city.cardSentence}
+                  variant="editorial"
                 />
               ))}
             </div>
           </div>
-        ))}
+        )}
       </div>
     </section>
   );
