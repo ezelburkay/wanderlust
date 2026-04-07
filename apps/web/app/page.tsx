@@ -54,21 +54,32 @@ export default function HomePage() {
       const storageKey = "wanderlust_onboarding";
       const rawValue = window.localStorage.getItem(storageKey);
       
-      if (!rawValue) return null;
+      console.log('=== PAGE LEVEL DEBUG ===');
+      console.log('Raw localStorage onboarding payload:', rawValue);
       
-      const parsedValue = JSON.parse(rawValue);
-      
-      if (parsedValue.completed !== true && parsedValue.skipped !== true) {
+      if (!rawValue) {
+        console.log('No raw value found in localStorage');
         return null;
       }
       
-      return {
+      const parsedValue = JSON.parse(rawValue);
+      console.log('Parsed onboarding value:', parsedValue);
+      
+      if (parsedValue.completed !== true && parsedValue.skipped !== true) {
+        console.log('Onboarding not completed and not skipped - returning null');
+        return null;
+      }
+      
+      const normalizedPreferences = {
         mood: Array.isArray(parsedValue.preferences?.mood) ? parsedValue.preferences.mood : [],
-        pace: typeof parsedValue.preferences?.pace === 'string' ? parsedValue.preferences.pace : "",
+        pace: typeof parsedValue.preferences?.pace === "string" ? parsedValue.preferences.pace : "",
         foodInterest: Array.isArray(parsedValue.preferences?.foodInterest) ? parsedValue.preferences.foodInterest : [],
         vibe: Array.isArray(parsedValue.preferences?.vibe) ? parsedValue.preferences.vibe : [],
         tripStyle: Array.isArray(parsedValue.preferences?.tripStyle) ? parsedValue.preferences.tripStyle : []
       };
+      
+      console.log('Normalized onboarding preferences:', normalizedPreferences);
+      return normalizedPreferences;
     } catch (error) {
       console.warn('Failed to read onboarding preferences:', error);
       return null;
@@ -429,10 +440,18 @@ export default function HomePage() {
     let primaryVibe: VibeId | null = null;
     let timeframe: TimeframeId | null = null;
     
+    console.log('=== ACTIVE COLLECTIONS DEBUG ===');
+    console.log('onboardingPreferences exists:', !!onboardingPreferences);
+    
     if (onboardingPreferences) {
       const hierarchy = extractOnboardingHierarchy(onboardingPreferences);
       primaryVibe = hierarchy.primaryVibe;
       timeframe = hierarchy.timeframe;
+      console.log('Extracted hierarchy:', hierarchy);
+      console.log('Primary vibe:', primaryVibe);
+      console.log('Timeframe:', timeframe);
+    } else {
+      console.log('No onboarding preferences - using fallback');
     }
     
     // Always generate a single collection, even without onboarding
@@ -505,13 +524,25 @@ export default function HomePage() {
       };
     }
     
-    return [{
+    const finalCollections = [{
       cities: primaryCities,
       label: copy.eyebrow,
       slug: primaryVibe ? `primary-${primaryVibe}` : "primary-discovery",
       subtitle: copy.subcopy,
       title: copy.title
     }];
+    
+    console.log('Final collections being returned:', finalCollections);
+    finalCollections.forEach((collection, index) => {
+      console.log(`Collection ${index}:`, {
+        slug: collection.slug,
+        title: collection.title,
+        label: collection.label,
+        cityCount: collection.cities.length
+      });
+    });
+    
+    return finalCollections;
   }, [activeDiscoveryLens.type, searchCollections, onboardingPreferences]);
   
   // Get all cities for components that need it
