@@ -479,8 +479,11 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
   // Simplified sections generation - use passed collections directly
   const sections = useMemo(() => {
     if (!collections || collections.length === 0) {
+      console.log('PersonalizedDiscoveryFlow: no collections to process');
       return [];
     }
+    
+    console.log('PersonalizedDiscoveryFlow: processing', collections.length, 'collections into sections');
     
     // Convert collections to sections with safety checks
     const sectionCandidates = collections.map((collection, index) => {
@@ -490,17 +493,30 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
         return null;
       }
       
-      return {
+      const section = {
         cities: collection.cities.filter(Boolean),
         label: collection.label || `Collection ${index + 1}`,
         layout: index === 0 ? "four" as const : "three" as const,
         slug: collection.slug || `collection-${index}`,
         title: collection.title || "Cities"
       };
+      
+      console.log(`PersonalizedDiscoveryFlow section ${index}:`, {
+        slug: section.slug,
+        title: section.title,
+        label: section.label,
+        cityCount: section.cities.length,
+        layout: section.layout
+      });
+      
+      return section;
     });
     
     // Type-safe filter to remove null values
-    return sectionCandidates.filter((section): section is DiscoveryFlowSection => section !== null);
+    const validSections = sectionCandidates.filter((section): section is DiscoveryFlowSection => section !== null);
+    console.log('PersonalizedDiscoveryFlow: final sections count:', validSections.length);
+    
+    return validSections;
   }, [collections]);
 
   return (
