@@ -460,7 +460,7 @@ export default function HomePage() {
       const vibeCopyMap: Record<string, { eyebrow: string; title: string; subcopy: string }> = {
         food: {
           eyebrow: "Food",
-          title: "Cities worth arriving hungry",
+          title: "Great for food lovers",
           subcopy: "A curated edit of places shaped by markets, long lunches, and the appetite that defines a trip."
         },
         romantic: {
@@ -470,17 +470,17 @@ export default function HomePage() {
         },
         culture: {
           eyebrow: "Culture",
-          title: "Cities that reward curiosity",
+          title: "Cities where culture leads the day",
           subcopy: "A thoughtful edit of places where museums, streets, and architectural stories reveal themselves slowly."
         },
         nature: {
           eyebrow: "Nature",
-          title: "Cities with room to breathe",
+          title: "Cities with space to exhale",
           subcopy: "A calmer edit of places where parks, gardens, and open air give the city space to unfold."
         },
         adventure: {
           eyebrow: "Adventure",
-          title: "Cities that energize",
+          title: "Cities that keep the day moving",
           subcopy: "A dynamic edit of places where walks, viewpoints, and urban energy shape the experience."
         },
         slow: {
@@ -492,7 +492,7 @@ export default function HomePage() {
       
       copy = vibeCopyMap[primaryVibe] || {
         eyebrow: "Discovery",
-        title: "Cities in focus",
+        title: "Cities worth exploring",
         subcopy: "A thoughtful edit of places for your next trip."
       };
     } else {
