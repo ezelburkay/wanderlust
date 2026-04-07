@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CityViewModel, HomepageDiscoveryViewModel } from "../../content";
-import type { OnboardingPreferences } from "../onboarding/OnboardingExperience";
+import type { OnboardingPreferences } from "../onboarding/onboarding-types";
 import { CityCard } from "../city";
 
 interface PersonalizedDiscoveryFlowProps {
