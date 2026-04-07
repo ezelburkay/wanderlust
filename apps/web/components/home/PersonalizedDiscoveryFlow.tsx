@@ -433,26 +433,47 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
   // Simplified: use page-level resolved state instead of independent onboarding reading
   const isSearchDriven = activeSearchQuery && activeSearchQuery.trim() !== '';
   
+  console.log('=== PERSONALIZED DISCOVERY FLOW DEBUG ===');
+  console.log('Incoming props:', {
+    citiesCount: cities.length,
+    collectionsCount: collections.length,
+    activeSearchQuery: activeSearchQuery || 'none'
+  });
+  console.log('Collections received:', collections);
+  console.log('isSearchDriven:', isSearchDriven);
+  
   // Editorial intro based on collections - use passed data instead of hardcoded fallback
   const discoveryIntro = useMemo(() => {
+    console.log('Generating discoveryIntro...');
+    console.log('collections.length:', collections.length);
+    
     // Use the first collection's data if available
     if (collections.length > 0) {
       const primaryCollection = collections[0];
-      return {
+      console.log('Primary collection:', primaryCollection);
+      
+      const intro = {
         eyebrow: primaryCollection?.label || "For you",
         identity: "",
         title: primaryCollection?.title || "Cities in focus",
         text: primaryCollection?.subtitle || defaultDiscoverySupport
       };
+      
+      console.log('Generated discoveryIntro from collection:', intro);
+      return intro;
     }
 
     // Fallback only if no collections
-    return {
+    console.log('No collections available - using fallback');
+    const fallbackIntro = {
       eyebrow: "For you",
       identity: "",
       title: "Cities in focus",
       text: defaultDiscoverySupport
     };
+    
+    console.log('Generated fallback discoveryIntro:', fallbackIntro);
+    return fallbackIntro;
   }, [collections]);
 
   // Simplified sections generation - use passed collections directly
@@ -491,6 +512,15 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
           <h2 className="discovery-flow__intro-title">{discoveryIntro.title}</h2>
           <p className="discovery-flow__intro-text">{discoveryIntro.text}</p>
         </div>
+        
+        {/* Debug log right before render */}
+        {(() => {
+          console.log('=== FINAL RENDER DEBUG ===');
+          console.log('Final discoveryIntro.title being rendered:', discoveryIntro.title);
+          console.log('Branch used:', collections.length > 0 ? 'collection-based' : 'fallback');
+          console.log('Section 1 final title:', discoveryIntro.title);
+          return null;
+        })()}
 
         {sections.map((section: DiscoveryFlowSection, index: number) => (
           <div className={`discovery-flow-section${index === 0 ? " discovery-flow-section--primary" : ""}`} key={section.slug}>
