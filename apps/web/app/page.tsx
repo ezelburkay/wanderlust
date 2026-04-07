@@ -54,19 +54,11 @@ export default function HomePage() {
       const storageKey = "wanderlust_onboarding";
       const rawValue = window.localStorage.getItem(storageKey);
       
-      console.log('=== PAGE LEVEL DEBUG ===');
-      console.log('Raw localStorage onboarding payload:', rawValue);
-      
-      if (!rawValue) {
-        console.log('No raw value found in localStorage');
-        return null;
-      }
+      if (!rawValue) return null;
       
       const parsedValue = JSON.parse(rawValue);
-      console.log('Parsed onboarding value:', parsedValue);
       
       if (parsedValue.completed !== true && parsedValue.skipped !== true) {
-        console.log('Onboarding not completed and not skipped - returning null');
         return null;
       }
       
@@ -78,7 +70,6 @@ export default function HomePage() {
         tripStyle: Array.isArray(parsedValue.preferences?.tripStyle) ? parsedValue.preferences.tripStyle : []
       };
       
-      console.log('Normalized onboarding preferences:', normalizedPreferences);
       return normalizedPreferences;
     } catch (error) {
       console.warn('Failed to read onboarding preferences:', error);
@@ -440,18 +431,10 @@ export default function HomePage() {
     let primaryVibe: VibeId | null = null;
     let timeframe: TimeframeId | null = null;
     
-    console.log('=== ACTIVE COLLECTIONS DEBUG ===');
-    console.log('onboardingPreferences exists:', !!onboardingPreferences);
-    
     if (onboardingPreferences) {
       const hierarchy = extractOnboardingHierarchy(onboardingPreferences);
       primaryVibe = hierarchy.primaryVibe;
       timeframe = hierarchy.timeframe;
-      console.log('Extracted hierarchy:', hierarchy);
-      console.log('Primary vibe:', primaryVibe);
-      console.log('Timeframe:', timeframe);
-    } else {
-      console.log('No onboarding preferences - using fallback');
     }
     
     // Always generate a single collection, even without onboarding
@@ -532,37 +515,11 @@ export default function HomePage() {
       title: copy.title
     }];
     
-    console.log('Final collections being returned:', finalCollections);
-    finalCollections.forEach((collection, index) => {
-      console.log(`Collection ${index}:`, {
-        slug: collection.slug,
-        title: collection.title,
-        label: collection.label,
-        cityCount: collection.cities.length
-      });
-    });
-    
     return finalCollections;
   }, [activeDiscoveryLens.type, searchCollections, onboardingPreferences]);
   
   // Get all cities for components that need it
   const cities = getAllCities();
-
-  // Log full section sequence before render
-  console.log('=== FULL HOMEPAGE SECTION SEQUENCE ===');
-  console.log('Discovery mode:', activeDiscoveryLens.type === 'search' ? 'search-active' : 'search-inactive');
-  console.log('Sections to be rendered:');
-  
-  if (activeDiscoveryLens.type === 'search') {
-    console.log('1. PersonalizedDiscoveryFlow (search-active) - collections:', activeCollections.length);
-    console.log('2. SeasonalDiscoverySection - collections:', seasonalCollections.length);
-    console.log('3. PreferenceSeasonSection - collections:', onboardingCollections.length);
-    console.log('4. CityBrowser - cities:', filteredCities.length);
-  } else {
-    console.log('1. PersonalizedDiscoveryFlow (search-inactive) - collections:', activeCollections.length);
-    console.log('2. SeasonalDiscoverySection - collections:', seasonalCollections.length);
-    console.log('3. CityBrowser - cities:', filteredCities.length);
-  }
 
   return (
     <OnboardingGate>
