@@ -106,7 +106,7 @@ export default function HomePage() {
     };
   }, [query, parsedQuery]);
 
-  // Generate search-driven collections with coherent editorial flow
+  // Generate search-driven collections with specific copy for each pill
   const searchCollections = useMemo(() => {
     if (activeDiscoveryLens.type !== 'search' || !activeDiscoveryLens.parsedQuery) {
       return [];
@@ -123,16 +123,56 @@ export default function HomePage() {
                            activeDiscoveryLens.parsedQuery.intents.season?.[0] || 
                            "Discovery";
       
-      // Section 1 — Primary active-lens section (for PersonalizedDiscoveryFlow)
+      // Section 1 copy mapping for each pill
+      const pillCopyMap: Record<string, { eyebrow: string; title: string; subcopy: string }> = {
+        romantic: {
+          eyebrow: "Romantic",
+          title: "Romantic destinations",
+          subcopy: "A more thoughtful edit of cities shaped by atmosphere, pace, and shared moments."
+        },
+        food: {
+          eyebrow: "Food",
+          title: "Cities worth arriving hungry",
+          subcopy: "A curated edit of places shaped by markets, long lunches, and the appetite that defines a trip."
+        },
+        slow: {
+          eyebrow: "Slow",
+          title: "Slower cities, softer days",
+          subcopy: "Cities that reward a gentler pace, longer mornings, and less urgency in how you move through them."
+        },
+        summer: {
+          eyebrow: "Summer",
+          title: "Summer cities in full light",
+          subcopy: "A warmer edit of places that feel most alive in longer days, brighter evenings, and open-air rhythms."
+        },
+        coastal: {
+          eyebrow: "Coastal",
+          title: "Coastal places that linger",
+          subcopy: "Cities where water, light, and a slower edge shape the rhythm of the stay."
+        },
+        weekend: {
+          eyebrow: "Weekend",
+          title: "Cities made for the weekend",
+          subcopy: "A tighter edit of places that give more back in less time \u2014 easy to enter, hard to leave."
+        }
+      };
+      
+      const copy = pillCopyMap[primaryIntent.toLowerCase()] || {
+        eyebrow: primaryIntent.charAt(0).toUpperCase() + primaryIntent.slice(1),
+        title: `${primaryIntent.charAt(0).toUpperCase() + primaryIntent.slice(1)} destinations`,
+        subcopy: "A curated edit of places shaped by your interests."
+      };
+      
+      // Section 1 - Primary active-lens section
       if (rankedResults && rankedResults.length > 0) {
         const topResults = rankedResults.slice(0, 6);
         
         collections.push({
           cities: topResults.map(result => result?.city).filter(Boolean),
-          label: primaryIntent.charAt(0).toUpperCase() + primaryIntent.slice(1), // "Romantic"
+          label: copy.eyebrow,
           slug: "primary-lens",
-          subtitle: `Curated ${primaryIntent} destinations`,
-          title: `${primaryIntent.charAt(0).toUpperCase() + primaryIntent.slice(1)} destinations`
+          subtitle: copy.subcopy,
+          title: copy.title
         });
       }
 
@@ -143,7 +183,7 @@ export default function HomePage() {
     }
   }, [activeDiscoveryLens]);
 
-  // Generate seasonal continuation collections for SeasonalDiscoverySection
+  // Generate seasonal continuation collections with specified copy
   const seasonalCollections = useMemo(() => {
     if (activeDiscoveryLens.type !== 'search' || !activeDiscoveryLens.parsedQuery) {
       return getHomepageDiscovery(); // Default when not searching
@@ -155,19 +195,14 @@ export default function HomePage() {
       
       const collections = [];
       
-      // Get primary intent for editorial direction
-      const primaryIntent = activeDiscoveryLens.parsedQuery.intents.mood?.[0] || 
-                           activeDiscoveryLens.parsedQuery.intents.season?.[0] || 
-                           "Discovery";
-      
-      // Section 2 — Seasonal continuation with active lens
+      // Section 2 - Shared seasonal continuation
       const seasonalResults = rankedResults.slice(6, 10);
       if (seasonalResults.length > 0) {
         collections.push({
           cities: seasonalResults.map(result => result?.city).filter(Boolean),
           label: "Seasonal",
           slug: "seasonal-continuation",
-          subtitle: `${primaryIntent} destinations that feel right this season`,
+          subtitle: "A timely edit of places where mood, season, and setting come together naturally.",
           title: "Cities that feel right this season"
         });
       }
@@ -178,6 +213,51 @@ export default function HomePage() {
       return getHomepageDiscovery();
     }
   }, [activeDiscoveryLens]);
+
+  // Generate onboarding preference collections with specified copy patterns
+  const onboardingCollections = useMemo(() => {
+    // For search-active mode, we need to preserve the onboarding preference
+    // but use the specified copy patterns for section 3
+    const defaultCollections = getHomepageDiscovery();
+    
+    // Copy patterns for onboarding preferences in search-active mode
+    const onboardingCopyMap: Record<string, { eyebrow: string; title: string; subcopy: string }> = {
+      food: {
+        eyebrow: "For food lovers",
+        title: "Cities worth arriving hungry",
+        subcopy: "A few more cities shaped by markets, long lunches, and the kind of places you usually look for first."
+      },
+      romantic: {
+        eyebrow: "For romantics",
+        title: "Cities for slower evenings",
+        subcopy: "A few more places shaped by atmosphere, softer light, and the kind of moments you usually travel for."
+      },
+      slow: {
+        eyebrow: "For slower travel",
+        title: "Cities that unfold gently",
+        subcopy: "A quieter edit of places where pace softens and the city reveals itself more gradually."
+      },
+      summer: {
+        eyebrow: "For summer seekers",
+        title: "Cities that open up in full light",
+        subcopy: "A few more places shaped by longer days, open air, and the energy of the season."
+      },
+      coastal: {
+        eyebrow: "For coastal escapes",
+        title: "Cities with a slower shoreline rhythm",
+        subcopy: "A few more places where water, atmosphere, and ease shape the way you move through the city."
+      },
+      weekend: {
+        eyebrow: "For weekends away",
+        title: "Cities that give more in less time",
+        subcopy: "A few more places built for shorter escapes, quick entry, and strong payoff."
+      }
+    };
+    
+    // For now, return the default collections since we don't have access to user's onboarding preference
+    // In a real implementation, this would be based on stored onboarding data
+    return defaultCollections;
+  }, []);
 
   // Use search collections if search is active, otherwise use default
   const activeCollections = activeDiscoveryLens.type === 'search' ? searchCollections : getHomepageDiscovery();
@@ -206,7 +286,7 @@ export default function HomePage() {
               <SeasonalDiscoverySection cities={cities} collections={seasonalCollections} />
               
               {/* 3. Onboarding preference section (secondary, preserved) */}
-              <PreferenceSeasonSection cities={cities} collections={getHomepageDiscovery()} />
+              <PreferenceSeasonSection cities={cities} collections={onboardingCollections} />
               
               {/* 4. Explore more cities (final broader browsing) */}
               <CityBrowser cities={filteredCities} />
