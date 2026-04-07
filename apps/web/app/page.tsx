@@ -16,7 +16,9 @@ import {
   getDiscoveryMode, 
   extractOnboardingHierarchy,
   type DiscoveryMode,
-  type DiscoverySection 
+  type DiscoverySection,
+  type VibeId,
+  type TimeframeId
 } from "../components/home/post-onboarding-behavior";
 import type { OnboardingPreferences } from "../components/onboarding/onboarding-types";
 
@@ -423,76 +425,90 @@ export default function HomePage() {
       return searchCollections;
     }
     
-    // Search inactive: generate single primary onboarding collection
-    if (!onboardingPreferences) {
-      return getHomepageDiscovery(); // Fallback
+    // Search inactive: always generate single primary onboarding collection
+    let primaryVibe: VibeId | null = null;
+    let timeframe: TimeframeId | null = null;
+    
+    if (onboardingPreferences) {
+      const hierarchy = extractOnboardingHierarchy(onboardingPreferences);
+      primaryVibe = hierarchy.primaryVibe;
+      timeframe = hierarchy.timeframe;
     }
     
-    const { primaryVibe, timeframe } = extractOnboardingHierarchy(onboardingPreferences);
-    
-    if (!primaryVibe) {
-      return getHomepageDiscovery(); // Fallback
-    }
-    
-    // Generate primary onboarding collection
+    // Always generate a single collection, even without onboarding
     const allCities = getAllCities();
-    const rankedCities = rankCitiesByQuery(allCities, {
-      original: '',
-      normalized: '',
-      tokens: [],
-      intents: {
-        city: [],
-        mood: [primaryVibe],
-        season: timeframe ? [timeframe] : []
-      }
-    });
     
-    const primaryCities = rankedCities?.slice(0, 4).map(result => result?.city).filter(Boolean) || allCities.slice(0, 4);
+    let primaryCities: any[] = [];
+    let copy: { eyebrow: string; title: string; subcopy: string };
     
-    // Get copy for primary vibe
-    const vibeCopyMap: Record<string, { eyebrow: string; title: string; subcopy: string }> = {
-      food: {
-        eyebrow: "Food",
-        title: "Cities worth arriving hungry",
-        subcopy: "A curated edit of places shaped by markets, long lunches, and the appetite that defines a trip."
-      },
-      romantic: {
-        eyebrow: "Romantic",
-        title: "Romantic destinations",
-        subcopy: "A more thoughtful edit of cities shaped by atmosphere, pace, and shared moments."
-      },
-      culture: {
-        eyebrow: "Culture",
-        title: "Cities that reward curiosity",
-        subcopy: "A thoughtful edit of places where museums, streets, and architectural stories reveal themselves slowly."
-      },
-      nature: {
-        eyebrow: "Nature",
-        title: "Cities with room to breathe",
-        subcopy: "A calmer edit of places where parks, gardens, and open air give the city space to unfold."
-      },
-      adventure: {
-        eyebrow: "Adventure",
-        title: "Cities that energize",
-        subcopy: "A dynamic edit of places where walks, viewpoints, and urban energy shape the experience."
-      },
-      slow: {
-        eyebrow: "Slow",
-        title: "Slower cities, softer days",
-        subcopy: "Cities that reward a gentler pace, longer mornings, and less urgency in how you move through them."
-      }
-    };
-    
-    const copy = vibeCopyMap[primaryVibe] || {
-      eyebrow: "Discovery",
-      title: "Cities in focus",
-      subcopy: "A thoughtful edit of places for your next trip."
-    };
+    if (primaryVibe) {
+      // Generate based on primary vibe
+      const rankedCities = rankCitiesByQuery(allCities, {
+        original: '',
+        normalized: '',
+        tokens: [],
+        intents: {
+          city: [],
+          mood: [primaryVibe],
+          season: timeframe ? [timeframe] : []
+        }
+      });
+      
+      primaryCities = rankedCities?.slice(0, 4).map(result => result?.city).filter(Boolean) || allCities.slice(0, 4);
+      
+      // Get copy for primary vibe
+      const vibeCopyMap: Record<string, { eyebrow: string; title: string; subcopy: string }> = {
+        food: {
+          eyebrow: "Food",
+          title: "Cities worth arriving hungry",
+          subcopy: "A curated edit of places shaped by markets, long lunches, and the appetite that defines a trip."
+        },
+        romantic: {
+          eyebrow: "Romantic",
+          title: "Romantic destinations",
+          subcopy: "A more thoughtful edit of cities shaped by atmosphere, pace, and shared moments."
+        },
+        culture: {
+          eyebrow: "Culture",
+          title: "Cities that reward curiosity",
+          subcopy: "A thoughtful edit of places where museums, streets, and architectural stories reveal themselves slowly."
+        },
+        nature: {
+          eyebrow: "Nature",
+          title: "Cities with room to breathe",
+          subcopy: "A calmer edit of places where parks, gardens, and open air give the city space to unfold."
+        },
+        adventure: {
+          eyebrow: "Adventure",
+          title: "Cities that energize",
+          subcopy: "A dynamic edit of places where walks, viewpoints, and urban energy shape the experience."
+        },
+        slow: {
+          eyebrow: "Slow",
+          title: "Slower cities, softer days",
+          subcopy: "Cities that reward a gentler pace, longer mornings, and less urgency in how you move through them."
+        }
+      };
+      
+      copy = vibeCopyMap[primaryVibe] || {
+        eyebrow: "Discovery",
+        title: "Cities in focus",
+        subcopy: "A thoughtful edit of places for your next trip."
+      };
+    } else {
+      // Fallback: generic discovery collection
+      primaryCities = allCities.slice(0, 4);
+      copy = {
+        eyebrow: "For you",
+        title: "Cities in focus",
+        subcopy: "A thoughtful edit of places for your next trip."
+      };
+    }
     
     return [{
       cities: primaryCities,
       label: copy.eyebrow,
-      slug: `primary-${primaryVibe}`,
+      slug: primaryVibe ? `primary-${primaryVibe}` : "primary-discovery",
       subtitle: copy.subcopy,
       title: copy.title
     }];
