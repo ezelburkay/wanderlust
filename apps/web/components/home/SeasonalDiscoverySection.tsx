@@ -112,21 +112,9 @@ export function SeasonalDiscoverySection({ cities, collections }: SeasonalDiscov
     return getSeasonalCities(cities, selectedTimeframe);
   }, [cities, selectedTimeframe]);
 
-  console.log('=== SEASONAL DISCOVERY SECTION DEBUG ===');
-  console.log('Component: SeasonalDiscoverySection');
-  console.log('Data source:', collections.length > 0 ? 'passed collections' : 'independent seasonal logic');
-  console.log('Collections received:', collections.length);
-  console.log('Selected timeframe:', selectedTimeframe);
-  console.log('Seasonal cities generated:', seasonalCities.length);
-  console.log('Section title source: hardcoded');
-  console.log('Section title: "Cities that feel right this season"');
-
   if (!hasHydrated || seasonalCities.length === 0) {
-    console.log('SeasonalDiscoverySection: not rendering (no hydration or no cities)');
     return null;
   }
-
-  console.log('SeasonalDiscoverySection: rendering with', seasonalCities.length, 'cities');
 
   return (
     <section className="seasonal-discovery" id="seasonal">
