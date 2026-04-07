@@ -6,6 +6,13 @@ interface CityBrowserProps {
 }
 
 export function CityBrowser({ cities }: CityBrowserProps) {
+  console.log('=== CITY BROWSER DEBUG ===');
+  console.log('Component: CityBrowser');
+  console.log('Data source: passed cities prop');
+  console.log('Cities received:', cities.length);
+  console.log('Section title source: hardcoded');
+  console.log('Section title: "Explore more cities"');
+  
   return (
     <section className="city-browser" id="cities">
       <div className="site-shell">
