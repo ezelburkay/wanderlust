@@ -43,8 +43,7 @@ interface EditorialCardTone {
 const storageKey = "wanderlust_onboarding";
 const validVibes: VibeId[] = ["food", "romantic", "culture", "nature", "adventure", "slow"];
 const validTimeframes: TimeframeId[] = ["this-month", "next-3-months"];
-
-const defaultDiscoverySupport = "Not more options — just a more thoughtful edit of places that match how you want to travel next.";
+const defaultDiscoverySupport = "Not more options \u2014 just a more thoughtful edit of places that match how you want to travel next.";
 
 const vibeCopy: Record<VibeId, { identity: string; keywords: string[]; supportingLine: string; title: string }> = {
   adventure: {
@@ -434,45 +433,36 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
   // Simplified: use page-level resolved state instead of independent onboarding reading
   const isSearchDriven = activeSearchQuery && activeSearchQuery.trim() !== '';
   
-  // Editorial intro based on active lens - no search-results utility copy
+  // Editorial intro based on collections - use passed data instead of hardcoded fallback
   const discoveryIntro = useMemo(() => {
-    if (!isSearchDriven || collections.length === 0) {
+    // Use the first collection's data if available
+    if (collections.length > 0) {
+      const primaryCollection = collections[0];
       return {
-        eyebrow: "For you",
+        eyebrow: primaryCollection?.label || "For you",
         identity: "",
-        title: "Cities in focus",
-        text: defaultDiscoverySupport
+        title: primaryCollection?.title || "Cities in focus",
+        text: primaryCollection?.subtitle || defaultDiscoverySupport
       };
     }
 
-    // For active search lens, use the first collection's identity as the intro
-    const primaryCollection = collections[0];
-    
-    // Safety checks for collection properties
-    const label = primaryCollection?.label || "Discovery";
-    const title = primaryCollection?.title || "Cities";
-    const text = primaryCollection?.subtitle || defaultDiscoverySupport;
-    
+    // Fallback only if no collections
     return {
-      eyebrow: label,
-      identity: "", // No "Based on your search" utility copy
-      title: title,
-      text: text
+      eyebrow: "For you",
+      identity: "",
+      title: "Cities in focus",
+      text: defaultDiscoverySupport
     };
-  }, [isSearchDriven, collections]);
+  }, [collections]);
 
-  // Simplified sections generation - no independent onboarding reading
+  // Simplified sections generation - use passed collections directly
   const sections = useMemo(() => {
     if (!collections || collections.length === 0) {
       return [];
     }
     
-    // When search is active, only show the first (primary) section
-    // Other sections will be handled by separate components
-    const collectionsToUse = isSearchDriven ? [collections[0]] : collections;
-    
     // Convert collections to sections with safety checks
-    const sectionCandidates = collectionsToUse.map((collection, index) => {
+    const sectionCandidates = collections.map((collection, index) => {
       // Safety checks for collection properties
       if (!collection || !collection.cities || !Array.isArray(collection.cities)) {
         console.warn('Invalid collection in discovery content:', collection);
@@ -490,7 +480,7 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
     
     // Type-safe filter to remove null values
     return sectionCandidates.filter((section): section is DiscoveryFlowSection => section !== null);
-  }, [collections, isSearchDriven]);
+  }, [collections]);
 
   return (
     <section className="discovery-flow" id="discover">
