@@ -1,0 +1,66 @@
+/* Onboarding Visual Hierarchy Enhancements */
+
+/* Primary selection indicator */
+.onboarding-chip--primary {
+  border-color: var(--accent-primary);
+  background-color: var(--accent-primary);
+  color: var(--background);
+}
+
+/* Secondary selection indicator */
+.onboarding-chip--secondary {
+  border-color: var(--accent-soft);
+  background-color: var(--accent-soft);
+  color: var(--text);
+}
+
+/* Selection order indicators */
+.onboarding-chip__indicator {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--accent-primary);
+  color: var(--background);
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--background);
+}
+
+.onboarding-chip--secondary .onboarding-chip__indicator {
+  background-color: var(--accent-soft);
+  color: var(--text);
+}
+
+/* Disabled state for max selections */
+.onboarding-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.onboarding-chip:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Hint text for max selections */
+.onboarding-group__hint {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* Enhanced label with conditional text */
+.onboarding-group__label {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: var(--text);
+  transition: color 0.2s ease;
+}
