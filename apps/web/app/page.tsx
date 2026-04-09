@@ -11,12 +11,25 @@ import { PreferenceSeasonSection } from "../components/home/PreferenceSeasonSect
 import { Header } from "../components/layout/Header";
 import { OnboardingGate } from "../components/onboarding/OnboardingGate";
 import { parseDiscoveryQuery, rankCitiesByQuery, type ParsedQuery } from "../components/home/discoverySearch";
-import { 
-  extractOnboardingHierarchy,
-  type VibeId,
-  type TimeframeId
-} from "../components/home/post-onboarding-behavior";
 import type { OnboardingPreferences } from "../components/onboarding/onboarding-types";
+
+type VibeId = "food" | "romantic" | "culture" | "nature" | "adventure" | "slow";
+type TimeframeId = "this-month" | "next-3-months";
+
+function extractOnboardingHierarchy(preferences: OnboardingPreferences): {
+  primaryVibe: VibeId | null;
+  secondaryVibes: VibeId[];
+  timeframe: TimeframeId | null;
+} {
+  const vibes = preferences.vibe as VibeId[];
+  const timeframe = (preferences.tripStyle[0] as TimeframeId | undefined) ?? null;
+
+  return {
+    primaryVibe: vibes[0] ?? null,
+    secondaryVibes: vibes.slice(1),
+    timeframe
+  };
+}
 
 export default function HomePage() {
   // Stable client-side search state
@@ -321,7 +334,7 @@ export default function HomePage() {
     // Always generate a single collection, even without onboarding
     const allCities = getAllCities();
     
-    let primaryCities: any[] = [];
+    let primaryCities: CityViewModel[] = [];
     let copy: { eyebrow: string; title: string; subcopy: string };
     
     if (primaryVibe) {
