@@ -491,22 +491,50 @@ export function PersonalizedDiscoveryFlow({ cities, collections, activeSearchQue
           <p className="discovery-flow__intro-text">{discoveryIntro.text}</p>
         </div>
 
-        {/* Only render the first section in search-inactive mode */}
-        {sections.length > 0 && (
-          <div className="discovery-flow-section discovery-flow-section--primary" key={sections[0].slug}>
-            <div className={`discovery-flow-section__grid discovery-flow-section__grid--${sections[0].layout}`}>
-              {sections[0].cities.map((city: CityViewModel) => (
-                <CityCard
-                  key={`${sections[0].slug}-${city.slug}`}
-                  badgeText={null}
-                  city={city}
-                  descriptorText={city.country}
-                  sentenceText={city.cardSentence}
-                  variant="editorial"
-                />
-              ))}
+        {/* Mode-aware section rendering */}
+        {isSearchDriven ? (
+          // Search-active mode: render all sections (typically 1 primary search section)
+          sections.map((section: DiscoveryFlowSection, index: number) => (
+            <div className={`discovery-flow-section${index === 0 ? " discovery-flow-section--primary" : ""}`} key={section.slug}>
+              {index > 0 ? (
+                <div className="discovery-flow-section__heading">
+                  <p className="discovery-flow-section__label">{section.label}</p>
+                  <h3 className="discovery-flow-section__title">{section.title}</h3>
+                </div>
+              ) : null}
+
+              <div className={`discovery-flow-section__grid discovery-flow-section__grid--${section.layout}`}>
+                {section.cities.map((city: CityViewModel) => (
+                  <CityCard
+                    key={`${section.slug}-${city.slug}`}
+                    badgeText={index === 0 ? null : undefined}
+                    city={city}
+                    descriptorText={index === 0 ? city.country : undefined}
+                    sentenceText={index === 0 ? city.cardSentence : undefined}
+                    variant={index === 0 ? "editorial" : "default"}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ))
+        ) : (
+          // Search-inactive mode: render only the primary onboarding section
+          sections.length > 0 && (
+            <div className="discovery-flow-section discovery-flow-section--primary" key={sections[0].slug}>
+              <div className={`discovery-flow-section__grid discovery-flow-section__grid--${sections[0].layout}`}>
+                {sections[0].cities.map((city: CityViewModel) => (
+                  <CityCard
+                    key={`${sections[0].slug}-${city.slug}`}
+                    badgeText={null}
+                    city={city}
+                    descriptorText={city.country}
+                    sentenceText={city.cardSentence}
+                    variant="editorial"
+                  />
+                ))}
+              </div>
+            </div>
+          )
         )}
       </div>
     </section>
