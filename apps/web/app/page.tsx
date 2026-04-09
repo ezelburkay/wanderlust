@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { getAllCities, getHomepageDiscovery } from "../content";
+import { getAllCities, type CityViewModel, type HomepageDiscoveryViewModel } from "../content";
 import { CityBrowser } from "../components/city";
 import { HeroSection } from "../components/home/HeroSection";
 import { PersonalizedDiscoveryFlow } from "../components/home/PersonalizedDiscoveryFlow";
@@ -12,11 +12,7 @@ import { Header } from "../components/layout/Header";
 import { OnboardingGate } from "../components/onboarding/OnboardingGate";
 import { parseDiscoveryQuery, rankCitiesByQuery, type ParsedQuery } from "../components/home/discoverySearch";
 import { 
-  generateDiscoverySections, 
-  getDiscoveryMode, 
   extractOnboardingHierarchy,
-  type DiscoveryMode,
-  type DiscoverySection,
   type VibeId,
   type TimeframeId
 } from "../components/home/post-onboarding-behavior";
@@ -173,27 +169,19 @@ export default function HomePage() {
     };
   }, [committedQuery, committedParsedQuery]);
 
-  // Determine discovery mode
-  const discoveryMode = useMemo((): DiscoveryMode => {
-    return getDiscoveryMode(committedQuery);
-  }, [committedQuery]);
-
-  // Generate discovery sections based on mode and preferences
-  const discoverySections = useMemo((): DiscoverySection[] => {
-    const allCities = getAllCities();
-    const searchResults = activeDiscoveryLens.type === 'search' 
-      ? rankCitiesByQuery(allCities, activeDiscoveryLens.parsedQuery!)
-      : null;
-    
-    return generateDiscoverySections(
-      discoveryMode,
-      onboardingPreferences,
-      committedQuery,
-      committedParsedQuery,
-      allCities,
-      searchResults
-    );
-  }, [discoveryMode, onboardingPreferences, committedQuery, committedParsedQuery, activeDiscoveryLens]);
+  const onboardingHierarchy = useMemo<{
+    primaryVibe: VibeId | null;
+    secondaryVibes: VibeId[];
+    timeframe: TimeframeId | null;
+  }>(() => {
+    return onboardingPreferences
+      ? extractOnboardingHierarchy(onboardingPreferences)
+      : {
+          primaryVibe: null,
+          secondaryVibes: [],
+          timeframe: null
+        };
+  }, [onboardingPreferences]);
 
   // Generate search-driven collections with fallback system
   const searchCollections = useMemo(() => {
@@ -205,7 +193,7 @@ export default function HomePage() {
       const cities = getAllCities();
       const rankedResults = rankCitiesByQuery(cities, activeDiscoveryLens.parsedQuery);
       
-      const collections = [];
+      const collections: HomepageDiscoveryViewModel[] = [];
       
       // Get primary intent for editorial direction
       const primaryIntent = activeDiscoveryLens.parsedQuery.intents.mood?.[0] || 
@@ -263,11 +251,11 @@ export default function HomePage() {
       };
       
       // Section 1 - Primary active-lens section with fallback
-      let primaryCities: any[] = [];
+      let primaryCities: CityViewModel[] = [];
       
       if (rankedResults && rankedResults.length > 0) {
         // Take top matches
-        primaryCities = rankedResults.slice(0, 4).map(result => result?.city).filter(Boolean);
+        primaryCities = rankedResults.slice(0, 4).map((result) => result?.city).filter(Boolean) as CityViewModel[];
       }
       
       // Fallback: if not enough cities, expand with editorial relevance
@@ -279,7 +267,7 @@ export default function HomePage() {
         fallbackIntents.forEach(fallbackIntent => {
           if (primaryCities.length >= 4) return;
           
-          const fallbackCities = allCities.filter(city => 
+          const fallbackCities = allCities.filter((city) => 
             !primaryCities.some(pc => pc.slug === city.slug) &&
             (
               city.searchText?.includes(fallbackIntent) ||
@@ -296,7 +284,7 @@ export default function HomePage() {
       // Final fallback: if still not enough, add diverse cities
       if (primaryCities.length < 3) {
         const allCities = getAllCities();
-        const remainingCities = allCities.filter(city => 
+        const remainingCities = allCities.filter((city) => 
           !primaryCities.some(pc => pc.slug === city.slug)
         ).slice(0, 4 - primaryCities.length);
         
@@ -320,106 +308,6 @@ export default function HomePage() {
     }
   }, [activeDiscoveryLens]);
 
-  // Generate simplified seasonal collections
-  const seasonalCollections = useMemo(() => {
-    const allCities = getAllCities();
-    const { timeframe } = onboardingPreferences 
-      ? extractOnboardingHierarchy(onboardingPreferences)
-      : { timeframe: null };
-    
-    // Generate seasonal query based on timeframe or current season
-    const seasonQuery = timeframe === 'this-month' ? 'this month' : 
-                       timeframe === 'next-3-months' ? 'next few months' : 
-                       'this season';
-    
-    try {
-      const rankedResults = rankCitiesByQuery(allCities, {
-        original: seasonQuery,
-        normalized: seasonQuery,
-        tokens: [seasonQuery],
-        intents: {
-          city: [],
-          mood: [],
-          season: timeframe ? [timeframe] : ['current']
-        }
-      });
-      
-      // Get seasonal cities (exclude primary collection cities if search active)
-      const primaryCities = activeDiscoveryLens.type === 'search' && searchCollections.length > 0
-        ? searchCollections[0]?.cities || []
-        : [];
-      const primaryCitySlugs = new Set(primaryCities.map((city: any) => city.slug));
-      
-      const seasonalCities = rankedResults
-        ?.map(result => result?.city)
-        .filter(Boolean)
-        .filter((city: any) => !primaryCitySlugs.has(city.slug))
-        .slice(0, 3) || allCities.slice(0, 3);
-      
-      return [{
-        cities: seasonalCities,
-        label: "Seasonal",
-        slug: "seasonal-continuation",
-        subtitle: "A timely edit of places where mood, season, and setting come together naturally.",
-        title: "Cities that feel right this season"
-      }];
-    } catch (error) {
-      console.warn('Error generating seasonal collections:', error);
-      return [{
-        cities: allCities.slice(0, 3),
-        label: "Seasonal",
-        slug: "seasonal-continuation",
-        subtitle: "A timely edit of places where mood, season, and setting come together naturally.",
-        title: "Cities that feel right this season"
-      }];
-    }
-  }, [activeDiscoveryLens.type, searchCollections, onboardingPreferences]);
-
-  // Generate onboarding preference collections with specified copy patterns
-  const onboardingCollections = useMemo(() => {
-    // For search-active mode, we need to preserve the onboarding preference
-    // but use the specified copy patterns for section 3
-    const defaultCollections = getHomepageDiscovery();
-    
-    // Copy patterns for onboarding preferences in search-active mode
-    const onboardingCopyMap: Record<string, { eyebrow: string; title: string; subcopy: string }> = {
-      food: {
-        eyebrow: "For food lovers",
-        title: "Cities worth arriving hungry",
-        subcopy: "A few more cities shaped by markets, long lunches, and the kind of places you usually look for first."
-      },
-      romantic: {
-        eyebrow: "For romantics",
-        title: "Cities for slower evenings",
-        subcopy: "A few more places shaped by atmosphere, softer light, and the kind of moments you usually travel for."
-      },
-      slow: {
-        eyebrow: "For slower travel",
-        title: "Cities that unfold gently",
-        subcopy: "A quieter edit of places where pace softens and the city reveals itself more gradually."
-      },
-      summer: {
-        eyebrow: "For summer seekers",
-        title: "Cities that open up in full light",
-        subcopy: "A few more places shaped by longer days, open air, and the energy of the season."
-      },
-      coastal: {
-        eyebrow: "For coastal escapes",
-        title: "Cities with a slower shoreline rhythm",
-        subcopy: "A few more places where water, atmosphere, and ease shape the way you move through the city."
-      },
-      weekend: {
-        eyebrow: "For weekends away",
-        title: "Cities that give more in less time",
-        subcopy: "A few more places built for shorter escapes, quick entry, and strong payoff."
-      }
-    };
-    
-    // For now, return the default collections since we don't have access to user's onboarding preference
-    // In a real implementation, this would be based on stored onboarding data
-    return defaultCollections;
-  }, []);
-
   // Generate simplified collections based on discovery mode
   const activeCollections = useMemo(() => {
     if (activeDiscoveryLens.type === 'search') {
@@ -428,14 +316,7 @@ export default function HomePage() {
     }
     
     // Search inactive: always generate single primary onboarding collection
-    let primaryVibe: VibeId | null = null;
-    let timeframe: TimeframeId | null = null;
-    
-    if (onboardingPreferences) {
-      const hierarchy = extractOnboardingHierarchy(onboardingPreferences);
-      primaryVibe = hierarchy.primaryVibe;
-      timeframe = hierarchy.timeframe;
-    }
+    const { primaryVibe, timeframe } = onboardingHierarchy;
     
     // Always generate a single collection, even without onboarding
     const allCities = getAllCities();
@@ -456,7 +337,7 @@ export default function HomePage() {
         }
       });
       
-      primaryCities = rankedCities?.slice(0, 4).map(result => result?.city).filter(Boolean) || allCities.slice(0, 4);
+      primaryCities = rankedCities?.slice(0, 4).map((result) => result?.city).filter(Boolean) as CityViewModel[] || allCities.slice(0, 4);
       
       // Get copy for primary vibe
       const vibeCopyMap: Record<string, { eyebrow: string; title: string; subcopy: string }> = {
@@ -516,10 +397,148 @@ export default function HomePage() {
     }];
     
     return finalCollections;
-  }, [activeDiscoveryLens.type, searchCollections, onboardingPreferences]);
-  
-  // Get all cities for components that need it
-  const cities = getAllCities();
+  }, [activeDiscoveryLens.type, onboardingHierarchy, searchCollections]);
+
+  // Generate simplified seasonal collections from parent-owned state
+  const seasonalCollections = useMemo(() => {
+    const allCities = getAllCities();
+    const { timeframe } = onboardingHierarchy;
+    const excludedSlugs = new Set((activeCollections[0]?.cities ?? []).map((city: CityViewModel) => city.slug));
+    const seasonQuery = timeframe === 'this-month'
+      ? 'this month'
+      : timeframe === 'next-3-months'
+        ? 'next few months'
+        : 'this season';
+
+    try {
+      const rankedResults = rankCitiesByQuery(allCities, {
+        original: seasonQuery,
+        normalized: seasonQuery,
+        tokens: [seasonQuery],
+        intents: {
+          city: [],
+          mood: [],
+          season: timeframe ? [timeframe] : ['current']
+        }
+      });
+
+      const rankedCities = (rankedResults ?? [])
+        .map((result) => result?.city)
+        .filter(Boolean)
+        .filter((city): city is CityViewModel => Boolean(city))
+        .filter((city) => !excludedSlugs.has(city.slug));
+
+      const fallbackCities = allCities.filter((city) => !excludedSlugs.has(city.slug));
+      const seasonalCities = [...rankedCities, ...fallbackCities].slice(0, 3);
+
+      if (seasonalCities.length === 0) {
+        return [];
+      }
+
+      return [{
+        cities: seasonalCities,
+        label: 'Seasonal',
+        slug: 'seasonal-continuation',
+        subtitle: 'A timely edit of places where mood, season, and setting come together naturally.',
+        title: 'Cities that feel right this season'
+      }];
+    } catch (error) {
+      console.warn('Error generating seasonal collections:', error);
+
+      const fallbackCities = allCities.filter((city) => !excludedSlugs.has(city.slug)).slice(0, 3);
+
+      return fallbackCities.length > 0
+        ? [{
+            cities: fallbackCities,
+            label: 'Seasonal',
+            slug: 'seasonal-continuation',
+            subtitle: 'A timely edit of places where mood, season, and setting come together naturally.',
+            title: 'Cities that feel right this season'
+          }]
+        : [];
+    }
+  }, [activeCollections, onboardingHierarchy]);
+
+  // Generate onboarding continuation collections from parent-owned state
+  const onboardingCollections = useMemo(() => {
+    if (activeDiscoveryLens.type !== 'search' || !onboardingHierarchy.primaryVibe) {
+      return [];
+    }
+
+    const allCities = getAllCities();
+    const primaryVibe = onboardingHierarchy.primaryVibe as VibeId;
+    const { timeframe } = onboardingHierarchy;
+    const excludedSlugs = new Set([
+      ...(activeCollections[0]?.cities ?? []),
+      ...(seasonalCollections[0]?.cities ?? [])
+    ].map((city: CityViewModel) => city.slug));
+
+    const onboardingCopyMap: Record<VibeId, { eyebrow: string; title: string; subcopy: string }> = {
+      food: {
+        eyebrow: 'For food lovers',
+        title: 'Cities worth arriving hungry',
+        subcopy: 'A few more cities shaped by markets, long lunches, and the kind of places you usually look for first.'
+      },
+      romantic: {
+        eyebrow: 'For romantics',
+        title: 'Cities for slower evenings',
+        subcopy: 'A few more places shaped by atmosphere, softer light, and the kind of moments you usually travel for.'
+      },
+      culture: {
+        eyebrow: 'For the curious',
+        title: 'Cities that reveal themselves slowly',
+        subcopy: 'A few more places where museums, architecture, and street life reward patient exploration.'
+      },
+      nature: {
+        eyebrow: 'For nature seekers',
+        title: 'Cities with room to breathe',
+        subcopy: 'A few more places where parks, gardens, and open air give the experience more space.'
+      },
+      adventure: {
+        eyebrow: 'For adventurers',
+        title: 'Cities that energize',
+        subcopy: 'A few more places where walks, viewpoints, and urban energy shape the rhythm of the stay.'
+      },
+      slow: {
+        eyebrow: 'For slower travel',
+        title: 'Cities that unfold gently',
+        subcopy: 'A quieter edit of places where pace softens and the city reveals itself more gradually.'
+      }
+    };
+
+    const rankedResults = rankCitiesByQuery(allCities, {
+      original: '',
+      normalized: '',
+      tokens: [],
+      intents: {
+        city: [],
+        mood: [primaryVibe],
+        season: timeframe ? [timeframe] : []
+      }
+    });
+
+    const rankedCities = (rankedResults ?? [])
+      .map((result) => result?.city)
+      .filter(Boolean)
+      .filter((city) => !excludedSlugs.has(city.slug));
+
+    const fallbackCities = allCities.filter((city) => !excludedSlugs.has(city.slug));
+    const continuationCities = [...rankedCities, ...fallbackCities].slice(0, 3);
+
+    if (continuationCities.length === 0) {
+      return [];
+    }
+
+    const copy = onboardingCopyMap[primaryVibe];
+
+    return [{
+      cities: continuationCities,
+      label: copy.eyebrow,
+      slug: `onboarding-continuation-${primaryVibe}`,
+      subtitle: copy.subcopy,
+      title: copy.title
+    }];
+  }, [activeCollections, activeDiscoveryLens.type, onboardingHierarchy, seasonalCollections]);
 
   return (
     <OnboardingGate>
@@ -544,13 +563,13 @@ export default function HomePage() {
           {activeDiscoveryLens.type === 'search' ? (
             <>
               {/* 1. Active selected-pill section (primary) */}
-              <PersonalizedDiscoveryFlow cities={cities} collections={activeCollections} activeSearchQuery={committedQuery} />
+              <PersonalizedDiscoveryFlow collections={activeCollections} isSearchDriven />
               
               {/* 2. Seasonal continuation section */}
-              <SeasonalDiscoverySection cities={cities} collections={seasonalCollections} />
+              <SeasonalDiscoverySection collections={seasonalCollections} />
               
               {/* 3. Onboarding preference section (secondary, preserved) */}
-              <PreferenceSeasonSection cities={cities} collections={onboardingCollections} />
+              <PreferenceSeasonSection collections={onboardingCollections} />
               
               {/* 4. Explore more cities (final broader browsing) */}
               <CityBrowser cities={filteredCities} />
@@ -559,10 +578,10 @@ export default function HomePage() {
             <>
               {/* Search-inactive flow: simplified 3-section model */}
               {/* 1. Primary onboarding section */}
-              <PersonalizedDiscoveryFlow cities={cities} collections={activeCollections} />
+              <PersonalizedDiscoveryFlow collections={activeCollections} isSearchDriven={false} />
               
               {/* 2. Seasonal continuation section */}
-              <SeasonalDiscoverySection cities={cities} collections={seasonalCollections} />
+              <SeasonalDiscoverySection collections={seasonalCollections} />
               
               {/* 3. Explore more cities */}
               <CityBrowser cities={filteredCities} />
