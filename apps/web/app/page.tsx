@@ -553,6 +553,67 @@ export default function HomePage() {
     }];
   }, [activeCollections, activeDiscoveryLens.type, onboardingHierarchy, seasonalCollections]);
 
+  const homepageMode = activeDiscoveryLens.type === 'search' ? 'search-active' : 'search-inactive';
+
+  const finalVisibleStack = useMemo(() => {
+    const stack: Array<{
+      component: string;
+      visible: boolean;
+      reason: string;
+      collectionSlugs?: string[];
+      cityCount?: number;
+    }> = [
+      {
+        component: 'PersonalizedDiscoveryFlow',
+        visible: true,
+        reason: activeCollections.length > 0 ? 'mounted-with-collections' : 'mounted-with-empty-collections',
+        collectionSlugs: activeCollections.map((collection: HomepageDiscoveryViewModel) => collection.slug)
+      },
+      {
+        component: 'SeasonalDiscoverySection',
+        visible: Boolean(seasonalCollections[0] && seasonalCollections[0].cities.length > 0),
+        reason: seasonalCollections[0]?.cities.length ? 'renders-first-collection' : 'returns-null',
+        collectionSlugs: seasonalCollections.map((collection: HomepageDiscoveryViewModel) => collection.slug)
+      }
+    ];
+
+    if (homepageMode === 'search-active') {
+      stack.push({
+        component: 'PreferenceSeasonSection',
+        visible: Boolean(onboardingCollections[0] && onboardingCollections[0].cities.length > 0),
+        reason: onboardingCollections[0]?.cities.length ? 'renders-first-collection' : 'returns-null',
+        collectionSlugs: onboardingCollections.map((collection: HomepageDiscoveryViewModel) => collection.slug)
+      });
+    }
+
+    stack.push({
+      component: 'CityBrowser',
+      visible: true,
+      reason: filteredCities.length > 0 ? 'renders-grid' : 'renders-empty-state',
+      cityCount: filteredCities.length
+    });
+
+    return stack;
+  }, [activeCollections, filteredCities, homepageMode, onboardingCollections, seasonalCollections]);
+
+  useEffect(() => {
+    const summarizeCollections = (collections: HomepageDiscoveryViewModel[]) => {
+      return collections.map((collection) => ({
+        slug: collection.slug,
+        label: collection.label,
+        title: collection.title,
+        cityCount: collection.cities.length,
+        citySlugs: collection.cities.map((city) => city.slug)
+      }));
+    };
+
+    console.log('[homepage-debug] homepageMode', homepageMode);
+    console.log('[homepage-debug] activeCollections', summarizeCollections(activeCollections));
+    console.log('[homepage-debug] seasonalCollections', summarizeCollections(seasonalCollections));
+    console.log('[homepage-debug] onboardingCollections', summarizeCollections(onboardingCollections));
+    console.log('[homepage-debug] finalVisibleStack', finalVisibleStack);
+  }, [activeCollections, finalVisibleStack, homepageMode, onboardingCollections, seasonalCollections]);
+
   return (
     <OnboardingGate>
       <>
@@ -605,4 +666,3 @@ export default function HomePage() {
     </OnboardingGate>
   );
 }
-
