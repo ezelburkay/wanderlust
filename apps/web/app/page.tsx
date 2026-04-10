@@ -59,6 +59,8 @@ interface SectionBuildResult {
   shouldRender: boolean;
   reason: string;
   usedOverlap: boolean;
+  minimumRenderableCityCount: number;
+  selectedCitySlugs: string[];
 }
 
 interface CitySelectionResult {
@@ -342,6 +344,10 @@ function getMinimumRenderableCityCount(
     return 1;
   }
 
+  if (allCitiesCount <= 2) {
+    return 1;
+  }
+
   return Math.min(2, limit);
 }
 
@@ -369,13 +375,17 @@ function buildSectionResult(
   collections: HomepageDiscoveryViewModel[],
   shouldRender: boolean,
   reason: string,
-  usedOverlap: boolean
+  usedOverlap: boolean,
+  minimumRenderableCityCount = 0,
+  selectedCitySlugs: string[] = []
 ): SectionBuildResult {
   return {
     collections,
     shouldRender,
     reason,
-    usedOverlap
+    usedOverlap,
+    minimumRenderableCityCount,
+    selectedCitySlugs
   };
 }
 
@@ -518,7 +528,14 @@ function buildPrimaryCollections(args: {
         }]
       : [];
 
-    return buildSectionResult(collections, collections.length > 0, `primary-search-${selection.reason}`, selection.usedOverlap);
+    return buildSectionResult(
+      collections,
+      collections.length > 0,
+      `primary-search-${selection.reason}`,
+      selection.usedOverlap,
+      getMinimumRenderableCityCount(allCities.length, 4, "required"),
+      selection.cities.map((city) => city.slug)
+    );
   }
 
   const { primaryVibe, secondaryVibes, timeframe } = onboardingHierarchy;
@@ -563,7 +580,14 @@ function buildPrimaryCollections(args: {
         }]
       : [];
 
-    return buildSectionResult(collections, collections.length > 0, `primary-onboarding-${selection.reason}`, selection.usedOverlap);
+    return buildSectionResult(
+      collections,
+      collections.length > 0,
+      `primary-onboarding-${selection.reason}`,
+      selection.usedOverlap,
+      getMinimumRenderableCityCount(allCities.length, 4, "required"),
+      selection.cities.map((city) => city.slug)
+    );
   }
 
   if (homepageMode === "onboarding") {
@@ -577,7 +601,9 @@ function buildPrimaryCollections(args: {
       }],
       true,
       "primary-onboarding-fallback",
-      false
+      false,
+      getMinimumRenderableCityCount(allCities.length, 4, "required"),
+      allCities.slice(0, 4).map((city) => city.slug)
     );
   }
 
@@ -591,7 +617,9 @@ function buildPrimaryCollections(args: {
     }],
     true,
     "primary-generic-fallback",
-    false
+    false,
+    getMinimumRenderableCityCount(allCities.length, 4, "required"),
+    allCities.slice(0, 4).map((city) => city.slug)
   );
 }
 
@@ -654,7 +682,14 @@ function buildSeasonalCollections(args: {
       }]
     : [];
 
-  return buildSectionResult(collections, shouldRender, `seasonal-${selection.reason}`, selection.usedOverlap);
+  return buildSectionResult(
+    collections,
+    shouldRender,
+    `seasonal-${selection.reason}`,
+    selection.usedOverlap,
+    minimumRenderableCityCount,
+    selection.cities.map((city) => city.slug)
+  );
 }
 
 function buildContinuationCollections(args: {
@@ -709,7 +744,14 @@ function buildContinuationCollections(args: {
   const shouldRender = selection.cities.length >= minimumRenderableCityCount;
 
   if (!shouldRender) {
-    return buildSectionResult([], false, `continuation-${selection.reason}`, selection.usedOverlap);
+    return buildSectionResult(
+      [],
+      false,
+      `continuation-${selection.reason}`,
+      selection.usedOverlap,
+      minimumRenderableCityCount,
+      selection.cities.map((city) => city.slug)
+    );
   }
 
   const copy = onboardingContinuationCopyMap[primaryVibe];
@@ -724,7 +766,9 @@ function buildContinuationCollections(args: {
     }],
     true,
     `continuation-${selection.reason}`,
-    selection.usedOverlap
+    selection.usedOverlap,
+    minimumRenderableCityCount,
+    selection.cities.map((city) => city.slug)
   );
 }
 
@@ -1016,13 +1060,17 @@ export default function HomePage() {
     console.log('[homepage-debug] seasonalSectionBuild', {
       shouldRender: seasonalSectionBuild.shouldRender,
       reason: seasonalSectionBuild.reason,
-      usedOverlap: seasonalSectionBuild.usedOverlap
+      usedOverlap: seasonalSectionBuild.usedOverlap,
+      minimumRenderableCityCount: seasonalSectionBuild.minimumRenderableCityCount,
+      selectedCitySlugs: seasonalSectionBuild.selectedCitySlugs
     });
     console.log('[homepage-debug] seasonalCollections', summarizeCollections(seasonalCollections));
     console.log('[homepage-debug] continuationSectionBuild', {
       shouldRender: continuationSectionBuild.shouldRender,
       reason: continuationSectionBuild.reason,
-      usedOverlap: continuationSectionBuild.usedOverlap
+      usedOverlap: continuationSectionBuild.usedOverlap,
+      minimumRenderableCityCount: continuationSectionBuild.minimumRenderableCityCount,
+      selectedCitySlugs: continuationSectionBuild.selectedCitySlugs
     });
     console.log('[homepage-debug] onboardingCollections', summarizeCollections(onboardingCollections));
     console.log('[homepage-debug] finalVisibleStack', finalVisibleStack);
