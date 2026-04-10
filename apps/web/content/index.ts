@@ -1,9 +1,9 @@
+import type { City as SourceCity } from "../../../packages/content/schemas/city";
+import { cities as sourceCities } from "../../../packages/content/cities/index";
 import {
-  cities as sourceCities,
   personalizedCollections,
-  seasonalCollections,
-  type City as SourceCity
-} from "../../../packages/content";
+  seasonalCollections
+} from "../../../packages/content/discovery/index";
 
 interface CityPresentation {
   country: string;
