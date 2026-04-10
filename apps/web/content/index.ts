@@ -229,3 +229,4 @@ export function getHomepageDiscovery(): HomepageDiscoveryViewModel[] {
     toHomepageDiscoveryViewModel(greatForInterest, "Great for food lovers")
   ];
 }
+
