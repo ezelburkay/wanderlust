@@ -12,6 +12,9 @@ interface CityPresentation {
   imageUrl: string;
 }
 
+const defaultCityImageUrl =
+  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80";
+
 const cityPresentationBySlug: Record<string, CityPresentation> = {
   paris: {
     country: "France",
@@ -26,6 +29,54 @@ const cityPresentationBySlug: Record<string, CityPresentation> = {
     imagePosition: "center center",
     imageUrl:
       "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1600&q=80"
+  },
+  "san-sebastian": {
+    country: "Spain",
+    imageAlt: "San Sebastian bay and beachfront at golden hour",
+    imagePosition: "center center",
+    imageUrl: defaultCityImageUrl
+  },
+  oaxaca: {
+    country: "Mexico",
+    imageAlt: "Oaxaca rooftops and colorful historic streets",
+    imagePosition: "center center",
+    imageUrl: defaultCityImageUrl
+  },
+  kyoto: {
+    country: "Japan",
+    imageAlt: "Kyoto temple roofs and green hills in soft light",
+    imagePosition: "center center",
+    imageUrl: defaultCityImageUrl
+  },
+  lisbon: {
+    country: "Portugal",
+    imageAlt: "Lisbon hillside rooftops and river light",
+    imagePosition: "center center",
+    imageUrl: defaultCityImageUrl
+  },
+  vienna: {
+    country: "Austria",
+    imageAlt: "Vienna grand avenues and classical architecture",
+    imagePosition: "center center",
+    imageUrl: defaultCityImageUrl
+  },
+  seville: {
+    country: "Spain",
+    imageAlt: "Seville rooftops in warm late-afternoon light",
+    imagePosition: "center center",
+    imageUrl: defaultCityImageUrl
+  },
+  reykjavik: {
+    country: "Iceland",
+    imageAlt: "Reykjavik colorful roofs with mountain backdrop",
+    imagePosition: "center center",
+    imageUrl: defaultCityImageUrl
+  },
+  copenhagen: {
+    country: "Denmark",
+    imageAlt: "Copenhagen waterfront and canal buildings in daylight",
+    imagePosition: "center center",
+    imageUrl: defaultCityImageUrl
   }
 };
 
@@ -62,8 +113,7 @@ function getCityPresentation(city: SourceCity): CityPresentation {
       country: "",
       imageAlt: `${city.name} city view`,
       imagePosition: "center center",
-      imageUrl:
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80"
+      imageUrl: defaultCityImageUrl
     }
   );
 }
