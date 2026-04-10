@@ -16,6 +16,7 @@ interface StoredOnboardingState {
 }
 
 const storageKey = "wanderlust_onboarding";
+const onboardingUpdatedEvent = "wanderlust:onboarding-updated";
 const loadingDurationMs = 3600;
 const loadingFadeDurationMs = 850;
 const emptyOnboardingPreferences: OnboardingPreferences = {
@@ -73,6 +74,7 @@ function saveStoredOnboarding(state: StoredOnboardingState) {
   }
 
   window.localStorage.setItem(storageKey, JSON.stringify(state));
+  window.dispatchEvent(new Event(onboardingUpdatedEvent));
 }
 
 export function OnboardingGate({ children }: OnboardingGateProps) {
