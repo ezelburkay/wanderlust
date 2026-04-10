@@ -31,7 +31,7 @@ function extractOnboardingHierarchy(preferences: OnboardingPreferences): {
   };
 }
 
-type HomepageMode = "search-active" | "search-inactive";
+type HomepageMode = "search" | "onboarding" | "generic";
 type CanonicalSeasonIntent = "thismonth" | "next3months";
 
 interface OnboardingHierarchy {
@@ -58,11 +58,13 @@ interface SectionBuildResult {
   collections: HomepageDiscoveryViewModel[];
   shouldRender: boolean;
   reason: string;
+  usedOverlap: boolean;
 }
 
 interface CitySelectionResult {
   cities: CityViewModel[];
   reason: string;
+  usedOverlap: boolean;
 }
 
 const primaryVibeCopyMap: Record<VibeId, { eyebrow: string; title: string; subcopy: string }> = {
@@ -323,9 +325,17 @@ function getExcludedSlugsFromCollections(collections: HomepageDiscoveryViewModel
   );
 }
 
-function getMinimumRenderableCityCount(allCitiesCount: number, limit: number): number {
+function getMinimumRenderableCityCount(
+  allCitiesCount: number,
+  limit: number,
+  priority: "required" | "preferred"
+): number {
   if (allCitiesCount <= 0) {
     return 0;
+  }
+
+  if (priority === "required") {
+    return 1;
   }
 
   if (allCitiesCount === 1) {
@@ -358,40 +368,55 @@ function appendReusableCities(
 function buildSectionResult(
   collections: HomepageDiscoveryViewModel[],
   shouldRender: boolean,
-  reason: string
+  reason: string,
+  usedOverlap: boolean
 ): SectionBuildResult {
   return {
     collections,
     shouldRender,
-    reason
+    reason,
+    usedOverlap
   };
 }
 
 function resolveSectionCities(args: {
   allCities: CityViewModel[];
   preferredCities: CityViewModel[];
-  editorialFallbackCities: CityViewModel[];
+  uniqueFallbackCities: CityViewModel[];
+  reusableFallbackCities: CityViewModel[];
   excludedSlugs: Set<string>;
   limit: number;
+  minimumRenderableCityCount: number;
+  allowOverlap: boolean;
 }): CitySelectionResult {
-  const { allCities, preferredCities, editorialFallbackCities, excludedSlugs, limit } = args;
-  const minimumRenderableCityCount = getMinimumRenderableCityCount(allCities.length, limit);
+  const {
+    allCities,
+    preferredCities,
+    uniqueFallbackCities,
+    reusableFallbackCities,
+    excludedSlugs,
+    limit,
+    minimumRenderableCityCount,
+    allowOverlap
+  } = args;
 
   let selectedCities = appendUniqueCities([], preferredCities, limit, excludedSlugs);
 
   if (selectedCities.length >= minimumRenderableCityCount) {
     return {
       cities: selectedCities,
-      reason: "unique-preferred"
+      reason: "unique-preferred",
+      usedOverlap: false
     };
   }
 
-  selectedCities = appendUniqueCities(selectedCities, editorialFallbackCities, limit, excludedSlugs);
+  selectedCities = appendUniqueCities(selectedCities, uniqueFallbackCities, limit, excludedSlugs);
 
   if (selectedCities.length >= minimumRenderableCityCount) {
     return {
       cities: selectedCities,
-      reason: "unique-editorial-fallback"
+      reason: "unique-editorial-fallback",
+      usedOverlap: false
     };
   }
 
@@ -400,7 +425,16 @@ function resolveSectionCities(args: {
   if (selectedCities.length >= minimumRenderableCityCount) {
     return {
       cities: selectedCities,
-      reason: "unique-broad-fallback"
+      reason: "unique-broad-fallback",
+      usedOverlap: false
+    };
+  }
+
+  if (!allowOverlap) {
+    return {
+      cities: selectedCities,
+      reason: selectedCities.length > 0 ? "partial-unique" : "no-cities",
+      usedOverlap: false
     };
   }
 
@@ -409,16 +443,18 @@ function resolveSectionCities(args: {
   if (selectedCities.length >= minimumRenderableCityCount) {
     return {
       cities: selectedCities,
-      reason: "reused-preferred-fallback"
+      reason: "overlap-preferred-fallback",
+      usedOverlap: true
     };
   }
 
-  selectedCities = appendReusableCities(selectedCities, editorialFallbackCities, limit);
+  selectedCities = appendReusableCities(selectedCities, reusableFallbackCities, limit);
 
   if (selectedCities.length >= minimumRenderableCityCount) {
     return {
       cities: selectedCities,
-      reason: "reused-editorial-fallback"
+      reason: "overlap-editorial-fallback",
+      usedOverlap: true
     };
   }
 
@@ -426,22 +462,24 @@ function resolveSectionCities(args: {
 
   return {
     cities: selectedCities,
-    reason: selectedCities.length >= minimumRenderableCityCount ? "reused-broad-fallback" : selectedCities.length > 0 ? "partial-fallback" : "no-cities"
+    reason: selectedCities.length >= minimumRenderableCityCount ? "overlap-broad-fallback" : selectedCities.length > 0 ? "partial-overlap" : "no-cities",
+    usedOverlap: selectedCities.length > 0
   };
 }
 
 function buildPrimaryCollections(args: {
+  homepageMode: HomepageMode;
   activeDiscoveryLens: ActiveDiscoveryLens;
   allCities: CityViewModel[];
   onboardingHierarchy: OnboardingHierarchy;
 }): SectionBuildResult {
-  const { activeDiscoveryLens, allCities, onboardingHierarchy } = args;
+  const { homepageMode, activeDiscoveryLens, allCities, onboardingHierarchy } = args;
 
   if (allCities.length === 0) {
-    return buildSectionResult([], false, "primary-no-cities");
+    return buildSectionResult([], false, "primary-no-cities", false);
   }
 
-  if (activeDiscoveryLens.type === "search") {
+  if (homepageMode === "search" && activeDiscoveryLens.type === "search") {
     const primaryIntent = activeDiscoveryLens.parsedQuery.intents.mood[0] || activeDiscoveryLens.parsedQuery.intents.season[0] || activeDiscoveryLens.parsedQuery.intents.city[0] || "Discovery";
     const copy = searchPrimaryCopyMap[primaryIntent.toLowerCase()] || {
       eyebrow: primaryIntent.charAt(0).toUpperCase() + primaryIntent.slice(1),
@@ -452,14 +490,22 @@ function buildPrimaryCollections(args: {
     const selection = resolveSectionCities({
       allCities,
       preferredCities: collectRankedCities(allCities, activeDiscoveryLens.parsedQuery),
-      editorialFallbackCities: collectEditorialFallbackCities(
+      uniqueFallbackCities: collectEditorialFallbackCities(
+        allCities,
+        searchEditorialFallbackMap[primaryIntent.toLowerCase()] ?? [],
+        new Set<string>(),
+        4
+      ),
+      reusableFallbackCities: collectEditorialFallbackCities(
         allCities,
         searchEditorialFallbackMap[primaryIntent.toLowerCase()] ?? [],
         new Set<string>(),
         4
       ),
       excludedSlugs: new Set<string>(),
-      limit: 4
+      limit: 4,
+      minimumRenderableCityCount: getMinimumRenderableCityCount(allCities.length, 4, "required"),
+      allowOverlap: true
     });
 
     const collections = selection.cities.length > 0
@@ -472,12 +518,55 @@ function buildPrimaryCollections(args: {
         }]
       : [];
 
-    return buildSectionResult(collections, collections.length > 0, `primary-search-${selection.reason}`);
+    return buildSectionResult(collections, collections.length > 0, `primary-search-${selection.reason}`, selection.usedOverlap);
   }
 
   const { primaryVibe, secondaryVibes, timeframe } = onboardingHierarchy;
 
-  if (!primaryVibe) {
+  if (homepageMode === "onboarding" && primaryVibe) {
+    const canonicalSeasonIntent = getCanonicalSeasonIntent(timeframe);
+    const selection = resolveSectionCities({
+      allCities,
+      preferredCities: collectRankedCities(
+        allCities,
+        buildParsedQuery(primaryVibe, {
+          mood: [primaryVibe],
+          season: canonicalSeasonIntent ? [canonicalSeasonIntent] : []
+        })
+      ),
+      uniqueFallbackCities: collectEditorialFallbackCities(
+        allCities,
+        secondaryVibes.length > 0 ? secondaryVibes : searchEditorialFallbackMap[primaryVibe] ?? [],
+        new Set<string>(),
+        4
+      ),
+      reusableFallbackCities: collectEditorialFallbackCities(
+        allCities,
+        secondaryVibes.length > 0 ? secondaryVibes : searchEditorialFallbackMap[primaryVibe] ?? [],
+        new Set<string>(),
+        4
+      ),
+      excludedSlugs: new Set<string>(),
+      limit: 4,
+      minimumRenderableCityCount: getMinimumRenderableCityCount(allCities.length, 4, "required"),
+      allowOverlap: true
+    });
+
+    const copy = primaryVibeCopyMap[primaryVibe];
+    const collections = selection.cities.length > 0
+      ? [{
+          cities: selection.cities,
+          label: copy.eyebrow,
+          slug: `primary-${primaryVibe}`,
+          subtitle: copy.subcopy,
+          title: copy.title
+        }]
+      : [];
+
+    return buildSectionResult(collections, collections.length > 0, `primary-onboarding-${selection.reason}`, selection.usedOverlap);
+  }
+
+  if (homepageMode === "onboarding") {
     return buildSectionResult(
       [{
         cities: allCities.slice(0, 4),
@@ -487,42 +576,22 @@ function buildPrimaryCollections(args: {
         title: "Cities in focus"
       }],
       true,
-      "primary-generic-fallback-no-onboarding"
+      "primary-onboarding-fallback",
+      false
     );
   }
 
-  const canonicalSeasonIntent = getCanonicalSeasonIntent(timeframe);
-  const selection = resolveSectionCities({
-    allCities,
-    preferredCities: collectRankedCities(
-      allCities,
-      buildParsedQuery(primaryVibe, {
-        mood: [primaryVibe],
-        season: canonicalSeasonIntent ? [canonicalSeasonIntent] : []
-      })
-    ),
-    editorialFallbackCities: collectEditorialFallbackCities(
-      allCities,
-      secondaryVibes.length > 0 ? secondaryVibes : searchEditorialFallbackMap[primaryVibe] ?? [],
-      new Set<string>(),
-      4
-    ),
-    excludedSlugs: new Set<string>(),
-    limit: 4
-  });
-
-  const copy = primaryVibeCopyMap[primaryVibe];
-
   return buildSectionResult(
     [{
-      cities: selection.cities,
-      label: copy.eyebrow,
-      slug: `primary-${primaryVibe}`,
-      subtitle: copy.subcopy,
-      title: copy.title
+      cities: allCities.slice(0, 4),
+      label: "For you",
+      slug: "primary-discovery",
+      subtitle: "A thoughtful edit of places for your next trip.",
+      title: "Cities in focus"
     }],
-    selection.cities.length > 0,
-    `primary-onboarding-${selection.reason}`
+    true,
+    "primary-generic-fallback",
+    false
   );
 }
 
@@ -530,24 +599,23 @@ function buildSeasonalCollections(args: {
   allCities: CityViewModel[];
   excludeSlugs: Set<string>;
   homepageMode: HomepageMode;
-  onboardingHierarchy: OnboardingHierarchy;
   timeframe: TimeframeId | null;
 }): SectionBuildResult {
-  const { allCities, excludeSlugs, homepageMode, onboardingHierarchy, timeframe } = args;
+  const { allCities, excludeSlugs, homepageMode, timeframe } = args;
 
   if (allCities.length === 0) {
-    return buildSectionResult([], false, "seasonal-no-cities");
+    return buildSectionResult([], false, "seasonal-no-cities", false);
   }
 
-  const shouldAttemptSeasonal = homepageMode === "search-active" || Boolean(onboardingHierarchy.primaryVibe) || Boolean(onboardingHierarchy.timeframe);
-
-  if (!shouldAttemptSeasonal) {
-    return buildSectionResult([], false, "seasonal-skipped-no-signal");
+  if (homepageMode === "generic") {
+    return buildSectionResult([], false, "seasonal-skipped-generic-mode", false);
   }
 
   const strategy = timeframe
     ? seasonalStrategyByTimeframe[timeframe]
     : seasonalStrategyByTimeframe["this-month"];
+
+  const minimumRenderableCityCount = getMinimumRenderableCityCount(allCities.length, 3, "preferred");
 
   const selection = resolveSectionCities({
     allCities,
@@ -557,17 +625,24 @@ function buildSeasonalCollections(args: {
         season: [strategy.canonicalSeasonIntent]
       })
     ),
-    editorialFallbackCities: collectEditorialFallbackCities(
+    uniqueFallbackCities: collectEditorialFallbackCities(
       allCities,
       strategy.editorialFallbackIntents,
       excludeSlugs,
       3
     ),
+    reusableFallbackCities: collectEditorialFallbackCities(
+      allCities,
+      strategy.editorialFallbackIntents,
+      new Set<string>(),
+      3
+    ),
     excludedSlugs: excludeSlugs,
-    limit: 3
+    limit: 3,
+    minimumRenderableCityCount,
+    allowOverlap: true
   });
 
-  const minimumRenderableCityCount = getMinimumRenderableCityCount(allCities.length, 3);
   const shouldRender = selection.cities.length >= minimumRenderableCityCount;
   const collections = shouldRender
     ? [{
@@ -579,7 +654,7 @@ function buildSeasonalCollections(args: {
       }]
     : [];
 
-  return buildSectionResult(collections, shouldRender, `seasonal-${selection.reason}`);
+  return buildSectionResult(collections, shouldRender, `seasonal-${selection.reason}`, selection.usedOverlap);
 }
 
 function buildContinuationCollections(args: {
@@ -592,18 +667,19 @@ function buildContinuationCollections(args: {
   const { primaryVibe, secondaryVibes, timeframe } = onboardingHierarchy;
 
   if (allCities.length === 0) {
-    return buildSectionResult([], false, "continuation-no-cities");
+    return buildSectionResult([], false, "continuation-no-cities", false);
   }
 
-  if (homepageMode !== "search-active") {
-    return buildSectionResult([], false, "continuation-skipped-search-inactive");
+  if (homepageMode !== "search") {
+    return buildSectionResult([], false, "continuation-skipped-non-search-mode", false);
   }
 
   if (!primaryVibe) {
-    return buildSectionResult([], false, "continuation-skipped-no-onboarding-primary");
+    return buildSectionResult([], false, "continuation-skipped-no-onboarding-primary", false);
   }
 
   const canonicalSeasonIntent = getCanonicalSeasonIntent(timeframe);
+  const minimumRenderableCityCount = getMinimumRenderableCityCount(allCities.length, 3, "preferred");
   const selection = resolveSectionCities({
     allCities,
     preferredCities: collectRankedCities(
@@ -613,21 +689,27 @@ function buildContinuationCollections(args: {
         season: canonicalSeasonIntent ? [canonicalSeasonIntent] : []
       })
     ),
-    editorialFallbackCities: collectEditorialFallbackCities(
+    uniqueFallbackCities: collectEditorialFallbackCities(
       allCities,
       secondaryVibes.length > 0 ? secondaryVibes : searchEditorialFallbackMap[primaryVibe] ?? [],
       excludeSlugs,
       3
     ),
+    reusableFallbackCities: collectEditorialFallbackCities(
+      allCities,
+      secondaryVibes.length > 0 ? secondaryVibes : searchEditorialFallbackMap[primaryVibe] ?? [],
+      new Set<string>(),
+      3
+    ),
     excludedSlugs: excludeSlugs,
-    limit: 3
+    limit: 3,
+    minimumRenderableCityCount,
+    allowOverlap: true
   });
-
-  const minimumRenderableCityCount = getMinimumRenderableCityCount(allCities.length, 3);
   const shouldRender = selection.cities.length >= minimumRenderableCityCount;
 
   if (!shouldRender) {
-    return buildSectionResult([], false, `continuation-${selection.reason}`);
+    return buildSectionResult([], false, `continuation-${selection.reason}`, selection.usedOverlap);
   }
 
   const copy = onboardingContinuationCopyMap[primaryVibe];
@@ -641,7 +723,8 @@ function buildContinuationCollections(args: {
       title: copy.title
     }],
     true,
-    `continuation-${selection.reason}`
+    `continuation-${selection.reason}`,
+    selection.usedOverlap
   );
 }
 
@@ -809,15 +892,24 @@ export default function HomePage() {
         };
   }, [onboardingPreferences]);
 
-  const homepageMode: HomepageMode = activeDiscoveryLens.type === 'search' ? 'search-active' : 'search-inactive';
+  const hasOnboardingSignal = Boolean(
+    onboardingHierarchy.primaryVibe || onboardingHierarchy.timeframe
+  );
+
+  const homepageMode: HomepageMode = activeDiscoveryLens.type === 'search'
+    ? 'search'
+    : hasOnboardingSignal
+      ? 'onboarding'
+      : 'generic';
 
   const primarySectionBuild = useMemo(() => {
     return buildPrimaryCollections({
+      homepageMode,
       activeDiscoveryLens,
       allCities,
       onboardingHierarchy
     });
-  }, [activeDiscoveryLens, allCities, onboardingHierarchy]);
+  }, [activeDiscoveryLens, allCities, homepageMode, onboardingHierarchy]);
 
   const activeCollections = primarySectionBuild.collections;
 
@@ -830,10 +922,9 @@ export default function HomePage() {
       allCities,
       excludeSlugs: excludedAfterPrimary,
       homepageMode,
-      onboardingHierarchy,
       timeframe: onboardingHierarchy.timeframe
     });
-  }, [allCities, excludedAfterPrimary, homepageMode, onboardingHierarchy, onboardingHierarchy.timeframe]);
+  }, [allCities, excludedAfterPrimary, homepageMode, onboardingHierarchy.timeframe]);
 
   const seasonalCollections = seasonalSectionBuild.collections;
 
@@ -916,11 +1007,26 @@ export default function HomePage() {
     };
 
     console.log('[homepage-debug] homepageMode', homepageMode);
+    console.log('[homepage-debug] primarySectionBuild', {
+      shouldRender: primarySectionBuild.shouldRender,
+      reason: primarySectionBuild.reason,
+      usedOverlap: primarySectionBuild.usedOverlap
+    });
     console.log('[homepage-debug] activeCollections', summarizeCollections(activeCollections));
+    console.log('[homepage-debug] seasonalSectionBuild', {
+      shouldRender: seasonalSectionBuild.shouldRender,
+      reason: seasonalSectionBuild.reason,
+      usedOverlap: seasonalSectionBuild.usedOverlap
+    });
     console.log('[homepage-debug] seasonalCollections', summarizeCollections(seasonalCollections));
+    console.log('[homepage-debug] continuationSectionBuild', {
+      shouldRender: continuationSectionBuild.shouldRender,
+      reason: continuationSectionBuild.reason,
+      usedOverlap: continuationSectionBuild.usedOverlap
+    });
     console.log('[homepage-debug] onboardingCollections', summarizeCollections(onboardingCollections));
     console.log('[homepage-debug] finalVisibleStack', finalVisibleStack);
-  }, [activeCollections, finalVisibleStack, homepageMode, onboardingCollections, seasonalCollections]);
+  }, [activeCollections, continuationSectionBuild.reason, continuationSectionBuild.shouldRender, continuationSectionBuild.usedOverlap, finalVisibleStack, homepageMode, onboardingCollections, primarySectionBuild.reason, primarySectionBuild.shouldRender, primarySectionBuild.usedOverlap, seasonalCollections, seasonalSectionBuild.reason, seasonalSectionBuild.shouldRender, seasonalSectionBuild.usedOverlap]);
 
   return (
     <OnboardingGate>
