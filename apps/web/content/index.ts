@@ -80,51 +80,51 @@ const cityPresentationBySlug: Record<string, CityPresentation> = {
   },
   "san-sebastian": {
     country: "Spain",
-    imageAlt: "San Sebastian bay and beachfront at golden hour",
+    imageAlt: "La Concha bay and elegant seaside promenade in soft evening light",
     imagePosition: "center center",
-    imageUrl: defaultCityImageUrl
+    imageUrl: "/images/cities/san-sebastian/card.jpg"
   },
   oaxaca: {
     country: "Mexico",
-    imageAlt: "Oaxaca rooftops and colorful historic streets",
+    imageAlt: "Warm Oaxaca street with colorful facades and layered historic texture",
     imagePosition: "center center",
-    imageUrl: defaultCityImageUrl
+    imageUrl: "/images/cities/oaxaca/card.jpg"
   },
   kyoto: {
     country: "Japan",
-    imageAlt: "Kyoto temple roofs and green hills in soft light",
+    imageAlt: "Kyoto temple approach framed by trees and quiet morning light",
     imagePosition: "center center",
-    imageUrl: defaultCityImageUrl
+    imageUrl: "/images/cities/kyoto/card.jpg"
   },
   lisbon: {
     country: "Portugal",
-    imageAlt: "Lisbon hillside rooftops and river light",
+    imageAlt: "Lisbon hillside facades and river glow in late afternoon light",
     imagePosition: "center center",
-    imageUrl: defaultCityImageUrl
+    imageUrl: "/images/cities/lisbon/card.jpg"
   },
   vienna: {
     country: "Austria",
-    imageAlt: "Vienna grand avenues and classical architecture",
+    imageAlt: "Vienna boulevard and grand historic facades in crisp daylight",
     imagePosition: "center center",
-    imageUrl: defaultCityImageUrl
+    imageUrl: "/images/cities/vienna/card.jpg"
   },
   seville: {
     country: "Spain",
-    imageAlt: "Seville rooftops in warm late-afternoon light",
+    imageAlt: "Seville rooftops and cathedral skyline in warm golden light",
     imagePosition: "center center",
-    imageUrl: defaultCityImageUrl
+    imageUrl: "/images/cities/seville/card.jpg"
   },
   reykjavik: {
     country: "Iceland",
-    imageAlt: "Reykjavik colorful roofs with mountain backdrop",
+    imageAlt: "Reykjavik colorful roofs with open sky and distant mountains",
     imagePosition: "center center",
-    imageUrl: defaultCityImageUrl
+    imageUrl: "/images/cities/reykjavik/card.jpg"
   },
   copenhagen: {
     country: "Denmark",
-    imageAlt: "Copenhagen waterfront and canal buildings in daylight",
+    imageAlt: "Copenhagen canal frontage and calm waterfront light",
     imagePosition: "center center",
-    imageUrl: defaultCityImageUrl
+    imageUrl: "/images/cities/copenhagen/card.jpg"
   }
 };
 
