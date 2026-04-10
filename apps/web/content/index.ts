@@ -12,6 +12,33 @@ import { vienna } from "../../../packages/content/cities/vienna";
 import { personalizedCollections } from "../../../packages/content/discovery/personalized";
 import { seasonalCollections } from "../../../packages/content/discovery/seasonal";
 
+export interface CityViewModel {
+  badge: string;
+  cardSentence: string;
+  country: string;
+  essence: string;
+  imageAlt: string;
+  imagePosition: string;
+  imageUrl: string;
+  moreToEat: SourceCity["moreToEat"];
+  mustSeeFirst: SourceCity["mustSeeFirst"];
+  name: string;
+  places: SourceCity["places"];
+  quickFacts: SourceCity["quickFacts"];
+  searchText: string;
+  signatureDishes: SourceCity["signatureDishes"];
+  slug: string;
+  whereToEat: string[];
+}
+
+export interface HomepageDiscoveryViewModel {
+  cities: CityViewModel[];
+  label: string;
+  slug: string;
+  subtitle: string;
+  title: string;
+}
+
 interface CityPresentation {
   country: string;
   imageAlt: string;
@@ -100,33 +127,6 @@ const cityPresentationBySlug: Record<string, CityPresentation> = {
   }
 };
 
-export interface CityViewModel {
-  badge: string;
-  cardSentence: string;
-  country: string;
-  essence: string;
-  imageAlt: string;
-  imagePosition: string;
-  imageUrl: string;
-  moreToEat: SourceCity["moreToEat"];
-  mustSeeFirst: SourceCity["mustSeeFirst"];
-  name: string;
-  places: SourceCity["places"];
-  quickFacts: SourceCity["quickFacts"];
-  searchText: string;
-  signatureDishes: SourceCity["signatureDishes"];
-  slug: string;
-  whereToEat: string[];
-}
-
-export interface HomepageDiscoveryViewModel {
-  cities: CityViewModel[];
-  label: string;
-  slug: string;
-  subtitle: string;
-  title: string;
-}
-
 function getCityPresentation(city: SourceCity): CityPresentation {
   return (
     cityPresentationBySlug[city.slug] ?? {
@@ -138,9 +138,8 @@ function getCityPresentation(city: SourceCity): CityPresentation {
   );
 }
 
-function toCityViewModel(city: SourceCity): CityViewModel {
-  const presentation = getCityPresentation(city);
-  const searchText = [
+function buildCitySearchText(city: SourceCity, presentation: CityPresentation) {
+  return [
     city.name,
     presentation.country,
     city.badge,
@@ -157,6 +156,11 @@ function toCityViewModel(city: SourceCity): CityViewModel {
   ]
     .join(" ")
     .toLowerCase();
+}
+
+function toCityViewModel(city: SourceCity): CityViewModel {
+  const presentation = getCityPresentation(city);
+  const searchText = buildCitySearchText(city, presentation);
 
   return {
     badge: city.badge,
@@ -187,20 +191,16 @@ function getCitiesForDiscovery(citySlugs: string[]) {
     .filter((city): city is CityViewModel => Boolean(city));
 }
 
-export function getAllCities() {
-  return mappedCities;
-}
-
-export function getCityBySlug(slug: string) {
-  return cityBySlug.get(slug);
-}
-
-export function getHomepageDiscovery(): HomepageDiscoveryViewModel[] {
-  const pickedForYou = personalizedCollections[1] ?? personalizedCollections[0];
-  const bestThisMonth = seasonalCollections[0];
-  const greatForInterest = personalizedCollections[0];
-
-  return [
-    {
-      cities: getCitiesForDiscovery(pickedForYou.citySlugs),
-      label: "Picked for you",
+function toHomepageDiscoveryViewModel(
+  citySlugs: string[],
+  label: string,
+  slug: string,
+  subtitle: string,
+  title: string
+): HomepageDiscoveryViewModel {
+  return {
+    cities: getCitiesForDiscovery(citySlugs),
+    label,
+    slug,
+    subtitle,
+    title
