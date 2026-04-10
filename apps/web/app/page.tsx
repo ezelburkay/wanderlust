@@ -15,6 +15,8 @@ import type { OnboardingPreferences } from "../components/onboarding/onboarding-
 
 type VibeId = "food" | "romantic" | "culture" | "nature" | "adventure" | "slow";
 type TimeframeId = "this-month" | "next-3-months";
+const onboardingStorageKey = "wanderlust_onboarding";
+const onboardingUpdatedEvent = "wanderlust:onboarding-updated";
 
 function extractOnboardingHierarchy(preferences: OnboardingPreferences): {
   primaryVibe: VibeId | null;
@@ -29,6 +31,37 @@ function extractOnboardingHierarchy(preferences: OnboardingPreferences): {
     secondaryVibes: vibes.slice(1),
     timeframe
   };
+}
+
+function readStoredOnboardingPreferences(): OnboardingPreferences | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const rawValue = window.localStorage.getItem(onboardingStorageKey);
+
+    if (!rawValue) {
+      return null;
+    }
+
+    const parsedValue = JSON.parse(rawValue);
+
+    if (parsedValue.completed !== true && parsedValue.skipped !== true) {
+      return null;
+    }
+
+    return {
+      mood: Array.isArray(parsedValue.preferences?.mood) ? parsedValue.preferences.mood : [],
+      pace: typeof parsedValue.preferences?.pace === "string" ? parsedValue.preferences.pace : "",
+      foodInterest: Array.isArray(parsedValue.preferences?.foodInterest) ? parsedValue.preferences.foodInterest : [],
+      vibe: Array.isArray(parsedValue.preferences?.vibe) ? parsedValue.preferences.vibe : [],
+      tripStyle: Array.isArray(parsedValue.preferences?.tripStyle) ? parsedValue.preferences.tripStyle : []
+    };
+  } catch (error) {
+    console.warn("Failed to read onboarding preferences:", error);
+    return null;
+  }
 }
 
 type HomepageMode = "search" | "onboarding" | "generic";
@@ -780,6 +813,7 @@ export default function HomePage() {
   const [committedQuery, setCommittedQuery] = useState("");
   const [committedParsedQuery, setCommittedParsedQuery] = useState<ParsedQuery | null>(null);
   const [filteredCities, setFilteredCities] = useState<CityViewModel[]>(allCities);
+  const [onboardingPreferences, setOnboardingPreferences] = useState<OnboardingPreferences | null>(null);
 
   // Safe URL query parameter sync
   useEffect(() => {
@@ -798,35 +832,35 @@ export default function HomePage() {
     }
   }, []);
 
-  // Read onboarding preferences from localStorage
-  const onboardingPreferences = useMemo((): OnboardingPreferences | null => {
-    if (typeof window === 'undefined') return null;
-    
-    try {
-      const storageKey = "wanderlust_onboarding";
-      const rawValue = window.localStorage.getItem(storageKey);
-      
-      if (!rawValue) return null;
-      
-      const parsedValue = JSON.parse(rawValue);
-      
-      if (parsedValue.completed !== true && parsedValue.skipped !== true) {
-        return null;
-      }
-      
-      const normalizedPreferences = {
-        mood: Array.isArray(parsedValue.preferences?.mood) ? parsedValue.preferences.mood : [],
-        pace: typeof parsedValue.preferences?.pace === "string" ? parsedValue.preferences.pace : "",
-        foodInterest: Array.isArray(parsedValue.preferences?.foodInterest) ? parsedValue.preferences.foodInterest : [],
-        vibe: Array.isArray(parsedValue.preferences?.vibe) ? parsedValue.preferences.vibe : [],
-        tripStyle: Array.isArray(parsedValue.preferences?.tripStyle) ? parsedValue.preferences.tripStyle : []
-      };
-      
-      return normalizedPreferences;
-    } catch (error) {
-      console.warn('Failed to read onboarding preferences:', error);
-      return null;
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
     }
+
+    const syncOnboardingPreferences = () => {
+      setOnboardingPreferences(readStoredOnboardingPreferences());
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key && event.key !== onboardingStorageKey) {
+        return;
+      }
+
+      syncOnboardingPreferences();
+    };
+
+    const handleOnboardingUpdated = () => {
+      syncOnboardingPreferences();
+    };
+
+    syncOnboardingPreferences();
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener(onboardingUpdatedEvent, handleOnboardingUpdated);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener(onboardingUpdatedEvent, handleOnboardingUpdated);
+    };
   }, []);
 
   // Safe URL update function
