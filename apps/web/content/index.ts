@@ -1,9 +1,16 @@
 import type { City as SourceCity } from "../../../packages/content/schemas/city";
-import { cities as sourceCities } from "../../../packages/content/cities/index";
-import {
-  personalizedCollections,
-  seasonalCollections
-} from "../../../packages/content/discovery/index";
+import { copenhagen } from "../../../packages/content/cities/copenhagen";
+import { kyoto } from "../../../packages/content/cities/kyoto";
+import { lisbon } from "../../../packages/content/cities/lisbon";
+import { oaxaca } from "../../../packages/content/cities/oaxaca";
+import { paris } from "../../../packages/content/cities/paris";
+import { reykjavik } from "../../../packages/content/cities/reykjavik";
+import { rome } from "../../../packages/content/cities/rome";
+import { sanSebastian } from "../../../packages/content/cities/san-sebastian";
+import { seville } from "../../../packages/content/cities/seville";
+import { vienna } from "../../../packages/content/cities/vienna";
+import { personalizedCollections } from "../../../packages/content/discovery/personalized";
+import { seasonalCollections } from "../../../packages/content/discovery/seasonal";
 
 interface CityPresentation {
   country: string;
@@ -14,6 +21,19 @@ interface CityPresentation {
 
 const defaultCityImageUrl =
   "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80";
+
+const sourceCities: SourceCity[] = [
+  paris,
+  rome,
+  kyoto,
+  lisbon,
+  vienna,
+  copenhagen,
+  sanSebastian,
+  oaxaca,
+  seville,
+  reykjavik
+];
 
 const cityPresentationBySlug: Record<string, CityPresentation> = {
   paris: {
@@ -184,23 +204,3 @@ export function getHomepageDiscovery(): HomepageDiscoveryViewModel[] {
     {
       cities: getCitiesForDiscovery(pickedForYou.citySlugs),
       label: "Picked for you",
-      slug: "picked-for-you",
-      subtitle: pickedForYou.subtitle,
-      title: pickedForYou.title
-    },
-    {
-      cities: getCitiesForDiscovery(bestThisMonth.citySlugs),
-      label: "Best this month",
-      slug: bestThisMonth.slug,
-      subtitle: bestThisMonth.subtitle,
-      title: bestThisMonth.title
-    },
-    {
-      cities: getCitiesForDiscovery(greatForInterest.citySlugs),
-      label: "Great for food lovers",
-      slug: greatForInterest.slug,
-      subtitle: greatForInterest.subtitle,
-      title: greatForInterest.title
-    }
-  ];
-}
