@@ -54,6 +54,17 @@ type ActiveDiscoveryLens =
       isActive: false;
     };
 
+interface SectionBuildResult {
+  collections: HomepageDiscoveryViewModel[];
+  shouldRender: boolean;
+  reason: string;
+}
+
+interface CitySelectionResult {
+  cities: CityViewModel[];
+  reason: string;
+}
+
 const primaryVibeCopyMap: Record<VibeId, { eyebrow: string; title: string; subcopy: string }> = {
   food: {
     eyebrow: "Food",
@@ -312,227 +323,326 @@ function getExcludedSlugsFromCollections(collections: HomepageDiscoveryViewModel
   );
 }
 
+function getMinimumRenderableCityCount(allCitiesCount: number, limit: number): number {
+  if (allCitiesCount <= 0) {
+    return 0;
+  }
+
+  if (allCitiesCount === 1) {
+    return 1;
+  }
+
+  return Math.min(2, limit);
+}
+
+function appendReusableCities(
+  currentCities: CityViewModel[],
+  nextCities: CityViewModel[],
+  limit: number
+): CityViewModel[] {
+  const collectedCities = [...currentCities];
+  const seenSlugs = new Set<string>(collectedCities.map((city) => city.slug));
+
+  nextCities.forEach((city) => {
+    if (collectedCities.length >= limit || seenSlugs.has(city.slug)) {
+      return;
+    }
+
+    collectedCities.push(city);
+    seenSlugs.add(city.slug);
+  });
+
+  return collectedCities;
+}
+
+function buildSectionResult(
+  collections: HomepageDiscoveryViewModel[],
+  shouldRender: boolean,
+  reason: string
+): SectionBuildResult {
+  return {
+    collections,
+    shouldRender,
+    reason
+  };
+}
+
+function resolveSectionCities(args: {
+  allCities: CityViewModel[];
+  preferredCities: CityViewModel[];
+  editorialFallbackCities: CityViewModel[];
+  excludedSlugs: Set<string>;
+  limit: number;
+}): CitySelectionResult {
+  const { allCities, preferredCities, editorialFallbackCities, excludedSlugs, limit } = args;
+  const minimumRenderableCityCount = getMinimumRenderableCityCount(allCities.length, limit);
+
+  let selectedCities = appendUniqueCities([], preferredCities, limit, excludedSlugs);
+
+  if (selectedCities.length >= minimumRenderableCityCount) {
+    return {
+      cities: selectedCities,
+      reason: "unique-preferred"
+    };
+  }
+
+  selectedCities = appendUniqueCities(selectedCities, editorialFallbackCities, limit, excludedSlugs);
+
+  if (selectedCities.length >= minimumRenderableCityCount) {
+    return {
+      cities: selectedCities,
+      reason: "unique-editorial-fallback"
+    };
+  }
+
+  selectedCities = appendUniqueCities(selectedCities, getRemainingCities(allCities, excludedSlugs), limit, excludedSlugs);
+
+  if (selectedCities.length >= minimumRenderableCityCount) {
+    return {
+      cities: selectedCities,
+      reason: "unique-broad-fallback"
+    };
+  }
+
+  selectedCities = appendReusableCities(selectedCities, preferredCities, limit);
+
+  if (selectedCities.length >= minimumRenderableCityCount) {
+    return {
+      cities: selectedCities,
+      reason: "reused-preferred-fallback"
+    };
+  }
+
+  selectedCities = appendReusableCities(selectedCities, editorialFallbackCities, limit);
+
+  if (selectedCities.length >= minimumRenderableCityCount) {
+    return {
+      cities: selectedCities,
+      reason: "reused-editorial-fallback"
+    };
+  }
+
+  selectedCities = appendReusableCities(selectedCities, allCities, limit);
+
+  return {
+    cities: selectedCities,
+    reason: selectedCities.length >= minimumRenderableCityCount ? "reused-broad-fallback" : selectedCities.length > 0 ? "partial-fallback" : "no-cities"
+  };
+}
+
 function buildPrimaryCollections(args: {
   activeDiscoveryLens: ActiveDiscoveryLens;
   allCities: CityViewModel[];
   onboardingHierarchy: OnboardingHierarchy;
-}): HomepageDiscoveryViewModel[] {
+}): SectionBuildResult {
   const { activeDiscoveryLens, allCities, onboardingHierarchy } = args;
 
   if (allCities.length === 0) {
-    return [];
+    return buildSectionResult([], false, "primary-no-cities");
   }
 
   if (activeDiscoveryLens.type === "search") {
-    const primaryIntent = activeDiscoveryLens.parsedQuery.intents.mood[0] || activeDiscoveryLens.parsedQuery.intents.season[0] || "Discovery";
+    const primaryIntent = activeDiscoveryLens.parsedQuery.intents.mood[0] || activeDiscoveryLens.parsedQuery.intents.season[0] || activeDiscoveryLens.parsedQuery.intents.city[0] || "Discovery";
     const copy = searchPrimaryCopyMap[primaryIntent.toLowerCase()] || {
       eyebrow: primaryIntent.charAt(0).toUpperCase() + primaryIntent.slice(1),
       title: `${primaryIntent.charAt(0).toUpperCase() + primaryIntent.slice(1)} destinations`,
       subcopy: "A curated edit of places shaped by your interests."
     };
 
-    let primaryCities = appendUniqueCities(
-      [],
-      collectRankedCities(allCities, activeDiscoveryLens.parsedQuery),
-      4,
-      new Set<string>()
-    );
+    const selection = resolveSectionCities({
+      allCities,
+      preferredCities: collectRankedCities(allCities, activeDiscoveryLens.parsedQuery),
+      editorialFallbackCities: collectEditorialFallbackCities(
+        allCities,
+        searchEditorialFallbackMap[primaryIntent.toLowerCase()] ?? [],
+        new Set<string>(),
+        4
+      ),
+      excludedSlugs: new Set<string>(),
+      limit: 4
+    });
 
-    if (primaryCities.length < 3) {
-      primaryCities = appendUniqueCities(
-        primaryCities,
-        collectEditorialFallbackCities(
-          allCities,
-          searchEditorialFallbackMap[primaryIntent.toLowerCase()] ?? [],
-          new Set(primaryCities.map((city) => city.slug)),
-          4 - primaryCities.length
-        ),
-        4,
-        new Set<string>()
-      );
-    }
-
-    if (primaryCities.length < 3) {
-      primaryCities = appendUniqueCities(primaryCities, allCities, 4, new Set<string>());
-    }
-
-    return primaryCities.length > 0
+    const collections = selection.cities.length > 0
       ? [{
-          cities: primaryCities,
+          cities: selection.cities,
           label: copy.eyebrow,
           slug: "primary-lens",
           subtitle: copy.subcopy,
           title: copy.title
         }]
       : [];
+
+    return buildSectionResult(collections, collections.length > 0, `primary-search-${selection.reason}`);
   }
 
-  const { primaryVibe, timeframe } = onboardingHierarchy;
+  const { primaryVibe, secondaryVibes, timeframe } = onboardingHierarchy;
 
   if (!primaryVibe) {
-    return [{
-      cities: allCities.slice(0, 4),
-      label: "For you",
-      slug: "primary-discovery",
-      subtitle: "A thoughtful edit of places for your next trip.",
-      title: "Cities in focus"
-    }];
+    return buildSectionResult(
+      [{
+        cities: allCities.slice(0, 4),
+        label: "For you",
+        slug: "primary-discovery",
+        subtitle: "A thoughtful edit of places for your next trip.",
+        title: "Cities in focus"
+      }],
+      true,
+      "primary-generic-fallback-no-onboarding"
+    );
   }
 
   const canonicalSeasonIntent = getCanonicalSeasonIntent(timeframe);
-  let primaryCities = appendUniqueCities(
-    [],
-    collectRankedCities(
+  const selection = resolveSectionCities({
+    allCities,
+    preferredCities: collectRankedCities(
       allCities,
       buildParsedQuery(primaryVibe, {
         mood: [primaryVibe],
         season: canonicalSeasonIntent ? [canonicalSeasonIntent] : []
       })
     ),
-    4,
-    new Set<string>()
-  );
-
-  if (primaryCities.length === 0) {
-    primaryCities = allCities.slice(0, 4);
-  }
+    editorialFallbackCities: collectEditorialFallbackCities(
+      allCities,
+      secondaryVibes.length > 0 ? secondaryVibes : searchEditorialFallbackMap[primaryVibe] ?? [],
+      new Set<string>(),
+      4
+    ),
+    excludedSlugs: new Set<string>(),
+    limit: 4
+  });
 
   const copy = primaryVibeCopyMap[primaryVibe];
 
-  return [{
-    cities: primaryCities,
-    label: copy.eyebrow,
-    slug: `primary-${primaryVibe}`,
-    subtitle: copy.subcopy,
-    title: copy.title
-  }];
+  return buildSectionResult(
+    [{
+      cities: selection.cities,
+      label: copy.eyebrow,
+      slug: `primary-${primaryVibe}`,
+      subtitle: copy.subcopy,
+      title: copy.title
+    }],
+    selection.cities.length > 0,
+    `primary-onboarding-${selection.reason}`
+  );
 }
 
 function buildSeasonalCollections(args: {
   allCities: CityViewModel[];
   excludeSlugs: Set<string>;
+  homepageMode: HomepageMode;
+  onboardingHierarchy: OnboardingHierarchy;
   timeframe: TimeframeId | null;
-}): HomepageDiscoveryViewModel[] {
-  const { allCities, excludeSlugs, timeframe } = args;
+}): SectionBuildResult {
+  const { allCities, excludeSlugs, homepageMode, onboardingHierarchy, timeframe } = args;
+
+  if (allCities.length === 0) {
+    return buildSectionResult([], false, "seasonal-no-cities");
+  }
+
+  const shouldAttemptSeasonal = homepageMode === "search-active" || Boolean(onboardingHierarchy.primaryVibe) || Boolean(onboardingHierarchy.timeframe);
+
+  if (!shouldAttemptSeasonal) {
+    return buildSectionResult([], false, "seasonal-skipped-no-signal");
+  }
+
   const strategy = timeframe
     ? seasonalStrategyByTimeframe[timeframe]
     : seasonalStrategyByTimeframe["this-month"];
 
-  let seasonalCities = appendUniqueCities(
-    [],
-    collectRankedCities(
+  const selection = resolveSectionCities({
+    allCities,
+    preferredCities: collectRankedCities(
       allCities,
       buildParsedQuery(strategy.queryLabel, {
         season: [strategy.canonicalSeasonIntent]
       })
     ),
-    3,
-    excludeSlugs
-  );
+    editorialFallbackCities: collectEditorialFallbackCities(
+      allCities,
+      strategy.editorialFallbackIntents,
+      excludeSlugs,
+      3
+    ),
+    excludedSlugs: excludeSlugs,
+    limit: 3
+  });
 
-  if (seasonalCities.length < 3) {
-    seasonalCities = appendUniqueCities(
-      seasonalCities,
-      collectEditorialFallbackCities(
-        allCities,
-        strategy.editorialFallbackIntents,
-        new Set([
-          ...Array.from(excludeSlugs),
-          ...seasonalCities.map((city) => city.slug)
-        ]),
-        3 - seasonalCities.length
-      ),
-      3,
-      excludeSlugs
-    );
-  }
-
-  if (seasonalCities.length < 3) {
-    seasonalCities = appendUniqueCities(
-      seasonalCities,
-      getRemainingCities(allCities, excludeSlugs),
-      3,
-      excludeSlugs
-    );
-  }
-
-  return seasonalCities.length > 0
+  const minimumRenderableCityCount = getMinimumRenderableCityCount(allCities.length, 3);
+  const shouldRender = selection.cities.length >= minimumRenderableCityCount;
+  const collections = shouldRender
     ? [{
-        cities: seasonalCities,
+        cities: selection.cities,
         label: "Seasonal",
         slug: "seasonal-continuation",
         subtitle: strategy.subtitle,
         title: strategy.title
       }]
     : [];
+
+  return buildSectionResult(collections, shouldRender, `seasonal-${selection.reason}`);
 }
 
-function buildOnboardingContinuationCollections(args: {
+function buildContinuationCollections(args: {
   allCities: CityViewModel[];
   excludeSlugs: Set<string>;
   homepageMode: HomepageMode;
   onboardingHierarchy: OnboardingHierarchy;
-}): HomepageDiscoveryViewModel[] {
+}): SectionBuildResult {
   const { allCities, excludeSlugs, homepageMode, onboardingHierarchy } = args;
   const { primaryVibe, secondaryVibes, timeframe } = onboardingHierarchy;
 
-  if (homepageMode !== "search-active" || !primaryVibe) {
-    return [];
+  if (allCities.length === 0) {
+    return buildSectionResult([], false, "continuation-no-cities");
+  }
+
+  if (homepageMode !== "search-active") {
+    return buildSectionResult([], false, "continuation-skipped-search-inactive");
+  }
+
+  if (!primaryVibe) {
+    return buildSectionResult([], false, "continuation-skipped-no-onboarding-primary");
   }
 
   const canonicalSeasonIntent = getCanonicalSeasonIntent(timeframe);
-  let continuationCities = appendUniqueCities(
-    [],
-    collectRankedCities(
+  const selection = resolveSectionCities({
+    allCities,
+    preferredCities: collectRankedCities(
       allCities,
       buildParsedQuery(primaryVibe, {
         mood: [primaryVibe],
         season: canonicalSeasonIntent ? [canonicalSeasonIntent] : []
       })
     ),
-    3,
-    excludeSlugs
-  );
+    editorialFallbackCities: collectEditorialFallbackCities(
+      allCities,
+      secondaryVibes.length > 0 ? secondaryVibes : searchEditorialFallbackMap[primaryVibe] ?? [],
+      excludeSlugs,
+      3
+    ),
+    excludedSlugs: excludeSlugs,
+    limit: 3
+  });
 
-  if (continuationCities.length < 3 && secondaryVibes.length > 0) {
-    continuationCities = appendUniqueCities(
-      continuationCities,
-      collectEditorialFallbackCities(
-        allCities,
-        secondaryVibes,
-        new Set([
-          ...Array.from(excludeSlugs),
-          ...continuationCities.map((city) => city.slug)
-        ]),
-        3 - continuationCities.length
-      ),
-      3,
-      excludeSlugs
-    );
-  }
+  const minimumRenderableCityCount = getMinimumRenderableCityCount(allCities.length, 3);
+  const shouldRender = selection.cities.length >= minimumRenderableCityCount;
 
-  if (continuationCities.length < 3) {
-    continuationCities = appendUniqueCities(
-      continuationCities,
-      getRemainingCities(allCities, excludeSlugs),
-      3,
-      excludeSlugs
-    );
-  }
-
-  if (continuationCities.length === 0) {
-    return [];
+  if (!shouldRender) {
+    return buildSectionResult([], false, `continuation-${selection.reason}`);
   }
 
   const copy = onboardingContinuationCopyMap[primaryVibe];
 
-  return [{
-    cities: continuationCities,
-    label: copy.eyebrow,
-    slug: `onboarding-continuation-${primaryVibe}`,
-    subtitle: copy.subcopy,
-    title: copy.title
-  }];
+  return buildSectionResult(
+    [{
+      cities: selection.cities,
+      label: copy.eyebrow,
+      slug: `onboarding-continuation-${primaryVibe}`,
+      subtitle: copy.subcopy,
+      title: copy.title
+    }],
+    true,
+    `continuation-${selection.reason}`
+  );
 }
 
 export default function HomePage() {
@@ -701,7 +811,7 @@ export default function HomePage() {
 
   const homepageMode: HomepageMode = activeDiscoveryLens.type === 'search' ? 'search-active' : 'search-inactive';
 
-  const activeCollections = useMemo(() => {
+  const primarySectionBuild = useMemo(() => {
     return buildPrimaryCollections({
       activeDiscoveryLens,
       allCities,
@@ -709,22 +819,23 @@ export default function HomePage() {
     });
   }, [activeDiscoveryLens, allCities, onboardingHierarchy]);
 
+  const activeCollections = primarySectionBuild.collections;
+
   const excludedAfterPrimary = useMemo<Set<string>>(() => {
     return getExcludedSlugsFromCollections(activeCollections);
   }, [activeCollections]);
 
-  // Generate simplified seasonal collections from parent-owned state
-  const seasonalCollections = useMemo(() => {
-    if (excludedAfterPrimary.size >= allCities.length) {
-      return [];
-    }
-
+  const seasonalSectionBuild = useMemo(() => {
     return buildSeasonalCollections({
       allCities,
       excludeSlugs: excludedAfterPrimary,
+      homepageMode,
+      onboardingHierarchy,
       timeframe: onboardingHierarchy.timeframe
     });
-  }, [allCities, excludedAfterPrimary, onboardingHierarchy.timeframe]);
+  }, [allCities, excludedAfterPrimary, homepageMode, onboardingHierarchy, onboardingHierarchy.timeframe]);
+
+  const seasonalCollections = seasonalSectionBuild.collections;
 
   const excludedAfterPrimaryAndSeasonal = useMemo<Set<string>>(() => {
     const seasonalExcludedSlugs = getExcludedSlugsFromCollections(seasonalCollections);
@@ -736,17 +847,8 @@ export default function HomePage() {
     return new Set<string>(mergedExcludedSlugs);
   }, [excludedAfterPrimary, seasonalCollections]);
 
-  // Generate onboarding continuation collections from parent-owned state
-  const onboardingCollections = useMemo(() => {
-    if (homepageMode !== 'search-active') {
-      return [];
-    }
-
-    if (excludedAfterPrimaryAndSeasonal.size >= allCities.length) {
-      return [];
-    }
-
-    return buildOnboardingContinuationCollections({
+  const continuationSectionBuild = useMemo(() => {
+    return buildContinuationCollections({
       allCities,
       excludeSlugs: excludedAfterPrimaryAndSeasonal,
       homepageMode,
@@ -754,17 +856,9 @@ export default function HomePage() {
     });
   }, [allCities, excludedAfterPrimaryAndSeasonal, homepageMode, onboardingHierarchy]);
 
-  const shouldRenderSeasonalSection = useMemo(() => {
-    return seasonalCollections.length > 0 && excludedAfterPrimary.size < allCities.length;
-  }, [allCities.length, excludedAfterPrimary, seasonalCollections]);
-
-  const shouldRenderOnboardingSection = useMemo(() => {
-    return (
-      homepageMode === 'search-active' &&
-      onboardingCollections.length > 0 &&
-      excludedAfterPrimaryAndSeasonal.size < allCities.length
-    );
-  }, [allCities.length, excludedAfterPrimaryAndSeasonal, homepageMode, onboardingCollections]);
+  const onboardingCollections = continuationSectionBuild.collections;
+  const shouldRenderSeasonalSection = seasonalSectionBuild.shouldRender;
+  const shouldRenderOnboardingSection = continuationSectionBuild.shouldRender;
 
   const finalVisibleStack = useMemo(() => {
     const stack: Array<{
@@ -777,7 +871,7 @@ export default function HomePage() {
       {
         component: 'PersonalizedDiscoveryFlow',
         visible: true,
-        reason: activeCollections.length > 0 ? 'mounted-primary-collection' : 'mounted-empty-primary-fallback',
+        reason: primarySectionBuild.reason,
         collectionSlugs: activeCollections.map((collection: HomepageDiscoveryViewModel) => collection.slug)
       }
     ];
@@ -786,7 +880,7 @@ export default function HomePage() {
       stack.push({
         component: 'SeasonalDiscoverySection',
         visible: true,
-        reason: seasonalCollections[0]?.cities.length === 3 ? 'mounted-seasonal-continuation' : 'mounted-seasonal-tiny-dataset-fallback',
+        reason: seasonalSectionBuild.reason,
         collectionSlugs: seasonalCollections.map((collection: HomepageDiscoveryViewModel) => collection.slug)
       });
     }
@@ -795,7 +889,7 @@ export default function HomePage() {
       stack.push({
         component: 'PreferenceSeasonSection',
         visible: true,
-        reason: onboardingCollections[0]?.cities.length === 3 ? 'mounted-onboarding-continuation' : 'mounted-onboarding-tiny-dataset-fallback',
+        reason: continuationSectionBuild.reason,
         collectionSlugs: onboardingCollections.map((collection: HomepageDiscoveryViewModel) => collection.slug)
       });
     }
@@ -808,7 +902,7 @@ export default function HomePage() {
     });
 
     return stack;
-  }, [activeCollections, filteredCities, onboardingCollections, seasonalCollections, shouldRenderOnboardingSection, shouldRenderSeasonalSection]);
+  }, [activeCollections, continuationSectionBuild.reason, filteredCities, onboardingCollections, primarySectionBuild.reason, seasonalCollections, seasonalSectionBuild.reason, shouldRenderOnboardingSection, shouldRenderSeasonalSection]);
 
   useEffect(() => {
     const summarizeCollections = (collections: HomepageDiscoveryViewModel[]) => {
