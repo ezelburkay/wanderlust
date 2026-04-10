@@ -11,6 +11,7 @@ import { seville } from "../../../packages/content/cities/seville";
 import { vienna } from "../../../packages/content/cities/vienna";
 import { personalizedCollections } from "../../../packages/content/discovery/personalized";
 import { seasonalCollections } from "../../../packages/content/discovery/seasonal";
+import type { DiscoveryCollection } from "../../../packages/content/schemas/discovery";
 
 export interface CityViewModel {
   badge: string;
@@ -138,7 +139,7 @@ function getCityPresentation(city: SourceCity): CityPresentation {
   );
 }
 
-function buildCitySearchText(city: SourceCity, presentation: CityPresentation) {
+function buildCitySearchText(city: SourceCity, presentation: CityPresentation): string {
   return [
     city.name,
     presentation.country,
@@ -182,25 +183,49 @@ function toCityViewModel(city: SourceCity): CityViewModel {
   };
 }
 
-const mappedCities = sourceCities.map(toCityViewModel);
-const cityBySlug = new Map(mappedCities.map((city) => [city.slug, city]));
+const mappedCities: CityViewModel[] = sourceCities.map(toCityViewModel);
+const cityBySlug = new Map<string, CityViewModel>(mappedCities.map((city) => [city.slug, city]));
 
-function getCitiesForDiscovery(citySlugs: string[]) {
+function getCitiesForDiscovery(citySlugs: string[]): CityViewModel[] {
   return citySlugs
     .map((slug) => cityBySlug.get(slug))
     .filter((city): city is CityViewModel => Boolean(city));
 }
 
 function toHomepageDiscoveryViewModel(
-  citySlugs: string[],
+  collection: DiscoveryCollection,
   label: string,
-  slug: string,
-  subtitle: string,
-  title: string
+  slugOverride?: string
 ): HomepageDiscoveryViewModel {
   return {
-    cities: getCitiesForDiscovery(citySlugs),
+    cities: getCitiesForDiscovery(collection.citySlugs),
     label,
-    slug,
-    subtitle,
-    title
+    slug: slugOverride ?? collection.slug,
+    subtitle: collection.subtitle,
+    title: collection.title
+  };
+}
+
+export function getAllCities(): CityViewModel[] {
+  return mappedCities;
+}
+
+export function getCityBySlug(slug: string): CityViewModel | undefined {
+  return cityBySlug.get(slug);
+}
+
+export function getHomepageDiscovery(): HomepageDiscoveryViewModel[] {
+  const pickedForYou = personalizedCollections[1] ?? personalizedCollections[0];
+  const bestThisMonth = seasonalCollections[0];
+  const greatForInterest = personalizedCollections[0];
+
+  return [
+    toHomepageDiscoveryViewModel(
+      pickedForYou,
+      "Picked for you",
+      "picked-for-you"
+    ),
+    toHomepageDiscoveryViewModel(bestThisMonth, "Best this month"),
+    toHomepageDiscoveryViewModel(greatForInterest, "Great for food lovers")
+  ];
+}
