@@ -1162,4 +1162,3 @@ export default function HomePage() {
     </OnboardingGate>
   );
 }
-
