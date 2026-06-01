@@ -15,9 +15,11 @@ import type { DiscoveryCollection } from "../../../packages/content/schemas/disc
 
 export interface CityViewModel {
   badge: string;
+  cardImagePosition?: string;
   cardSentence: string;
   country: string;
   essence: string;
+  heroImagePosition?: string;
   imageAlt: string;
   imagePosition: string;
   imageUrl: string;
@@ -41,7 +43,9 @@ export interface HomepageDiscoveryViewModel {
 }
 
 interface CityPresentation {
+  cardImagePosition?: string;
   country: string;
+  heroImagePosition?: string;
   imageAlt: string;
   imagePosition: string;
   imageUrl: string;
@@ -79,9 +83,11 @@ const cityPresentationBySlug: Record<string, CityPresentation> = {
       "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1600&q=80"
   },
   "san-sebastian": {
+    cardImagePosition: "center 28%",
     country: "Spain",
+    heroImagePosition: "center center",
     imageAlt: "La Concha bay and elegant seaside promenade in soft evening light",
-    imagePosition: "center 35%",
+    imagePosition: "center center",
     imageUrl: "/images/cities/san-sebastian/card.jpg"
   },
   oaxaca: {
@@ -165,9 +171,11 @@ function toCityViewModel(city: SourceCity): CityViewModel {
 
   return {
     badge: city.badge,
+    cardImagePosition: presentation.cardImagePosition,
     cardSentence: city.cardSentence,
     country: presentation.country,
     essence: city.essence,
+    heroImagePosition: presentation.heroImagePosition,
     imageAlt: presentation.imageAlt,
     imagePosition: presentation.imagePosition,
     imageUrl: presentation.imageUrl,
@@ -229,4 +237,3 @@ export function getHomepageDiscovery(): HomepageDiscoveryViewModel[] {
     toHomepageDiscoveryViewModel(greatForInterest, "Great for food lovers")
   ];
 }
-
