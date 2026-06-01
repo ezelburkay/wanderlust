@@ -81,7 +81,7 @@ const cityPresentationBySlug: Record<string, CityPresentation> = {
   "san-sebastian": {
     country: "Spain",
     imageAlt: "La Concha bay and elegant seaside promenade in soft evening light",
-    imagePosition: "center center",
+    imagePosition: "center 42%",
     imageUrl: "/images/cities/san-sebastian/card.jpg"
   },
   oaxaca: {
