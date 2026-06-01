@@ -13,7 +13,7 @@ interface CityCardProps {
 export function CityCard({ badgeText, city, descriptorText, sentenceText, variant = "default" }: CityCardProps) {
   const imageStyle = {
     backgroundImage: `url(${city.imageUrl})`,
-    backgroundPosition: city.imagePosition,
+    backgroundPosition: city.cardImagePosition ?? city.imagePosition,
     backgroundSize: "cover"
   };
   const resolvedBadgeText = badgeText === undefined ? city.badge : badgeText;
