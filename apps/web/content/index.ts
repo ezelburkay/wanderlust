@@ -83,7 +83,7 @@ const cityPresentationBySlug: Record<string, CityPresentation> = {
       "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1600&q=80"
   },
   "san-sebastian": {
-    cardImagePosition: "center 28%",
+    cardImagePosition: "center 32%",
     country: "Spain",
     heroImagePosition: "center center",
     imageAlt: "La Concha bay and elegant seaside promenade in soft evening light",
