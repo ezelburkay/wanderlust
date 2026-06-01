@@ -1,20 +1,11 @@
-import { getCityBySlug } from "@/lib/content/getCities";
+import { permanentRedirect } from "next/navigation";
 
-interface Props {
-  params: { slug: string };
+interface LegacyCityPageProps {
+  params: Promise<{ slug: string }>;
 }
 
-export default function CityPage({ params }: Props) {
-  const city = getCityBySlug(params.slug);
+export default async function LegacyCityPage({ params }: LegacyCityPageProps) {
+  const { slug } = await params;
 
-  if (!city) {
-    return <main>City not found</main>;
-  }
-
-  return (
-    <main>
-      <h1>{city.name}</h1>
-      <p>{city.essence}</p>
-    </main>
-  );
+  permanentRedirect(`/cities/${slug}`);
 }
