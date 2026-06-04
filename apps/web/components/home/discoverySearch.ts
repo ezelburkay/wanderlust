@@ -28,6 +28,15 @@ const CITY_INTENTS = {
   // Direct city names
   paris: ['paris'],
   rome: ['rome'],
+  kyoto: ['kyoto'],
+  lisbon: ['lisbon'],
+  vienna: ['vienna'],
+  copenhagen: ['copenhagen'],
+  sansebastian: ['san sebastian', 'sebastian', 'donostia'],
+  oaxaca: ['oaxaca'],
+  seville: ['seville', 'sevilla'],
+  reykjavik: ['reykjavik'],
+  // Other well-known cities
   tokyo: ['tokyo'],
   london: ['london'],
   newyork: ['new york', 'nyc', 'new york city'],
@@ -35,11 +44,16 @@ const CITY_INTENTS = {
   amsterdam: ['amsterdam'],
   venice: ['venice'],
   florence: ['florence'],
-  // Country/region mappings that imply cities
+  // Country/region mappings
   france: ['france', 'french'],
   italy: ['italy', 'italian'],
   spain: ['spain', 'spanish'],
   japan: ['japan', 'japanese'],
+  portugal: ['portugal', 'portuguese'],
+  austria: ['austria', 'austrian'],
+  denmark: ['denmark', 'danish'],
+  iceland: ['iceland', 'icelandic'],
+  mexico: ['mexico', 'mexican'],
   england: ['england', 'english', 'british', 'uk'],
   netherlands: ['netherlands', 'dutch', 'holland'],
 };

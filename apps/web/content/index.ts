@@ -223,17 +223,19 @@ export function getCityBySlug(slug: string): CityViewModel | undefined {
 }
 
 export function getHomepageDiscovery(): HomepageDiscoveryViewModel[] {
-  const pickedForYou = personalizedCollections[1] ?? personalizedCollections[0];
-  const bestThisMonth = seasonalCollections[0];
-  const greatForInterest = personalizedCollections[0];
+  const pickedForYou =
+    personalizedCollections.find((c) => c.slug === "perfect-for-first-time") ??
+    personalizedCollections[0];
+  const bestThisMonth =
+    seasonalCollections.find((c) => c.slug === "where-march-feels-better") ??
+    seasonalCollections[0];
+  const greatForFood =
+    personalizedCollections.find((c) => c.slug === "great-for-food") ??
+    personalizedCollections[0];
 
   return [
-    toHomepageDiscoveryViewModel(
-      pickedForYou,
-      "Picked for you",
-      "picked-for-you"
-    ),
+    toHomepageDiscoveryViewModel(pickedForYou, "Picked for you", "picked-for-you"),
     toHomepageDiscoveryViewModel(bestThisMonth, "Best this month"),
-    toHomepageDiscoveryViewModel(greatForInterest, "Great for food lovers")
+    toHomepageDiscoveryViewModel(greatForFood, "Great for food lovers")
   ];
 }
