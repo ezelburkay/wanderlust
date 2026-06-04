@@ -2145,3 +2145,279 @@ input {
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   City detail page — Phase 2 sections
+   ============================================================ */
+
+.city-section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.6rem;
+}
+
+.city-section-heading .section-title {
+  font-size: clamp(1.75rem, 2.8vw, 2.3rem);
+  line-height: 1.06;
+}
+
+/* At A Glance */
+
+.at-a-glance {
+  padding-top: 2.75rem;
+}
+
+.at-a-glance__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.at-a-glance__item {
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 1.35rem 1.4rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 100%),
+    var(--surface);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(16px);
+}
+
+.at-a-glance__label {
+  display: block;
+  margin-bottom: 0.55rem;
+  font-family: var(--font-code);
+  font-size: 0.76rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+}
+
+.at-a-glance__value {
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* If You Only Had One Day */
+
+.one-day {
+  padding-top: 2.75rem;
+}
+
+.one-day__timeline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.one-day__step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(16px);
+}
+
+.one-day__time {
+  font-family: var(--font-code);
+  font-size: 0.76rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+}
+
+.one-day__note {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* City Essence */
+
+.city-essence {
+  padding-top: 2.75rem;
+}
+
+.city-essence__categories {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.1rem;
+  align-items: start;
+}
+
+.essence-category {
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 100%),
+    var(--surface);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  transition: box-shadow 200ms ease;
+}
+
+.essence-category--open {
+  box-shadow: var(--shadow-card);
+}
+
+.essence-category__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1.35rem 1.4rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.essence-category__title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.essence-category__see-all {
+  flex-shrink: 0;
+  font-family: var(--font-code);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+}
+
+.essence-items {
+  list-style: none;
+  margin: 0;
+  padding: 0 1.4rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.essence-item + .essence-item {
+  border-top: 1px solid rgba(47, 38, 30, 0.07);
+}
+
+.essence-item__link,
+.essence-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.75rem 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.essence-item__link:hover .essence-item__title {
+  color: var(--accent);
+}
+
+.essence-item__title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: color 150ms ease;
+}
+
+.essence-item__subtitle {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Don't Miss */
+
+.dont-miss {
+  padding-top: 2.75rem;
+}
+
+.dont-miss__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.dont-miss-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.5rem 1.6rem 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 100%),
+    var(--surface);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(16px);
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.dont-miss-card:hover,
+.dont-miss-card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+  border-color: rgba(47, 38, 30, 0.18);
+}
+
+.dont-miss-card__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.22rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.dont-miss-card__descriptor {
+  margin: 0;
+  font-family: var(--font-code);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+}
+
+.dont-miss-card__hint {
+  margin-top: auto;
+  padding-top: 1rem;
+  font-family: var(--font-code);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+}
+
+/* Responsive — city detail Phase 2 */
+
+@media (max-width: 960px) {
+  .at-a-glance__grid,
+  .one-day__timeline,
+  .city-essence__categories,
+  .dont-miss__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .at-a-glance__grid,
+  .one-day__timeline,
+  .city-essence__categories,
+  .dont-miss__grid {
+    grid-template-columns: 1fr;
+  }
+}
