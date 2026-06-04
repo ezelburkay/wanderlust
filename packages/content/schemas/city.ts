@@ -15,6 +15,20 @@ export interface CityDish {
   name: string;
 }
 
+export interface EssenceItem {
+  title: string;
+  subtitle?: string;
+  url?: string;
+  mapsQuery?: string;
+}
+
+export interface CityEssence {
+  eat: EssenceItem[];
+  walk: EssenceItem[];
+  stay: EssenceItem[];
+  book: EssenceItem[];
+}
+
 export interface City {
   name: string;
   slug: string;
@@ -27,4 +41,5 @@ export interface City {
   signatureDishes: CityDish[];
   moreToEat: CityDish[];
   whereToEat: string[];
+  cityEssence?: CityEssence;
 }
