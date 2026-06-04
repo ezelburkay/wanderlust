@@ -14,6 +14,13 @@ const categoryLabels: Record<Category, string> = {
   book: "Book"
 };
 
+const ctaLabels: Record<Category, string> = {
+  eat: "See all food spots →",
+  walk: "See all walks →",
+  stay: "See all stays →",
+  book: "See all restaurants →"
+};
+
 function getMapsSearchUrl(mapsQuery: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`;
 }
@@ -39,7 +46,7 @@ export function CityEssenceAccordion({ essence }: Props) {
             type="button"
           >
             <span className="essence-category__title">{categoryLabels[cat]}</span>
-            <span className="essence-category__see-all">See all</span>
+            <span className="essence-category__see-all">{ctaLabels[cat]}</span>
           </button>
 
           {open === cat && (
