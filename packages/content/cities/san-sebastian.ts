@@ -29,5 +29,72 @@ export const sanSebastian: City = {
     { emoji: "🍰", name: "Basque cheesecake" }
   ],
   moreToEat: [{ emoji: "🐟", name: "Anchovies" }],
-  whereToEat: ["Pintxos bars in Parte Vieja", "Seafood counters by the market"]
+  whereToEat: ["Pintxos bars in Parte Vieja", "Seafood counters by the market"],
+  cityEssence: {
+    eat: [
+      {
+        title: "Pintxos",
+        subtitle: "Ganbara",
+        mapsQuery: "Ganbara San Sebastian"
+      },
+      {
+        title: "Basque Cheesecake",
+        subtitle: "La Viña",
+        mapsQuery: "La Viña San Sebastian"
+      },
+      {
+        title: "Seafood",
+        subtitle: "Elkano",
+        mapsQuery: "Elkano Getaria"
+      }
+    ],
+    walk: [
+      {
+        title: "La Concha Promenade",
+        subtitle: "The city's living room",
+        mapsQuery: "La Concha Promenade San Sebastian"
+      },
+      {
+        title: "Parte Vieja",
+        subtitle: "The Old Town rhythm",
+        mapsQuery: "Parte Vieja San Sebastian"
+      },
+      {
+        title: "Monte Igueldo",
+        subtitle: "The classic view",
+        mapsQuery: "Monte Igueldo San Sebastian"
+      }
+    ],
+    stay: [
+      {
+        title: "Parte Vieja",
+        subtitle: "Best for food-led nights"
+      },
+      {
+        title: "Centro",
+        subtitle: "Central and easy"
+      },
+      {
+        title: "La Concha",
+        subtitle: "Wake up by the bay"
+      }
+    ],
+    book: [
+      {
+        title: "Arzak",
+        subtitle: "Three stars, timeless",
+        mapsQuery: "Arzak San Sebastian"
+      },
+      {
+        title: "Akelarre",
+        subtitle: "Views and tasting menus",
+        mapsQuery: "Akelarre San Sebastian"
+      },
+      {
+        title: "Amelia",
+        subtitle: "Modern Basque dining",
+        mapsQuery: "Amelia San Sebastian"
+      }
+    ]
+  }
 };

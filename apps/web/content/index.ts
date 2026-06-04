@@ -1,4 +1,4 @@
-import type { City as SourceCity } from "../../../packages/content/schemas/city";
+import type { City as SourceCity, CityEssence } from "../../../packages/content/schemas/city";
 import { copenhagen } from "../../../packages/content/cities/copenhagen";
 import { kyoto } from "../../../packages/content/cities/kyoto";
 import { lisbon } from "../../../packages/content/cities/lisbon";
@@ -17,6 +17,7 @@ export interface CityViewModel {
   badge: string;
   cardImagePosition?: string;
   cardSentence: string;
+  cityEssence?: CityEssence;
   country: string;
   essence: string;
   heroImagePosition?: string;
@@ -173,6 +174,7 @@ function toCityViewModel(city: SourceCity): CityViewModel {
     badge: city.badge,
     cardImagePosition: presentation.cardImagePosition,
     cardSentence: city.cardSentence,
+    cityEssence: city.cityEssence,
     country: presentation.country,
     essence: city.essence,
     heroImagePosition: presentation.heroImagePosition,
